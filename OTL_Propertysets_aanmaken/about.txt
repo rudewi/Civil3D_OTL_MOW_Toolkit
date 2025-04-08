@@ -1,0 +1,1 @@
+De modules in OTL_Propertyset_aanmaken.py bevatten functies om Civil3D propertysets aan te maken adhv een OTL SQlite
