@@ -122,8 +122,6 @@ def attribute_info_to_dict(obj, attribute):
         
         if type(attr) == OTLAttribuut:
             OTL_datatype = attr_ws.field
-            print(attr.definition)
-            print(OTL_datatype)
             
         #DATATYPE & DEFAULT VALUE(civil3D datatypes)
         if OTL_datatype == StringField:
@@ -180,7 +178,6 @@ def create_psetnaam(obj, urilijst):
         propertysetnaam = "OTL_" + objectnaam + depr
     else: 
         propertysetnaam = "OTL_" + objectnaam + "_" + objectsoort + depr 
-        print(propertysetnaam)
 
     return propertysetnaam
 
@@ -240,7 +237,7 @@ def OTL_to_dict(OTL_subset, filter_subsetattributen:bool):
             eindlijst.append(onderdeeldict)
 
 
-    else: #Een dummu maken als er geen gebruikersinput gegeven is
+    else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt
         eindlijst = []
         onderdeeldict = dummydict()
 
