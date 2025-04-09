@@ -241,9 +241,8 @@ def OTL_to_dict(OTL_subset, filter_subsetattributen:bool):
         eindlijst = []
         onderdeeldict = dummydict()
 
-    eindlijst.append(onderdeeldict)
     return eindlijst
 
 
 #Voor testing script buiten dynamo:
-OTL_to_dict('test.db',False)
+print(OTL_to_dict('test.db',False))
