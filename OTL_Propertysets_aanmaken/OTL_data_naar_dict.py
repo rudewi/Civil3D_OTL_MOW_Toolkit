@@ -17,6 +17,7 @@ from otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDeci
 from otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField
 from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField
 from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut
+from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri
 
 #FUNCTIES
 def create_connection(db_file):
@@ -113,13 +114,16 @@ def attribute_info_to_dict(obj, attribute):
     else:
         #ATTRIBUUTNAAM
         attribuutdict["dotnotatie_attribuutnaam"] = attribute
-        attr = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute) #haalt het attribuut-object op voor de laatste stap van de dotnotatie
+        attr = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=False) #haalt het attribuut-object op
+        attr_ws = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=True)
 
         #DEFINTIE
         attribuutdict["attribuutdefinitie"] = (attr.definition[:250] + '..') if len(attr.definition) > 250 else attr.definition
         
         if type(attr) == OTLAttribuut:
-            OTL_datatype = attr.field
+            OTL_datatype = attr_ws.field
+            print(attr.definition)
+            print(OTL_datatype)
             
         #DATATYPE & DEFAULT VALUE(civil3D datatypes)
         if OTL_datatype == StringField:
@@ -158,90 +162,85 @@ def attribute_info_to_dict(obj, attribute):
 
     return attribuutdict
 
-def create_psetnaam(obj, objectenlijst, objectsoort):
+def create_psetnaam(obj, urilijst):
     """Maakt de unieke propertysetnaam voor een object"""
 
-    #Naam van de klasse
+    #Naam en soort van de klasse
     objectnaam = obj.__class__.__name__
-    
-    #DEPRECATION label toevoegen
+    objectsoort = obj.typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI
+
+    #Deprecation label toevoegen
     if hasattr(obj, 'deprecated_version'):
         depr = "_DEPR-" + str(obj.deprecated_version)
     else:
         depr = ""
 
     #Controle of naam reeds voorkomt
-    if sum(s.endswith('#' + objectnaam) for s in objectenlijst) == 1:
+    if sum(s.endswith('#' + objectnaam) for s in urilijst) == 1:
         propertysetnaam = "OTL_" + objectnaam + depr
     else: 
         propertysetnaam = "OTL_" + objectnaam + "_" + objectsoort + depr 
+        print(propertysetnaam)
 
     return propertysetnaam
 
+
+def get_dotnotation(obj):
+    """creer de dotnotatie weergave voor de attributen"""
+    
+    obj.fill_with_dummy_data() #Vul het object met dummy data, zodat deze bruikbaar is voor dotnotationdict
+
+    #Workaround voor ListOfList error bij dotnotatie creatie:
+    if obj.typeURI == "https://wegenenverkeer.data.vlaanderen.be/ns/implementatieelement#Toegangsprocedure": 
+        obj.bijlage = None
+
+    try:
+        d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie
+    except Error as e:
+        ctypes.windll.user32.MessageBoxW(0, str(e), "Dotnotatie aanmaken gefaald", 1)
+        pass
+
+    return d_dict
+    
 #MAIN FUNCTION
 def OTL_to_dict(OTL_subset, filter_subsetattributen:bool):
     """Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets"""
 
     if exists(OTL_subset):
-        objectenlijst = []
-        urilijst = select_klasses(OTL_subset)
+        eindlijst = [] 
+
+        urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset
+
         for uri in urilijst:
-            objectenlijst.append(str(uri.split('/')[-1]))
-            
-        eindlijst = []      
-        
-        for objectnaam in objectenlijst:
-            #split voor hastag in variabele steken, deze gebruiken in locatie (ondedeel/installatie/andere..)
-            objectsoort = str(objectnaam.partition('#')[0].title())
-            if objectsoort == "Implementatieelement": #workaround hoofdletter E in namespace, niet in uri
-                objectsoort = "ImplementatieElement"
 
-            objectnaam = str(objectnaam.partition('#')[-1])
-            locatie = "otlmow_model.OtlmowModel.Classes." + str(objectsoort) + "." + objectnaam
-            # ALTERNATIEF: object aanmaken obv namespace:
-                # in OTL object in baseclass -> functie= dynamic create instance from namespace / uri
-            OTL_Onderdeel = importlib.import_module(locatie,objectnaam) #haalt de juiste module op (cfr: import otlmow_model.OtlmowModel.Classes.Onderdeel.Camera)
-            Obj_klasse = getattr(OTL_Onderdeel,objectnaam) #haalt de klasse uit de module (cfr: from otlmow_model.OtlmowModel.Classes.Onderdeel.Camera import Camera )
-            obj = Obj_klasse() #instantieert deze klasse (cfr: obj = Camera())
+            obj = dynamic_create_instance_from_uri(uri) #Instantieer de klasse via het OTLMOW model
+            dotnotatie_attributen = get_dotnotation(obj) #Haalt alle dotnotatie attributen op voor het object 
+            subsetattributen = select_attributen(OTL_subset, obj.typeURI) #haal een lijst van de attributen voor het object uit de subset
 
-            propertysetnaam = create_psetnaam(obj, objectenlijst, objectsoort)
-
+            #Verzamel info over het onderdeel (of installatie, implemenatieelement, ...)
             onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen
-
-            onderdeeldict["propertysetnaam"] = propertysetnaam
+            onderdeeldict["propertysetnaam"] = create_psetnaam(obj, urilijst) #creert een unieke propertysetnaam
             onderdeeldict["definitie"] = (obj.__doc__[:250] + '..') if len(obj.__doc__) > 250 else obj.__doc__
             onderdeeldict["typeURI"] = obj.typeURI
             onderdeeldict["attributen"] = []
-
-            obj.fill_with_dummy_data() #Vul het object met dummy data
-
-            if obj.typeURI == "https://wegenenverkeer.data.vlaanderen.be/ns/implementatieelement#Toegangsprocedure": 
-                obj.bijlage = None #List of List error vermijden bij dotnotatie creatie
-
-            try:
-                d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie
-            except Error as e:
-                ctypes.windll.user32.MessageBoxW(0, str(e), "Dotnotatie aanmaken gefaald", 1)
-                pass        
-
-            subsetattributen = select_attributen(OTL_subset, obj.typeURI)
-
-            for attribute in d_dict:
+    
+            #Verzamel info per attribuut, indien gevraagd volgens subset
+            for attribute in dotnotatie_attributen:
                 if filter_subsetattributen: #Enkel de attributen uit de subset meenemen
                     if attribute.split(".")[0] in subsetattributen:
                         attribuutdict = attribute_info_to_dict(obj,attribute)
                     else:
                         attribuutdict = {}
+
                 else: attribuutdict = attribute_info_to_dict(obj,attribute) #Alle attributen uit het OTL model meenemen
 
-                if attribuutdict:
+                if attribuutdict: #Voegt enkel toe aan attributenlijst in dict als er een attribuutdict werd gemaakt.
                     onderdeeldict["attributen"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel
 
             eindlijst.append(onderdeeldict)
 
 
-    else: #Als er geen gebruikersinput gegeven is
-        #EEN DUMMY MAKEN
+    else: #Een dummu maken als er geen gebruikersinput gegeven is
         eindlijst = []
         onderdeeldict = dummydict()
 
@@ -250,5 +249,4 @@ def OTL_to_dict(OTL_subset, filter_subsetattributen:bool):
 
 
 #Voor testing script buiten dynamo:
-OTL_to_dict('OTL_212.db',False)
-#print(select_attributen('testsubset.db','https://wegenenverkeer.data.vlaanderen.be/ns/installatie#HorizontaleConstructieplaat'))
+OTL_to_dict('test.db',False)
