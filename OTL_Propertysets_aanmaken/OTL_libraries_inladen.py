@@ -3,7 +3,6 @@ import sys
 from zipfile import ZipFile
 import os.path
 import ctypes
-import os
 
 totalmessage = []
 
@@ -27,7 +26,6 @@ def moduleToevoegenAanPath(modulefolder,naam):
         try:
             if modulefolder not in sys.path:
                 sys.path.insert(0, modulefolder)
-                #sys.path.append(modulefolder)
             message = f'De {naam} python library werd gevonden'
             totalmessage.append(message)
         except:
@@ -51,20 +49,12 @@ def getOTLmodules(doelpath,downloadcheck):
             
             #OTLMOW MODEL
             naam = "otlmow_model"
-            #subfolder = "OTLMOW-Model-master"
-            #modulefolder = f'{doelpath}\\{subfolder}'
-            #if not os.path.isdir(modulefolder):
-            #    os.mkdir(modulefolder)
             githublink = r'https://raw.githubusercontent.com/davidvlaminck/OTLMOW-Model/refs/heads/master/source.zip'
             moduleDownloadenViaZiplink(str(naam),githublink,doelpath)
             moduleToevoegenAanPath(doelpath,naam)
             
             #OTLMOW CONVERTER
             naam = "otlmow_converter"
-            #subfolder = "OTLMOW-Converter-master"
-            #modulefolder = f'{doelpath}\\{subfolder}'
-            #if not os.path.isdir(modulefolder):
-            #    os.mkdir(modulefolder)
             githublink = r'https://raw.githubusercontent.com/davidvlaminck/OTLMOW-Converter/refs/heads/master/source.zip'
             moduleDownloadenViaZiplink(str(naam),githublink,doelpath)
             moduleToevoegenAanPath(doelpath,naam)
@@ -72,14 +62,10 @@ def getOTLmodules(doelpath,downloadcheck):
         else: #voor het geval de libs reeds gedownload zijn:
             #OTLMOW MODEL
             naam = "otlmow_model"
-            #subfolder = "OTLMOW-Model-master"
-            #modulefolder = f'{doelpath}\\{subfolder}'
             moduleToevoegenAanPath(doelpath,naam)
 
             #OTLMOW CONVERTER
             naam = "otlmow_converter"
-            #subfolder = "OTLMOW-Converter-master"
-            #modulefolder = f'{doelpath}\\{subfolder}'
             moduleToevoegenAanPath(doelpath,naam)
 
         try:
@@ -87,7 +73,6 @@ def getOTLmodules(doelpath,downloadcheck):
             camera = Camera()
             from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter
             totalmessage = ["geldig","OTL MOW libraries zijn succesvol ingeladen"]
-            #totalmessage.append(message) 
 
         except:
             message = "fout bij inladen OTL MOW libraries."
