@@ -14,7 +14,7 @@ jobs:
       - name: zip files
         run: |
           rm -rf Civil3D_OTL_MOW_Toolkit.zip
-          zip -v -r Civil3D_OTL_MOW_Toolkit.zip ./OTL_Propertysets_aanmaken
+          zip -v -r Civil3D_OTL_MOW_Toolkit.zip ./OTL_Propertysets_aanmaken ./OTL_PsetData_naar_CSV
       - name: Commit files
         run: |
           git pull
