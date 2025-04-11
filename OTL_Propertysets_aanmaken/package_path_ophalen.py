@@ -1,4 +1,4 @@
-#Deze codeblock zit ingewerkt in het script
+
 import os.path
 from System.Reflection import Assembly
 import xml.etree.ElementTree as et
@@ -26,7 +26,6 @@ else:
         dynamo = Assembly.Load('DynamoCore')   
         civil_version = str(dynamo.CodeBase).split("AutoCAD", 1)[1][1:5] #Civil versie opzoeken adhv locatie van dyn assembly
         dynamo_version = ".".join(str(dynamo.GetName().Version).split(".", 2)[:2]) #dynamo versie ophalen
-        ctypes.windll.user32.MessageBoxW(0, str(civil_version), "Gevonden civilversie", 0)
         
         found_dynpath = appDataPath + r'\Autodesk\C3D ' + civil_version + r'\Dynamo' + '\\' + dynamo_version
         
