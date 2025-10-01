@@ -26,7 +26,7 @@ def create_connection(db_file):
         try:
             conn = sqlite3.connect(db_file)
         except Error as e:
-            ctypes.windll.user32.MessageBoxW(0, str(e), "SQlite lezen gefaald", 1)
+            ctypes.windll.user32.MessageBoxW(0, str(e), "SQlite lezen gefaald", 0)
         return conn
     
     
@@ -52,7 +52,7 @@ def select_klasses(conn):
             klasses_onderdelen.append(k[0])
 
         if len(klasses_onderdelen) > 100:
-            ctypes.windll.user32.MessageBoxW(0, "Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..", "Inlezen OTL SQLite", 1)
+            ctypes.windll.user32.MessageBoxW(0, "Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..", "Inlezen OTL SQLite", 0)
 
     return(klasses_onderdelen)
 
@@ -194,7 +194,7 @@ def get_dotnotation(obj):
     try:
         d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie
     except Error as e:
-        ctypes.windll.user32.MessageBoxW(0, str(e), "Dotnotatie aanmaken gefaald", 1)
+        ctypes.windll.user32.MessageBoxW(0, str(e), "Dotnotatie aanmaken gefaald", 0)
         pass
 
     return d_dict

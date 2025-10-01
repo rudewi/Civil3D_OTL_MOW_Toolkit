@@ -1,12 +1,11 @@
 import collections
 import csv
 import ctypes
-from os import path
+
 m = ctypes.windll.user32
 
 #variabelen
 nl = "\n"
-messagelist = []
 
 def csv_schrijven(data,filepath):
     """CSV wegschrijven"""
@@ -41,6 +40,7 @@ def create_otl_datalist(dictlijst,headerkeys):
 
 def file_per_OTL_type(pset_dicts,folderpath):
     """maakt een aparte lijst van pset_dicts per typeURI waarde, en schrijf voor elk een file als csv"""
+    messagelist = []
     result = collections.defaultdict(list)
     for d in pset_dicts:
         if 'typeURI' in d.keys():
@@ -73,6 +73,7 @@ def file_per_OTL_type(pset_dicts,folderpath):
 
 def alles_in_een_OTL_file(pset_dicts,filepath):
     """zet alles in 1 lijst en schrijft naar een file in csv"""
+    messagelist = []
     headerkeys = ["assetId.identificator","typeURI"]
     for d in pset_dicts:
         for k in d.keys():
