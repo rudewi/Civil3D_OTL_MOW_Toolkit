@@ -4,7 +4,16 @@
   "Description": "",
   "Name": "OTL_Select_objects",
   "ElementResolver": {
-    "ResolutionMap": {}
+    "ResolutionMap": {
+      "Document": {
+        "Key": "Autodesk.AutoCAD.DynamoNodes.Document",
+        "Value": "AutoCADNodes.dll"
+      },
+      "Dictionary": {
+        "Key": "DesignScript.Builtin.Dictionary",
+        "Value": "DesignScriptBuiltin.dll"
+      }
+    }
   },
   "Inputs": [],
   "Outputs": [],
@@ -589,43 +598,13 @@
       "Code": "\"14aaa032-f3fc-4773-8a69-44434ba5fde4-b25kZXJkZWVsI0RhdGFrYWJlbA\";"
     },
     {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "Id": "cd5171a32cd341a48316d954e6a4ef5a",
-      "NodeType": "FunctionNode",
-      "Inputs": [
-        {
-          "Id": "3b66e149d2ed4f69b0438d102108a5a9",
-          "Name": "document",
-          "Description": "Autodesk.AutoCAD.DynamoNodes.Document",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "2bcfa647bea643f89548c37e2182d547",
-          "Name": "string[]",
-          "Description": "Names of layers in document",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "FunctionSignature": "Autodesk.AutoCAD.DynamoNodes.Document.LayerNames",
-      "Replication": "Auto",
-      "Description": "Returns the names of all layers in a document\n\nDocument.LayerNames: string[]"
-    },
-    {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
       "Id": "c7ef1c8066194a70a8722e1b594cb4c5",
       "NodeType": "CodeBlockNode",
       "Inputs": [],
       "Outputs": [
         {
-          "Id": "726f0c26a3954d7b912580671523e42f",
+          "Id": "54436fa0cdc749d4bacdb61023d1a21f",
           "Name": "",
           "Description": "Value of expression at line 1",
           "UsingDefaultValue": false,
@@ -634,7 +613,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "af6da027bfcb48bfb4162c6e4133e4bf",
+          "Id": "a5213e07241e43bbabf0e1f525a832c1",
           "Name": "",
           "Description": "Value of expression at line 2",
           "UsingDefaultValue": false,
@@ -643,7 +622,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "d328760b87ab45f9916355b69e61ddee",
+          "Id": "465b4d58b9b84b55b8bee0512d0926e4",
           "Name": "",
           "Description": "Value of expression at line 3",
           "UsingDefaultValue": false,
@@ -652,7 +631,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "95e5290e1a41414dbdd9614c8bea7a97",
+          "Id": "333a933d474943ba950f1d9c09c25010",
           "Name": "",
           "Description": "Value of expression at line 4",
           "UsingDefaultValue": false,
@@ -663,11 +642,11 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "\"handle\";\n\"assetId.identificator\";\n\"assetType\";\n\"rommel\";"
+      "Code": "\"handle\";\n\"assetId.identificator\";\n\"assetType\";\n\"OTL\";"
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport re\r\nfrom os import path\r\nimport csv\r\nimport ctypes\r\nimport clr\r\nimport random\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\nfrom Autodesk.AutoCAD.Colors import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# Import references for PropertySets\r\nfrom Autodesk.Aec.PropertyData import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\n\r\n# Import references for ListDefinitions\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\n#INPUT\r\ninputveld = IN[0]\r\nhoofdingfilter = IN[1]\r\ndwg_objecten_handles = IN[2]\r\ndwg_objecten_ids = IN[3]\r\ndwg_objecten_typeURIs = IN[4]\r\nfilepath_rapport = IN[5]\r\n\r\n#Variabelen\r\nmessage = \"\"\r\nm = ctypes.windll.user32\r\nnl = '\\n'\r\nobjectenlijst = []\r\nfilecount = 0\r\nfilter_oke = 1\r\nte_selecteren_handles = []\r\nhandlezoeker = 0\r\nrapportlijst = []\r\n\r\n#functies\r\ndef selectieopdracht(handles):\r\n    \"\"\"Selecteer en isoleer objecten obv een lijst van handles\"\"\"\r\n    if handles:\r\n        #bestaande selectie en isolate wegdoen en nieuwe selectie starten   \r\n        dwgcommando = f\"SELECT{nl}none{nl}UNISOLATE{nl}SELECT{nl}\"\r\n        #selecteer elke handle uit de lijst\r\n        for h in handles:\r\n            dwgcommando = f'{dwgcommando}(handent\"{h}\"){nl}'\r\n        #isoleer de geselecteerde objecten\r\n        dwgcommando = f\"{dwgcommando}{nl}ISOLATE{nl}\"\r\n    \r\n        #commando uitvoeren in dwgfile\r\n        adoc = Application.DocumentManager.MdiActiveDocument\r\n        with adoc.LockDocument():\r\n            adoc.SendStringToExecute(dwgcommando, True, False, False)\r\n        \r\n    return len(handles)\r\n\r\ndef csv_schrijven(data,filepath):\r\n    \"\"\"CSV wegschrijven\"\"\"\r\n    try:\r\n        with open(filepath, 'w', newline='', encoding='utf-8') as f:\r\n            writer = csv.writer(f, delimiter=';')\r\n            writer.writerows(data)\r\n        filename = filepath.split(\"\\\\\")[-1]\r\n        message = f\"{(len(data)-1)} rijen geschreven in {filename}\"    \r\n    except Exception as e:\r\n        message = f\"Er is een fout opgetreden bij het schrijven naar het bestand: {e}\"\r\n    return message\r\n\r\n#main\r\nif inputveld:\r\n    if hoofdingfilter == \"assetType\":\r\n        message = \"Objecten worden gezocht obv assetType\"\r\n        zoeklijst = dwg_objecten_typeURIs                    \r\n    elif hoofdingfilter == \"assetId.identificator\":\r\n        message = \"Objecten worden gezocht obv assetId.identificator\"\r\n        zoeklijst = dwg_objecten_ids                 \r\n    elif hoofdingfilter == \"handle\":\r\n        message = \"Objecten worden gezocht obv handle\"\r\n        zoeklijst = dwg_objecten_handles\r\n        handlezoeker = 1\r\n    else:\r\n        message = f\"Geen correcte filter, je kan objecten zoeken op een van de volgende eigenschappen: {nl}assetType{nl}assetId.identificator{nl}handle{nl}\"\r\n        zoeklijst = []\r\n        filter_oke = 0\r\n        \r\n    if inputveld.endswith(\".csv\"):\r\n        filedir = inputveld\r\n        try:\r\n            with open(filedir, encoding='utf-8') as csvfile:\r\n                ingelezen_csv = csv.DictReader(csvfile, delimiter=\";\")\r\n                csv_dicts = (list(ingelezen_csv))\r\n\r\n        except Exception as e:\r\n            message = f\"Kon CSV bestand niet openen: {nl}{str(inputveld)}{e}\"\r\n        \r\n        if filter_oke:\r\n            for d in csv_dicts:\r\n                if hoofdingfilter in d:#check of key bestaat\r\n                    if d[hoofdingfilter]:#check of er een waarde is voor deze key\r\n                        objectenlijst.append(d[hoofdingfilter])\r\n                else:\r\n                    message = f\"Kon de opgegeven attribuut: {hoofdingfilter} niet terugvinden als hoofding in de csv file\"\r\n            if len(objectenlijst) == 0:\r\n                message = f\"Geen waarden gevonden voor het attribuut {hoofdingfilter} in de opgegeven csv\"\r\n            \r\n    else:#indien er een waarde werd opgegeven ipv een csv\r\n        objectenlijst = [inputveld]\r\n        \r\n    ongevonden_waardes = []\r\n    for o in objectenlijst:\r\n        if handlezoeker:#handles in caps omzetten\r\n            o = o.upper()\r\n            \r\n        if zoeklijst:\r\n            if o in zoeklijst:\r\n                #meerdere indices mogelijk, bv bij donut polygons    \r\n                indices = [i for i, x in enumerate(zoeklijst) if x == o]\r\n                for i in indices:\r\n                    te_selecteren_handles.append(dwg_objecten_handles[i])\r\n                    \r\n                    r = {\r\n                    \"handle\":dwg_objecten_handles[i],\r\n                    \"objectType\":dwg_objecten_typeURIs[i],\r\n                    \"assetId.identificator\":dwg_objecten_ids[i]\r\n                    }\r\n                    rapportlijst.append(r)\r\n                    #rapport_dict maken en toevegen aan rapport dict lijst\r\n                       \r\n            else:\r\n                ongevonden_waardes.append(o)\r\n                \r\n            if len(ongevonden_waardes) > 0:\r\n                message = f\"Kon volgende {hoofdingfilter} waardes niet vinden in dwg file:{nl}{nl.join(ongevonden_waardes)}\"\r\n        \r\nelse:\r\n    message = f\"Geen input: Voer een waarde of een csv file met waardes in\"\r\n\r\n#selecteer de gevonden objecten\r\nif te_selecteren_handles:\r\n    try:\r\n        selectie = selectieopdracht(te_selecteren_handles)\r\n        message = f\"Er werden {selectie} objecten geselecteerd en geisoleerd.{nl}Open de dwg om het resultaat te bekijken.{nl}Gebruik het commando UNISOLATE om terug alle objecten te tonen.{nl}{nl}{message}\"\r\n    except:\r\n        message = f\"Selectieopdracht niet gelukt voor de gevonden handles:{nl}{nl.join(te_selecteren_handles)}\"\r\n\r\n\r\n#raport wegschrijven\r\nif rapportlijst:#Check of er te raporteren data is\r\n    try:\r\n        data = [[\"handle\",\"objectType\",\"assetId.identificator\"]]#hoofding\r\n        for d in rapportlijst: #lijn per object\r\n            data.append([d[\"handle\"],d[\"objectType\"],d[\"assetId.identificator\"]])\r\n            \r\n        if path.isdir(filepath_rapport):\r\n            filenaam = \"OTL_Select_objects_result\"\r\n            filepath = filepath_rapport + \"\\\\\" + filenaam + \".csv\"\r\n            result = csv_schrijven(data,filepath)\r\n            message = f\"{message}{nl}{nl}CSV overzicht van selectie werd aangemaakt:{nl}{filepath}\"\r\n    except:\r\n        message = f\"{message}{nl}{nl}Geen CSV overzicht aangemaakt. Mogelijks heeft dynamo geen toegang tot de folder:{filepath_rapport}\"\r\n\r\n\r\n#Bericht popup\r\nif message:\r\n    m.MessageBoxW(0, str(message), \"OTL Select Objects\", 0)\r\n\r\n\r\n# OUT variable.\r\nOUT = rapportlijst",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport re\r\nfrom os import path\r\nimport csv\r\nimport ctypes\r\nimport clr\r\nimport random\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\nfrom Autodesk.AutoCAD.Colors import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# Import references for PropertySets\r\nfrom Autodesk.Aec.PropertyData import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\n\r\n# Import references for ListDefinitions\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\n#INPUT\r\ninputveld = IN[0]\r\nhoofdingfilter = IN[1]\r\ndwg_objecten_handles = IN[2]\r\ndwg_objecten_ids = IN[3]\r\ndwg_objecten_typeURIs = IN[4]\r\nfilepath_rapport = IN[5]\r\n\r\n#Variabelen\r\nmessage = \"\"\r\nm = ctypes.windll.user32\r\nnl = '\\n'\r\nobjectenlijst = []\r\nfilecount = 0\r\nfilter_oke = 1\r\nte_selecteren_handles = []\r\nhandlezoeker = 0\r\nalle_OTL = 0\r\nrapportlijst = []\r\n\r\n#functies\r\ndef selectieopdracht(handles):\r\n    \"\"\"Selecteer en isoleer objecten obv een lijst van handles\"\"\"\r\n    if handles:\r\n        #bestaande selectie en isolate wegdoen en nieuwe selectie starten   \r\n        dwgcommando = f\"SELECT{nl}none{nl}UNISOLATE{nl}SELECT{nl}\"\r\n        #selecteer elke handle uit de lijst\r\n        for h in handles:\r\n            dwgcommando = f'{dwgcommando}(handent\"{h}\"){nl}'\r\n        #isoleer de geselecteerde objecten\r\n        dwgcommando = f\"{dwgcommando}{nl}ISOLATE{nl}\"\r\n    \r\n        #commando uitvoeren in dwgfile\r\n        adoc = Application.DocumentManager.MdiActiveDocument\r\n        with adoc.LockDocument():\r\n            adoc.SendStringToExecute(dwgcommando, True, False, False)\r\n        \r\n    return len(handles)\r\n\r\ndef csv_schrijven(data,filepath):\r\n    \"\"\"CSV wegschrijven\"\"\"\r\n    try:\r\n        with open(filepath, 'w', newline='', encoding='utf-8') as f:\r\n            writer = csv.writer(f, delimiter=';')\r\n            writer.writerows(data)\r\n        filename = filepath.split(\"\\\\\")[-1]\r\n        message = f\"{(len(data)-1)} rijen geschreven in {filename}\"    \r\n    except Exception as e:\r\n        message = f\"Er is een fout opgetreden bij het schrijven naar het bestand: {e}\"\r\n    return message\r\n\r\n#main\r\nif dwg_objecten_handles:\r\n    if inputveld:\r\n        if hoofdingfilter == \"assetType\":\r\n            message = \"Objecten werden gezocht obv assetType\"\r\n            zoeklijst = dwg_objecten_typeURIs                    \r\n        elif hoofdingfilter == \"assetId.identificator\":\r\n            message = \"Objecten werden gezocht obv assetId.identificator\"\r\n            zoeklijst = dwg_objecten_ids                 \r\n        elif hoofdingfilter == \"handle\":\r\n            message = \"Objecten werden gezocht obv handle\"\r\n            zoeklijst = dwg_objecten_handles\r\n            handlezoeker = 1\r\n        elif hoofdingfilter == \"OTL\":\r\n            message = \"Alle Objecten met een OTL propertyset werden gezocht\"\r\n            alle_OTL = 1\r\n        else:\r\n            message = f\"Geen correcte filter, je kan objecten zoeken op een van de volgende eigenschappen: {nl}assetType{nl}assetId.identificator{nl}handle{nl}\"\r\n            zoeklijst = []\r\n            filter_oke = 0\r\n            \r\n        if alle_OTL:\r\n            objectenlijst = dwg_objecten_handles\r\n            zoeklijst = dwg_objecten_handles\r\n            \r\n        elif inputveld.endswith(\".csv\"):\r\n            filedir = inputveld\r\n            try:\r\n                with open(filedir, encoding='utf-8') as csvfile:\r\n                    ingelezen_csv = csv.DictReader(csvfile, delimiter=\";\")\r\n                    csv_dicts = (list(ingelezen_csv))\r\n    \r\n            except Exception as e:\r\n                message = f\"Kon CSV bestand niet openen: {nl}{str(inputveld)}{e}\"\r\n            \r\n            if filter_oke:\r\n                for d in csv_dicts:\r\n                    if hoofdingfilter in d:#check of key bestaat\r\n                        if d[hoofdingfilter]:#check of er een waarde is voor deze key\r\n                            objectenlijst.append(d[hoofdingfilter])\r\n                    else:\r\n                        message = f\"Kon de opgegeven attribuut: {hoofdingfilter} niet terugvinden als hoofding in de csv file\"\r\n                if len(objectenlijst) == 0:\r\n                    message = f\"Geen waarden gevonden voor het attribuut {hoofdingfilter} in de opgegeven csv\"\r\n                \r\n        else:#indien er een waarde werd opgegeven ipv een csv\r\n            objectenlijst = [inputveld]\r\n            \r\n        ongevonden_waardes = []\r\n        for o in objectenlijst:\r\n            if handlezoeker:#handles in caps omzetten\r\n                o = o.upper()\r\n                \r\n            if zoeklijst:\r\n                if o in zoeklijst:\r\n                    #meerdere indices mogelijk, bv bij donut polygons    \r\n                    indices = [i for i, x in enumerate(zoeklijst) if x == o]\r\n                    for i in indices:\r\n                        te_selecteren_handles.append(dwg_objecten_handles[i])\r\n                        \r\n                        r = {\r\n                        \"handle\":dwg_objecten_handles[i],\r\n                        \"objectType\":dwg_objecten_typeURIs[i],\r\n                        \"assetId.identificator\":dwg_objecten_ids[i]\r\n                        }\r\n                        rapportlijst.append(r)\r\n                        #rapport_dict maken en toevegen aan rapport dict lijst\r\n                           \r\n                else:\r\n                    ongevonden_waardes.append(o)\r\n                    \r\n                if len(ongevonden_waardes) > 0:\r\n                    message = f\"Kon volgende {hoofdingfilter} waardes niet vinden in dwg file:{nl}{nl.join(ongevonden_waardes)}\"\r\n            \r\n    else:\r\n        message = f\"Geen input: Voer een waarde of een csv file met waardes in\"\r\n    \r\n    #selecteer de gevonden objecten\r\n    if te_selecteren_handles:\r\n        try:\r\n            selectie = selectieopdracht(te_selecteren_handles)\r\n            message = f\"Er werden {selectie} objecten geselecteerd en geisoleerd.{nl}Open de dwg om het resultaat te bekijken.{nl}Gebruik het commando UNISOLATE om terug alle objecten te tonen.{nl}{nl}{message}\"\r\n        except:\r\n            message = f\"Selectieopdracht niet gelukt voor de gevonden handles:{nl}{nl.join(te_selecteren_handles)}\"\r\n    \r\n    \r\n    #raport wegschrijven\r\n    if rapportlijst:#Check of er te raporteren data is\r\n        try:\r\n            data = [[\"handle\",\"objectType\",\"assetId.identificator\"]]#hoofding\r\n            for d in rapportlijst: #lijn per object\r\n                data.append([d[\"handle\"],d[\"objectType\"],d[\"assetId.identificator\"]])\r\n                \r\n            if path.isdir(filepath_rapport):\r\n                filenaam = \"OTL_Select_objects_result\"\r\n                filepath = filepath_rapport + \"\\\\\" + filenaam + \".csv\"\r\n                result = csv_schrijven(data,filepath)\r\n                message = f\"{message}{nl}{nl}CSV overzicht van selectie werd aangemaakt:{nl}{filepath}\"\r\n        except:\r\n            message = f\"{message}{nl}{nl}Geen CSV overzicht aangemaakt. Mogelijks heeft dynamo geen toegang tot de folder:{filepath_rapport}\"\r\nelse:\r\n    message = f\"Kon OTL objecten in dwg niet correct inlezen\"\r\n\r\n#Bericht popup\r\nif message:\r\n    m.MessageBoxW(0, str(message), \"OTL Select Objects\", 0)\r\n\r\n\r\n# OUT variable.\r\nOUT = rapportlijst",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "7733a6046c57457aa736d44621cbc6fd",
@@ -901,36 +880,6 @@
       "Description": "Flattens a nested list of lists by a certain amount.\n\nList.Flatten (list: var[]..[], amount: int = -1): var[]..[]"
     },
     {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "Id": "17dd7214585c43c0822dedc5ef106a11",
-      "NodeType": "FunctionNode",
-      "Inputs": [
-        {
-          "Id": "b3843ead816049e393a84a83c2e4e98c",
-          "Name": "document",
-          "Description": "Autodesk.AutoCAD.DynamoNodes.Document",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "9b80121ed55e46a19eda8af883e5acf3",
-          "Name": "string",
-          "Description": "Folder where drawing file for document is saved",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "FunctionSignature": "Autodesk.AutoCAD.DynamoNodes.Document.Folder",
-      "Replication": "Auto",
-      "Description": "Returns the folder where the drawing file for a document is saved\n\nDocument.Folder: string"
-    },
-    {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
       "Id": "6be6dea9ce9d47bf9c832e1ad38b86e9",
       "NodeType": "CodeBlockNode",
@@ -1009,9 +958,69 @@
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
       "Code": "type;"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport sys\r\nimport clr\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\ndataEnteringNode = IN\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\nlayernames = []\r\n\r\n# LAYERS AANMAKEN\r\nwith adoc.LockDocument():\r\n    with adoc.Database as db:\r\n        with db.TransactionManager.StartTransaction() as t:\r\n            layertable = t.GetObject(db.LayerTableId,OpenMode.ForRead)\r\n            for layerId in layertable:\r\n                layerobj = t.GetObject(layerId, OpenMode.ForRead)\r\n                layernames.append(layerobj.Name)\r\n                \r\n            t.Commit()\r\n\r\n# Assign your output to the OUT variable.\r\nOUT = layernames\r\n",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "113a5f000e80451d95daff20f34c82f6",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "6451397520e04383aec2e1155742a475",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "d8ccdcfc464a49e2822609e44a986afd",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport sys\r\nimport clr\r\n#from os import path\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\ndataEnteringNode = IN\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\nwith adoc.LockDocument():\r\n    with adoc.Database as db:\r\n        #dwg_filepath = path.GetDirectoryName(db.OriginalFileName)\r\n        #dwg_filepath = path.GetDirectoryName(doc.Name)\r\n        dwg_filepath = db.OriginalFileName\r\n        filepath = dwg_filepath.rsplit('\\\\',1)[0]#filenaam weglaten\r\n\r\n\r\n# Assign your output to the OUT variable.\r\nOUT = filepath\r\n",
+      "Engine": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "1dc5f58d8c004fe1813fa9179200523b",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7e5de44ea8084713b16799b48d2bfb10",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
     }
   ],
   "Connectors": [
+    {
+      "Start": "2c264e8bc9a9491498126df381d01603",
+      "End": "82ce4f69703542d8a0f62a25a7672992",
+      "Id": "3c17bb2ff6ad4945836b842654e67883",
+      "IsHidden": "False"
+    },
     {
       "Start": "1e420a9e5af946de8b497c53f2421a1d",
       "End": "bf7eff07e1674015ad90e689d69dec31",
@@ -1020,14 +1029,8 @@
     },
     {
       "Start": "1e420a9e5af946de8b497c53f2421a1d",
-      "End": "3b66e149d2ed4f69b0438d102108a5a9",
-      "Id": "f8c7ee3dd63c4c0fbc503e6bdb0cb3fc",
-      "IsHidden": "False"
-    },
-    {
-      "Start": "1e420a9e5af946de8b497c53f2421a1d",
-      "End": "b3843ead816049e393a84a83c2e4e98c",
-      "Id": "9df8a060be53490991f85fdbd97242b2",
+      "End": "6451397520e04383aec2e1155742a475",
+      "Id": "119c1d14d02e4f84af2b4bb2bfe2b21e",
       "IsHidden": "False"
     },
     {
@@ -1145,21 +1148,9 @@
       "IsHidden": "False"
     },
     {
-      "Start": "eae62d6d375f423385237b1be01ae8c4",
-      "End": "82ce4f69703542d8a0f62a25a7672992",
-      "Id": "d894f4a114394691a5f77e5b221121af",
-      "IsHidden": "False"
-    },
-    {
-      "Start": "2bcfa647bea643f89548c37e2182d547",
-      "End": "940ecd3e743b47efb014d64674b0cd5c",
-      "Id": "22470f3085534de3a6586c842f52bd01",
-      "IsHidden": "False"
-    },
-    {
-      "Start": "af6da027bfcb48bfb4162c6e4133e4bf",
+      "Start": "333a933d474943ba950f1d9c09c25010",
       "End": "9113763e77b94309bac6c94c329277a4",
-      "Id": "8ca9d1104ee84e4aa0a20d580ff4b544",
+      "Id": "e7feee26ee3e4496b90062126b4f3aaa",
       "IsHidden": "False"
     },
     {
@@ -1193,12 +1184,6 @@
       "IsHidden": "False"
     },
     {
-      "Start": "9b80121ed55e46a19eda8af883e5acf3",
-      "End": "9f35cd8502f947db9f24e9d137c9770f",
-      "Id": "77abe4f9ea0644958ba72ec27c21c623",
-      "IsHidden": "False"
-    },
-    {
       "Start": "a31e14c49feb4d1ab5e1e0ae7abb3691",
       "End": "3005ef383c914732be4a51f45a6513ad",
       "Id": "4c57c118fcde43de9e8ac8feb0163d66",
@@ -1209,6 +1194,18 @@
       "End": "45516d8675d8433a9815b068150b8a71",
       "Id": "ecc0c8d0bd104d0e96a46df0ea1f77bd",
       "IsHidden": "False"
+    },
+    {
+      "Start": "d8ccdcfc464a49e2822609e44a986afd",
+      "End": "940ecd3e743b47efb014d64674b0cd5c",
+      "Id": "7b47ee8068544c458b85785a2c8bc224",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "7e5de44ea8084713b16799b48d2bfb10",
+      "End": "9f35cd8502f947db9f24e9d137c9770f",
+      "Id": "253bbf4c9ced4407a0ae305a39d897c5",
+      "IsHidden": "False"
     }
   ],
   "Dependencies": [],
@@ -1217,7 +1214,8 @@
       "Name": "validatiefouten-DA-2025-dummy.csv",
       "ReferenceType": "External",
       "Nodes": [
-        "b6d593d000df4efab2a34d292ae84259"
+        "b6d593d000df4efab2a34d292ae84259",
+        "2582f21d82a545dda1512d657f48b8f9"
       ]
     }
   ],
@@ -1243,7 +1241,7 @@
     {
       "NodeId": "6c966f48-23a5-4e4e-ad2d-bcc141b19db2",
       "Binding": {
-        "get_PropertySets_InClassDecl-1_InFunctionScope-1_Instance0_6c966f48-23a5-4e4e-ad2d-bcc141b19db2": "H4sIAAAAAAAACu3SoQ2AMABFwV2+ZgI0WzQVTVqLoa7p7iQMgTr39MuVlXs8c/SrzZazrPQvkn1oHxhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGfjRQd30BOhvWAz5bAAA="
+        "get_PropertySets_InClassDecl-1_InFunctionScope-1_Instance0_6c966f48-23a5-4e4e-ad2d-bcc141b19db2": "H4sIAAAAAAAACu3SsQnAIBQE0F1+nQlSu4VYCNraxE7cPWCXBVI9uOK48nh5xejP7C3VWePOa1+fRDt7hO4HBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggIFfDZRdXjJRB7xNWwAA"
       }
     }
   ],
@@ -1297,8 +1295,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 427.2705995024842,
-        "Y": -640.9695011347101
+        "X": 424.9963080487827,
+        "Y": -663.7124156717248
       },
       {
         "Id": "4a5ef52354374347a2c24f9e0318e3df",
@@ -1451,16 +1449,6 @@
         "Y": -17.682050724108308
       },
       {
-        "Id": "cd5171a32cd341a48316d954e6a4ef5a",
-        "Name": "Document.Layers",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": 435.8119054939061,
-        "Y": -806.5525252055103
-      },
-      {
         "Id": "c7ef1c8066194a70a8722e1b594cb4c5",
         "Name": "Code Block",
         "IsSetAsInput": false,
@@ -1531,16 +1519,6 @@
         "Y": -944.559211264787
       },
       {
-        "Id": "17dd7214585c43c0822dedc5ef106a11",
-        "Name": "Document.Folder",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": 425.45905506681993,
-        "Y": -459.63736896996056
-      },
-      {
         "Id": "6be6dea9ce9d47bf9c832e1ad38b86e9",
         "Name": "Code Block",
         "IsSetAsInput": false,
@@ -1569,6 +1547,26 @@
         "ShowGeometry": true,
         "X": 183.96611044239944,
         "Y": 712.8280799191548
+      },
+      {
+        "Id": "113a5f000e80451d95daff20f34c82f6",
+        "Name": "Python Script: layernames",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 392.2108482609774,
+        "Y": -804.2450459351194
+      },
+      {
+        "Id": "1dc5f58d8c004fe1813fa9179200523b",
+        "Name": "Python Script: filepath",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 4053.6385920753673,
+        "Y": 497.65582732849145
       }
     ],
     "Annotations": [
@@ -1611,17 +1609,17 @@
           "c3131011d102419e884bdedbbcdcc87c",
           "4a5ef52354374347a2c24f9e0318e3df",
           "86b017297d1a4719901c02b24cc4f08e",
-          "cd5171a32cd341a48316d954e6a4ef5a"
+          "113a5f000e80451d95daff20f34c82f6"
         ],
         "HasNestedGroups": false,
         "Left": -3.370316652215706,
-        "Top": -879.5525252055103,
+        "Top": -877.2450459351194,
         "Width": 1260.2507503934198,
-        "Height": 370.5830240708002,
+        "Height": 345.5326302633946,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
-        "InitialTop": -806.5525252055103,
-        "InitialHeight": 310.5830240708002,
+        "InitialTop": -804.2450459351194,
+        "InitialHeight": 285.5326302633946,
         "TextblockHeight": 63.0,
         "Background": "#FFC1D676"
       },
@@ -1784,10 +1782,30 @@
         "InitialHeight": 145.0,
         "TextblockHeight": 63.0,
         "Background": "#FFC1D676"
+      },
+      {
+        "Id": "ea3b0782d755405cb5bd5a75d7c64e81",
+        "Title": "2023",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [],
+        "HasNestedGroups": false,
+        "Left": 441.0963143399599,
+        "Top": -1753.9439022049244,
+        "Width": 0.0,
+        "Height": 0.0,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 0.0,
+        "InitialHeight": 0.0,
+        "TextblockHeight": 0.0,
+        "Background": "#FFC1D676"
       }
     ],
-    "X": -3159.6986508927807,
-    "Y": 217.2888935202812,
-    "Zoom": 0.8583867908646438
+    "X": 348.45659388865647,
+    "Y": 39.183743348894154,
+    "Zoom": 0.36164916046325996
   }
 }
