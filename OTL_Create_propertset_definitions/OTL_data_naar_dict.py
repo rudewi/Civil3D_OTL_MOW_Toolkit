@@ -4,22 +4,6 @@ from sqlite3 import Error
 from os.path import exists
 import ctypes
 
-#NODIGE MODULES UIT OTLMOW CONVERTER INLADEN
-# OPM > Te bekijken of we deze helemaal nodig hebben
-from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter
-from otlmow_converter.DotnotationHelper import DotnotationHelper
-
-#NODIGE MODULES UIT OTLMOW MODEL INLADEN
-from otlmow_model.OtlmowModel.BaseClasses.KeuzelijstField import KeuzelijstField
-from otlmow_model.OtlmowModel.BaseClasses.StringField import StringField
-from otlmow_model.OtlmowModel.BaseClasses.BooleanField import BooleanField
-from otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDecimalField
-from otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField
-from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField
-from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut
-from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri
-
-
 #FUNCTIES
 def create_connection(db_file):
         """ maak connectie naar de SQLite database"""
@@ -253,6 +237,22 @@ go = IN[2]
 OUT = ""
 if go:
     try:
+        #NODIGE MODULES UIT OTLMOW CONVERTER INLADEN
+        from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter
+        from otlmow_converter.DotnotationHelper import DotnotationHelper
+        
+        #NODIGE MODULES UIT OTLMOW MODEL INLADEN
+        from otlmow_model.OtlmowModel.BaseClasses.KeuzelijstField import KeuzelijstField
+        from otlmow_model.OtlmowModel.BaseClasses.StringField import StringField
+        from otlmow_model.OtlmowModel.BaseClasses.BooleanField import BooleanField
+        from otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDecimalField
+        from otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField
+        from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField
+        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut
+        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri
+        
+        #OMZETTING STARTEN
         OUT = OTL_to_dict(subsetpad,subset_filter)
+        
     except:
         ctypes.windll.user32.MessageBoxW(0, "Er liep iets mis in het omzetten van de OTL data naar dynamo", "OTL data naar dict", 0)        

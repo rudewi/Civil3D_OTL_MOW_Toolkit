@@ -1,10 +1,9 @@
 # Load the Python Standard and DesignScript Libraries
-import sys
 import os.path
-from System.Reflection import Assembly
-import xml.etree.ElementTree as et
 import ctypes
 import sqlite3
+
+from Autodesk.AutoCAD.ApplicationServices import *
 
 # The inputs to this node will be stored as a list in the IN variables.
 toolkit_update = IN[0]
@@ -16,56 +15,39 @@ subset_filter = IN[3]
 nl = "\n"
 
 # Functies
+def downloadfolder_in_dwg_folder():
+    """Haal de foldernaam van de huidge dwg file op"""
+    try:
+        adoc = Application.DocumentManager.MdiActiveDocument
+        editor = adoc.Editor
+        with adoc.LockDocument():
+            with adoc.Database as db:
+                dwg_filepath = db.OriginalFileName
+                filepath = dwg_filepath.rsplit('\\',1)[0]#filenaam weglaten
+        
+        
+        if filepath.endswith(r'enu\Template'):
+            downloadfolder = "dwg templade folder (dwg file niet gesaved?)"
+        else:
+            downloadfolder = filepath + r'\OTLmodelDownload'
+            if not os.path.isdir(downloadfolder):
+                os.mkdir(downloadfolder)
+        
+    except:
+        downloadfolder = "ongeldig pad"
+    
+    return downloadfolder
+
 def check_pad_geldigheid(pad):
     """kijkt of het pad naar een bruikbare folder wijst"""
-    
     message = ""
-
     if isinstance(pad, str):
-        if os.path.isdir(pad):
-            message = f"{pad}{nl}Zal worden gebruikt om de OTLMOW libraries op te slaan"
-        else:
+        if not os.path.isdir(pad):
             message = f"{pad}{nl}Kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Folder bestaat niet"
             pad = "ongeldig_pad"
     else:
         message = f"{pad}{nl} kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Geef het pad op als tekstwaarde"
         pad = "ongeldig_pad"
-
-    return pad,message
-
-def packagefolderfinder():
-    """Zoekt de folder waar het package is opgeslagen"""
-    
-    folderstring_na_version = r'\packages\OTL_MOW_Toolkit\extra' #einde van het pad
-    message = ""
-
-    try:    
-        appDataPath = os.getenv('APPDATA') #de appdata locatie
-        dynamo = Assembly.Load('DynamoCore')
-        civil_version = str(dynamo.CodeBase).split("AutoCAD", 1)[1][1:5] #Civil versie opzoeken adhv locatie van dyn assembly
-        dynamo_version = ".".join(str(dynamo.GetName().Version).split(".", 2)[:2]) #dynamo versie ophalen
-        found_dynpath = appDataPath + r'\Autodesk\C3D ' + civil_version + r'\Dynamo' + '\\' + dynamo_version
-        
-        if os.path.isdir(found_dynpath):
-            #Open de dynamo settings XML en bekijk de folders waar packages zijn opgeslagen:
-            pad = found_dynpath + r'\packages' #voor wanneer OTL_MOW_Toolkit package folder niet bestaat
-            root = et.parse(found_dynpath + "\DynamoSettings.xml").getroot()
-            for child in root:
-                if child.tag == "CustomPackageFolders":
-                    for path in child:
-                        path_packages = path.text + folderstring_na_version
-                        if os.path.isdir(path_packages):
-                            pad = path_packages
-    
-            message = f"{pad}{nl} zal worden gebruikt om de OTLMOW libraries op te slaan"
-        
-        else:
-            pad = "ongeldig_pad"
-            message = f"Het gezochte package pad:{nl}{pad}{nl}kan NIET worden gebruikt om de OTLMOW libraries op te slaan. Gelieve een ander pad te kiezen"
-    
-    except Exception as e:
-        pad = "ongeldig_pad"
-        message = f"Het gezochte package pad:{nl}{pad}{nl}kan NIET worden gebruikt om de OTLMOW libraries op te slaan.{nl}{e}{nl} Gelieve een ander pad te kiezen"
 
     return pad,message
 
@@ -75,7 +57,7 @@ def doelpad_opzoeken(user_input_path):
         #Er werd een pad opgegeven door de user
         doelpad, foldermessage = check_pad_geldigheid(user_input_path)       
     else:
-        doelpad, foldermessage = packagefolderfinder()
+        doelpad, foldermessage = check_pad_geldigheid(downloadfolder_in_dwg_folder())
     return doelpad,foldermessage
 
 def create_connection(db_file):
@@ -86,6 +68,7 @@ def create_connection(db_file):
     except Error as e:
         print(e)
     return conn
+
 
 def select_klasses(conn):
     """klasses uit sqlite ophalen"""
@@ -110,7 +93,7 @@ def check_subset_geldigheid(db_pad):
             extensie = db_pad.split(".")[-1]
             if extensie == "db":
                 geldige_db_pad = db_pad
-                message = f"Geldige subset input:{nl}{db_pad}"
+                #message = f"Geldige subset input:{nl}{db_pad}"
             else:
                 message = f"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}"
         else:
@@ -131,8 +114,18 @@ def check_subset_geldigheid(db_pad):
 doelpad, foldermessage = doelpad_opzoeken(inputpad)
 subsetpad, subsetmessage = check_subset_geldigheid(subset_db)
 
-endmessage = f"{foldermessage}{nl}{nl}{subsetmessage}"
-ctypes.windll.user32.MessageBoxW(0, endmessage, "OTL_propertysetdefinitions_aanmaken", 0)
+# Enkel bij probleem pop-up geven
+if foldermessage and subsetmessage:
+    endmessage = f"{foldermessage}{nl}{nl}{subsetmessage}"
+elif foldermessage:
+    endmessage = foldermessage
+elif subsetmessage:
+    endmessage = subsetmessage
+else:
+    endmessage = ""
+
+if endmessage:
+    ctypes.windll.user32.MessageBoxW(0, endmessage, "OTL_propertysetdefinitions_aanmaken", 0)
 
 # OUT variable
 OUT = doelpad,subsetpad,subset_filter,toolkit_update

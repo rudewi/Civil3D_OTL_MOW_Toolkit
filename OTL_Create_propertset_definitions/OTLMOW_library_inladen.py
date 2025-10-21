@@ -11,6 +11,8 @@ subsetpad = IN[1]
 subset_filter = IN[2]
 toolkit_update = IN[3]
 
+nl = '\n'
+
 #FUNCTIE VOOR AFLADEN MODULES
 def moduleDownloadenViaZiplink(naam,link,doelpad):
     """Gebruikt een Github link om python modules af te laden en bruikbaar te maken"""
@@ -54,12 +56,14 @@ def checkOTLmodules(message):
     try:
         from otlmow_model.OtlmowModel.Classes.ImplementatieElement import AIMObject
         from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter
-        finalmessage = ["geldig", "OTL modules en libraries zijn succesvol ingeladen: " + "\n" + message + "\n" + f'locatie: {doelpad}' ]
+        finalmessage = f"{nl}OTL modules en libraries zijn succesvol ingeladen{nl}{message}"
+        go = 1
 
     except:
-        finalmessage = ["FOUT", "FOUT bij inladen OTL OTL modules en libraries: " + "\n" + message + "\n" + f'locatie: {doelpad}']
+        finalmessage = f"{nl}FOUT bij inladen OTL modules en libraries:{nl}{message}"
+        go = 0
 
-    return finalmessage
+    return finalmessage,go
     
 
 
@@ -79,17 +83,19 @@ def getOTLmodules(doelpad,downloadcheck):
         message = message + "\n" + moduleDownloadenViaZiplink(str(naam),githublink,doelpad)
 
     #PAD TOEVOEGEN
-    message = message + "\n" + moduleToevoegenAanPath(doelpad,"OTL modules en libraries")
-    outputmessage = checkOTLmodules(message)
+    message = message + "\n" + "\n" + moduleToevoegenAanPath(doelpad,"OTL modules en libraries")
+    
+    #CHECK OF MODULES WERKEN
+    outputmessage,go = checkOTLmodules(message)
 
-    return outputmessage
+    return outputmessage,go
 
-#Uitvoeren
+#UITVOEREN
 if doelpad and doelpad != "ongeldig_pad":
-    outputmessage = getOTLmodules(doelpad,toolkit_update)
+    outputmessage, go = getOTLmodules(doelpad,toolkit_update)
     ctypes.windll.user32.MessageBoxW(0, outputmessage, "Inladen OTLMOW libraries", 0)
-    go = 1
+
 else:
     go = 0
 
-OUT = [doelpad,subsetpad,subset_filter,go]
+OUT = [subsetpad,subset_filter,go]
