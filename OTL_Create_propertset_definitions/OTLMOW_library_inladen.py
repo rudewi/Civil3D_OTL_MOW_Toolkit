@@ -3,6 +3,7 @@ import sys
 from zipfile import ZipFile
 import os.path
 import ctypes
+import imp
 
 
 #DE JUISTE FOLDERS OPHALEN VIA INPUT
@@ -13,6 +14,7 @@ toolkit_update = IN[3]
 
 nl = '\n'
 
+
 #FUNCTIE VOOR AFLADEN MODULES
 def moduleDownloadenViaZiplink(naam,link,doelpad):
     """Gebruikt een Github link om python modules af te laden en bruikbaar te maken"""
@@ -20,8 +22,6 @@ def moduleDownloadenViaZiplink(naam,link,doelpad):
 
     try:
         urllib.request.urlretrieve(link,ziplocatie)
-        #downloadmsg = f'De package {naam} werd gedownload naar locatie {ziplocatie}'
-        #ctypes.windll.user32.MessageBoxW(0, downloadmsg , "Donwload library", 0)
         with ZipFile(ziplocatie, 'r') as zObject: 
             zObject.extractall(path=doelpad)
             message = f'Download van {naam} geslaagd'
@@ -35,18 +35,24 @@ def moduleDownloadenViaZiplink(naam,link,doelpad):
 #FUNCTIE VOOR MODULE TOEVOEGEN AAN PATH
 def moduleToevoegenAanPath(modulefolder,naam):
     if os.path.isdir(modulefolder): #kijken of de folder bestaat
-        if modulefolder not in sys.path:
+        if os.path.isdir(modulefolder + r'/otlmow_model'): #kijken of de otl model in de folder staat
+
+            if modulefolder in sys.path:
+                sys.path.remove(modulefolder) #Verwijderen om opniew te kunnen inladen, bv na nieuwe download
+
             try:
                 sys.path.insert(0, modulefolder)
-                message = f'Toevoegen van {naam} aan PATH geslaagd'
+                #message = f'Toevoegen van {naam} aan PATH geslaagd'
+                message = ""
     
             except:
                 message = f'FOUT in toevoegen van {naam} python library'
+
         else:
-            message = f'modulefolder met {naam} reeds toegevoegd aan sys.path'
+            message = f'De OTL library werd niet gevonden in de folder {modulefolder}, mogelijk zijn ze nog niet gedownload'
    
     else:
-        message = f'FOUT in toevoegen van python libraries, folder {modulefolder} bestaat niet, mogelijk zijn ze nog niet gedownload'
+        message = f'FOUT in toevoegen van python libraries, folder {modulefolder} bestaat niet'
     
     return message
 
@@ -56,12 +62,24 @@ def checkOTLmodules(message):
     try:
         from otlmow_model.OtlmowModel.Classes.ImplementatieElement import AIMObject
         from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter
+        
         finalmessage = f"{nl}OTL modules en libraries zijn succesvol ingeladen{nl}{message}"
         go = 1
 
-    except:
-        finalmessage = f"{nl}FOUT bij inladen OTL modules en libraries:{nl}{message}"
+    except Exception as e:
         go = 0
+        # Controleer of de gebruikte python versie lager is dan 3.9
+        MIN_MAJOR = 3
+        MIN_MINOR = 9
+        current_major = sys.version_info.major
+        current_minor = sys.version_info.minor
+
+        if current_major < MIN_MAJOR or (current_major == MIN_MAJOR and current_minor < MIN_MINOR):
+            finalmessage = f"{nl}FOUT bij inladen OTL modules en libraries:{nl}De gebruikte python versie ({current_major}.{current_minor}) is te laag {nl}Minimum vereist = 3.9{nl}Probeer een recentere versie van Dynamo voor Civil3D, bv. 2025 of nieuwer"
+    
+        else:
+            finalmessage = f"{nl}FOUT bij inladen OTL modules en libraries:{nl}{message}{nl}fout:{e}"
+
 
     return finalmessage,go
     
@@ -93,9 +111,10 @@ def getOTLmodules(doelpad,downloadcheck):
 #UITVOEREN
 if doelpad and doelpad != "ongeldig_pad":
     outputmessage, go = getOTLmodules(doelpad,toolkit_update)
-    ctypes.windll.user32.MessageBoxW(0, outputmessage, "Inladen OTLMOW libraries", 0)
+    if outputmessage:
+        ctypes.windll.user32.MessageBoxW(0, outputmessage, "Inladen OTLMOW libraries", 0)
 
 else:
     go = 0
 
-OUT = [subsetpad,subset_filter,go]
+OUT = [doelpad,subsetpad,subset_filter,go]
