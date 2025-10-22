@@ -1,8 +1,9 @@
 # Civil3D_OTL_MOW_Toolkit
-Functies voor het werken met OTL data in Civil3D via Dynamo
+Functies voor het werken met OTL data in Civil3D via Dynamo:
 Kan afgeladen worden als .dyn files,
-of als package met custom nodes gebruikt worden 
-Uitgebreide handleiding volgt binnenkort
+of als package met custom nodes gebruikt worden. -> Dit kan vanuit Dynamo door in de package manager te zoeken op 'Civil3D_OTL_MOW_Toolkit.
+
+Uitgebreide handleiding volgt binnenkort.
 Alle python code die in de dynamo workspaces vervat zit is hier ook als aparte .py file opgenomen
 
 In ons vakgebied wordt er veel gebruikgemaakt van Autodesk Civil 3D. Om in deze software makkelijker aan de slag te gaan met de MOW OTL-datastandaard, werd de OTL_MOW_Toolkit in het leven geroepen. Dit handige hulpmiddel bestaat uit enkele custom nodes (scripts), verzameld in een ‘package’, wat ervoor zorgt dat de OTL-data gekoppeld kan worden aan Civil 3D-objecten aan de hand van Property Sets.
