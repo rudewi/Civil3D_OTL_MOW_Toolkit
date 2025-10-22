@@ -1,8 +1,12 @@
 # Civil3D_OTL_MOW_Toolkit
 
+
 **De Civil3D_OTL_MOW_Toolkit kan het makkelijkst vanuit Dynamo geinstalleerd worden door in de package manager te zoeken op 'Civil3D_OTL_MOW_Toolkit'.**
 ![Zoek hem nu via de package manager en installeer, om toe te voegen aan je dynamo Add-ons](Afbeeldingen/MOW_OTL_Toolkit_Downloadtip.png)
 
+## Wat is het
+<br/>
+![OTLMOW_toolkit_logo](Afbeeldingen/OTL_MOW_Toolkit-logo.jpg)
 Functies voor het werken met OTL data in Civil3D via Dynamo: Kan afgeladen worden als .dyn files, 
 of als package met custom nodes gebruikt worden. 
 
