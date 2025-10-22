@@ -76,12 +76,12 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows you to select a directory on the system and returns its path",
-      "HintPath": "C:\\Users\\ruben\\Desktop\\wkt met maar 1 type",
-      "InputValue": "C:\\Users\\ruben\\Desktop\\wkt met maar 1 type"
+      "HintPath": "C:\\Users\\ruben\\Desktop\\voorbeeld wkt download",
+      "InputValue": "C:\\Users\\ruben\\Desktop\\voorbeeld wkt download"
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport re\r\nimport os\r\nimport csv\r\nimport ctypes\r\nimport clr\r\nimport random\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\nfrom Autodesk.AutoCAD.Colors import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# Import references for PropertySets\r\nfrom Autodesk.Aec.PropertyData import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\n\r\n# Import references for ListDefinitions\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\n#INPUT\r\nCSVMap = IN[0]\r\n\r\nfoutgevonden = 0\r\nmessage = \"\"\r\nm = ctypes.windll.user32\r\nnl = '\\n'\r\n\r\n#coomsg = \"Kijk aub na of je dwg hetzelfde coordinatenstelsel gebruikt als de WKTs in de CSV\"\r\n#m.MessageBoxW(0, coomsg , \"OTL objecten uit CSV omzetting\", 0)\r\n\r\n\r\n\r\ndef getCoo(wktstring):\r\n    nums = re.findall(r'\\d+(?:\\.\\d*)?', wktstring)\r\n    coords = zip(*[iter(nums)] * 3)\r\n    #strings uit tuple omzetten naar getallen in lijst\r\n    coord_numbers = [] \r\n    for c in coords:\r\n        x = float(c[0])\r\n        y = float(c[1])\r\n        z = float(c[2])\r\n        coord_numbers.append([x,y,z])\r\n    return list(coord_numbers)\r\n\r\ndef psetnaam(typeURI):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n    objectsoort = typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n    objectnaam = typeURI.split('#')[1]\r\n    propertysetnaam = \"OTL_\" + objectnaam\r\n    return propertysetnaam\r\n    \r\n#DICTS maken uit CSVs\r\ncsv_dicts = []\r\nfilecount = 0\r\n\r\nif CSVMap:\r\n    for root, dirs, files in os.walk(CSVMap):\r\n        for file in files:\r\n            if file.endswith(\".csv\"):\r\n                filecount = filecount + 1\r\n                filedir= CSVMap + \"\\\\\" + file\r\n                with open(filedir, encoding='utf-8') as csvfile:\r\n                    ingelezen_csv = csv.DictReader(csvfile, delimiter=\";\")\r\n                    csv_dicts.append(list(ingelezen_csv))\r\n    if filecount == 0:\r\n        foutgevonden = 1\r\n        if message == \"\":\r\n            message = f\"Kon geen CSV bestanden vinden in de folder: {nl}{str(CSVMap)}\"\r\nelse:\r\n    foutgevonden = 1\r\n    if message == \"\":\r\n        message = f\"Ongeldige input folder: {nl}{str(CSVMap)}\"\r\n\r\n\r\n#Lege items skippen\r\nlijstdictszonderlege = []\r\nlijstdictszondergeom = []\r\nOTLobjecten = 0\r\nlegacyobjecten = 0\r\n\r\nfor l in csv_dicts:\r\n    for dict_a in l:\r\n        #trailing .0 fix\r\n        for sleutel, waarde in dict_a.items():\r\n            if waarde.endswith(\".0\"):\r\n                dict_a[sleutel] = waarde[:-2]        \r\n    \r\n        #enkel attributen met ingevulde waarde behouden in nieuwe dict\r\n        res = {k: v for k, v in dict_a.items() if v}\r\n        if \"typeURI\" in res:\r\n            if (\"//lgc.data\") in res[\"typeURI\"]: #check op legacy objecten\r\n                legacyobjecten = legacyobjecten + 1\r\n            else:            \r\n                if \"assetId.identificator\" in res:\r\n                    if \"geometry\" in res:\r\n                        OTLobjecten = OTLobjecten + 1\r\n                        lijstdictszonderlege.append(res) #enkel de objecten met een geometrie attribuut toevoegen aan resultaatlijst\r\n                    else:\r\n                        lijstdictszondergeom.append(res)\r\n\r\nif OTLobjecten == 0:\r\n    foutgevonden = 1\r\n    if message == \"\":\r\n        message = f\"GEEN objecten aangemaakt in dwg: Kon geen OTL objecten met geometrie vinden in de CSV bestanden in de folder: {nl}{str(CSVMap)}\"                        \r\n\r\nif OTLobjecten > 2000:\r\n    veelobjectenmsg = \"Er worden meer dan 2000 objecten verwerkt, dit kan even tijd in beslag nemen..\"\r\n    m.MessageBoxW(0, str(veelobjectenmsg), \"OTL objecten uit CSV omzetting\", 0)\r\n\r\nif legacyobjecten > 0:\r\n    lgcmsg = \"Enkel OTL objecten kunnen verwerkt worden, De legacy objecten uit de CSVs worden GENEGEERD. Aantal legacy objecten: \" + str(legacyobjecten)\r\n    m.MessageBoxW(0, str(lgcmsg), \"OTL objecten uit CSV omzetting\", 0)\r\n    \r\nif lijstdictszondergeom:\r\n    nogeomtypes = set([psetnaam(d['typeURI']) for d in lijstdictszondergeom])\r\n    nogeommsg = f\"De OTL objecten ZONDER geometrie (zoals oa relaties) worden GENEGEERD. Aantal objecten zonder geometrie: {len(lijstdictszondergeom)} {nl}Van volgende types:{nl}{nl}{nl.join(nogeomtypes)}\"\r\n    m.MessageBoxW(0, str(nogeommsg), \"OTL objecten uit CSV omzetting\", 0)\r\n    \r\nongevonden_psets = []\r\npuntobjecten = []\r\nlijnobjecten = []\r\nsingle_polygoonobjecten = []\r\ndonut_polygoonobjecten = []\r\n\r\n#PROPERTSET DEFINITIONS CHECKEN\r\nwith adoc.LockDocument():\r\n    with adoc.Database as db:\r\n        with db.TransactionManager.StartTransaction() as t:\r\n            dpsd = DictionaryPropertySetDefinitions(db)\r\n            for dict_y in lijstdictszonderlege:\r\n                #controle of propertysetnaam  bestaat in de huidige dwg\r\n                propertysetnaam = psetnaam(dict_y['typeURI'])   \r\n                if not dpsd.Has(propertysetnaam, t): #propertysetnaam bestaat nog niet\r\n                    if propertysetnaam not in ongevonden_psets: #maar 1 keer toevoegen\r\n                        ongevonden_psets.append(propertysetnaam)\r\n\r\n\r\n# LAYERS AANMAKEN\r\nwith adoc.LockDocument():\r\n    with adoc.Database as db:\r\n        with db.TransactionManager.StartTransaction() as t:\r\n            layertable = t.GetObject(db.LayerTableId,OpenMode.ForRead)\r\n            for dict_y in lijstdictszonderlege:\r\n                layernaam = psetnaam(dict_y['typeURI']) #de naam van de layer afleiden uit typeURI\r\n                if not layertable.Has(layernaam):\r\n                    newlayer = LayerTableRecord()\r\n                    newlayer.Name = layernaam\r\n                    newlayer.Color = Color.FromColorIndex(ColorMethod.ByAci, random.randint(1, 249))\r\n                    layertable = t.GetObject(db.LayerTableId,OpenMode.ForWrite)\r\n                    layertable.Add(newlayer)\r\n                    t.AddNewlyCreatedDBObject(newlayer, True)\r\n            t.Commit()\r\n\r\n\r\nif len(ongevonden_psets) == 0: #bij alles gevonden\r\n    if message == \"\":\r\n        gevonden_types = set([psetnaam(d['typeURI']) for d in lijstdictszonderlege])\r\n        message = f\"De nodige OTL Propertysetdefinitions werden gevonden in de dwg:{nl}{nl}{nl.join(gevonden_types)}\"\r\n    for dict_b in lijstdictszonderlege:\r\n    #opsplitsing maken per mogelijk geotype\r\n        dict_b[\"psetnaam\"] = psetnaam(dict_b['typeURI']) #psetnaam toevoegen\r\n        if dict_b['geometry'].startswith(\"POINT Z\"):\r\n            dict_b[\"coordinates\"] = getCoo(dict_b['geometry'])\r\n            puntobjecten.append(dict_b)\r\n        elif dict_b['geometry'].startswith(\"LINESTRING Z\"):\r\n            dict_b[\"coordinates\"] = getCoo(dict_b['geometry'])\r\n            lijnobjecten.append(dict_b)\r\n        elif dict_b['geometry'].startswith(\"POLYGON Z\"):\r\n            donutsplit = dict_b['geometry'].split('),(')\r\n            if len(donutsplit) == 1:\r\n                dict_b[\"coordinates\"] = getCoo(dict_b['geometry'])\r\n                single_polygoonobjecten.append(dict_b)\r\n            else:\r\n                donutcoolist = []\r\n                for polygon in donutsplit:\r\n                    donutcoolist.append(getCoo(polygon))\r\n                dict_b[\"coordinates\"] = donutcoolist\r\n                donut_polygoonobjecten.append(dict_b)\r\nelse:\r\n   foutgevonden = 1\r\n   if message == \"\":\r\n        message = f\"Kon objecten niet aanmaken omdat de nodige propertysetdefinitie niet bestaat in de dwg. Voeg volgende propertysetdefinities toe: {nl}{nl}{nl.join(ongevonden_psets)}\"   \r\n\r\n\r\n\r\nm.MessageBoxW(0, str(message), \"OTL objecten uit CSV omzetting\", 0)\r\n\r\n# OUT variable.\r\n\r\nif foutgevonden == 1:\r\n    OUT = [[],[],[],[]]\r\nelse:   \r\n    OUT = [puntobjecten,lijnobjecten,single_polygoonobjecten,donut_polygoonobjecten]\r\n    \r\n",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport re\r\nimport os\r\nimport csv\r\nimport ctypes\r\nimport clr\r\nimport random\r\n\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\nfrom Autodesk.AutoCAD.Colors import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# Import references for PropertySets\r\nfrom Autodesk.Aec.PropertyData import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\n\r\n# Import references for ListDefinitions\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\n#INPUT\r\nCSVMap = IN[0]\r\n\r\nfoutgevonden = 0\r\nmessage = \"\"\r\nm = ctypes.windll.user32\r\nnl = '\\n'\r\n\r\ndef getCoo(wktstring):\r\n    nums = re.findall(r'\\d+(?:\\.\\d*)?', wktstring)\r\n    coords = zip(*[iter(nums)] * 3)\r\n    #strings uit tuple omzetten naar getallen in lijst\r\n    coord_numbers = [] \r\n    for c in coords:\r\n        x = float(c[0])\r\n        y = float(c[1])\r\n        z = float(c[2])\r\n        coord_numbers.append([x,y,z])\r\n    return list(coord_numbers)\r\n\r\ndef psetnaam(typeURI):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n    objectsoort = typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n    objectnaam = typeURI.split('#')[1]\r\n    propertysetnaam = \"OTL_\" + objectnaam\r\n    return propertysetnaam\r\n    \r\n#DICTS maken uit CSVs\r\ncsv_dicts = []\r\nfilecount = 0\r\n\r\nif CSVMap:\r\n    if os.path.isdir(CSVMap):#bij folder\r\n        for root, dirs, files in os.walk(CSVMap):\r\n            for file in files:\r\n                if file.endswith(\".csv\"):\r\n                    filecount = filecount + 1\r\n                    filedir= CSVMap + \"\\\\\" + file\r\n                    with open(filedir, encoding='utf-8') as csvfile:\r\n                        ingelezen_csv = csv.DictReader(csvfile, delimiter=\";\")\r\n                        csv_dicts.append(list(ingelezen_csv))\r\n        if filecount == 0:\r\n            foutgevonden = 1\r\n            if message == \"\":\r\n                message = f\"Kon geen CSV bestanden vinden in de folder: {nl}{str(CSVMap)}\"\r\n                \r\n    if os.path.isfile(CSVMap):#bij file\r\n        filedir = CSVMap\r\n        if filedir.endswith(\".csv\"):\r\n            filecount = filecount + 1\r\n            with open(filedir, encoding='utf-8') as csvfile:\r\n                ingelezen_csv = csv.DictReader(csvfile, delimiter=\";\")\r\n                csv_dicts.append(list(ingelezen_csv))\r\n        else:\r\n            foutgevonden = 1\r\n            if message == \"\":\r\n                message = f\"Opgegeven file is geen csv file: {nl}{str(CSVMap)}{nl}{nl}Geef een CSV file, of een folder met CSV files op\"\r\n\r\nelse:\r\n    foutgevonden = 1\r\n    if message == \"\":\r\n        message = f\"Ongeldige input:{nl}{str(CSVMap)}{nl}{nl}Geef een CSV file, of een folder met CSV files op\"\r\n\r\n\r\n#Lege items skippen\r\nlijstdictszonderlege = []\r\nlijstdictszondergeom = []\r\nOTLobjecten = 0\r\nlegacyobjecten = 0\r\n\r\nfor l in csv_dicts:\r\n    for dict_a in l:\r\n        #trailing .0 fix\r\n        for sleutel, waarde in dict_a.items():\r\n            if waarde.endswith(\".0\"):\r\n                dict_a[sleutel] = waarde[:-2]        \r\n    \r\n        #enkel attributen met ingevulde waarde behouden in nieuwe dict\r\n        res = {k: v for k, v in dict_a.items() if v}\r\n        if \"typeURI\" in res:\r\n            if (\"//lgc.data\") in res[\"typeURI\"]: #check op legacy objecten\r\n                legacyobjecten = legacyobjecten + 1\r\n            else:            \r\n                if \"assetId.identificator\" in res:\r\n                    if \"geometry\" in res:\r\n                        OTLobjecten = OTLobjecten + 1\r\n                        lijstdictszonderlege.append(res) #enkel de objecten met een geometrie attribuut toevoegen aan resultaatlijst\r\n                    else:\r\n                        lijstdictszondergeom.append(res)\r\n\r\nif OTLobjecten == 0:\r\n    foutgevonden = 1\r\n    if message == \"\":\r\n        message = f\"GEEN objecten aangemaakt in dwg: Kon geen OTL objecten met geometrie vinden in de CSV bestanden in de folder: {nl}{str(CSVMap)}\"                        \r\n\r\nif OTLobjecten > 2000:\r\n    veelobjectenmsg = \"Er worden meer dan 2000 objecten verwerkt, dit kan even tijd in beslag nemen..\"\r\n    m.MessageBoxW(0, str(veelobjectenmsg), \"OTL objecten uit CSV omzetting\", 0)\r\n\r\nif legacyobjecten > 0:\r\n    lgcmsg = \"Enkel OTL objecten kunnen verwerkt worden, De legacy objecten uit de CSVs worden GENEGEERD. Aantal legacy objecten: \" + str(legacyobjecten)\r\n    m.MessageBoxW(0, str(lgcmsg), \"OTL objecten uit CSV omzetting\", 0)\r\n    \r\nif lijstdictszondergeom:\r\n    nogeomtypes = set([psetnaam(d['typeURI']) for d in lijstdictszondergeom])\r\n    nogeommsg = f\"De OTL objecten ZONDER geometrie (zoals oa relaties) worden GENEGEERD. Aantal objecten zonder geometrie: {len(lijstdictszondergeom)} {nl}Van volgende types:{nl}{nl}{nl.join(nogeomtypes)}\"\r\n    m.MessageBoxW(0, str(nogeommsg), \"OTL objecten uit CSV omzetting\", 0)\r\n    \r\nongevonden_psets = []\r\npuntobjecten = []\r\nlijnobjecten = []\r\nsingle_polygoonobjecten = []\r\ndonut_polygoonobjecten = []\r\ngeofouten = []\r\n\r\n#PROPERTSET DEFINITIONS CHECKEN\r\nwith adoc.LockDocument():\r\n    with adoc.Database as db:\r\n        with db.TransactionManager.StartTransaction() as t:\r\n            dpsd = DictionaryPropertySetDefinitions(db)\r\n            for dict_y in lijstdictszonderlege:\r\n                #controle of propertysetnaam  bestaat in de huidige dwg\r\n                propertysetnaam = psetnaam(dict_y['typeURI'])   \r\n                if not dpsd.Has(propertysetnaam, t): #propertysetnaam bestaat nog niet\r\n                    if propertysetnaam not in ongevonden_psets: #maar 1 keer toevoegen\r\n                        ongevonden_psets.append(propertysetnaam)\r\n\r\n\r\n# LAYERS AANMAKEN\r\nwith adoc.LockDocument():\r\n    with adoc.Database as db:\r\n        with db.TransactionManager.StartTransaction() as t:\r\n            layertable = t.GetObject(db.LayerTableId,OpenMode.ForRead)\r\n            for dict_y in lijstdictszonderlege:\r\n                layernaam = f\"FromCSV_{psetnaam(dict_y['typeURI'])}\" #de naam van de layer afleiden uit typeURI\r\n                if not layertable.Has(layernaam):\r\n                    newlayer = LayerTableRecord()\r\n                    newlayer.Name = layernaam\r\n                    newlayer.Color = Color.FromColorIndex(ColorMethod.ByAci, random.randint(1, 249))\r\n                    layertable = t.GetObject(db.LayerTableId,OpenMode.ForWrite)\r\n                    layertable.Add(newlayer)\r\n                    t.AddNewlyCreatedDBObject(newlayer, True)\r\n            t.Commit()\r\n\r\n\r\nif len(ongevonden_psets) == 0: #bij alles gevonden\r\n    if message == \"\":\r\n        gevonden_types = set([psetnaam(d['typeURI']) for d in lijstdictszonderlege])\r\n        message = f\"De nodige OTL Propertysetdefinitions werden gevonden in de dwg:{nl}{nl}{nl.join(gevonden_types)}\"\r\n    for dict_b in lijstdictszonderlege:\r\n    #opsplitsing maken per mogelijk geotype\r\n        dict_b[\"psetnaam\"] = psetnaam(dict_b['typeURI']) #psetnaam toevoegen\r\n        if dict_b['geometry'].startswith(\"POINT Z\"):\r\n            dict_b[\"coordinates\"] = getCoo(dict_b['geometry'])\r\n            puntobjecten.append(dict_b)\r\n        elif dict_b['geometry'].startswith(\"LINESTRING Z\"):\r\n            dict_b[\"coordinates\"] = getCoo(dict_b['geometry'])\r\n            lijnobjecten.append(dict_b)\r\n        elif dict_b['geometry'].startswith(\"POLYGON Z\"):\r\n            donutsplit = dict_b['geometry'].split('),(')\r\n            if len(donutsplit) == 1:\r\n                dict_b[\"coordinates\"] = getCoo(dict_b['geometry'])\r\n                single_polygoonobjecten.append(dict_b)\r\n            else:\r\n                donutcoolist = []\r\n                for polygon in donutsplit:\r\n                    donutcoolist.append(getCoo(polygon))\r\n                dict_b[\"coordinates\"] = donutcoolist\r\n                donut_polygoonobjecten.append(dict_b)\r\n        else:\r\n            #onverwerkbaar geotype\r\n            geofouten.append(f'{nl}assetId: {dict_b[\"assetId.identificator\"]}{nl}type: {psetnaam(dict_b[\"typeURI\"])}{nl}wkt: {dict_b[\"geometry\"][:30]}...')\r\n    \r\n    if len(geofouten) > 0:\r\n        if len(geofouten) < 5:\r\n            geofoutmessage = f'Volgende objecten werden NIET toegevoegd vanwegen een ongeldig WKT geometrietype:{nl}{nl.join(geofouten)}'\r\n        else:\r\n            geofoutmessage = f'Meerdere objecten werden NIET toegevoegd vanwegen een ongeldig WKT geometrietype, waaronder:{nl}{nl.join(geofouten)}{nl}En meer..'            \r\n        m.MessageBoxW(0, str(geofoutmessage), \"OTL objecten uit CSV omzetting\", 0)\r\n\r\nelse:\r\n   foutgevonden = 1\r\n   if message == \"\":\r\n        message = f\"Kon objecten niet aanmaken omdat de nodige propertysetdefinitie niet bestaat in de dwg. Voeg volgende propertysetdefinities toe: {nl}{nl}{nl.join(ongevonden_psets)}\"   \r\n\r\n\r\nm.MessageBoxW(0, str(message), \"OTL objecten uit CSV omzetting\", 0)\r\n\r\n# OUT variable.\r\n\r\nif foutgevonden == 1:\r\n    OUT = [[],[],[],[]]\r\nelse:   \r\n    OUT = [puntobjecten,lijnobjecten,single_polygoonobjecten,donut_polygoonobjecten]\r\n    ",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "0ff91343bfff47d9aa67e21e9177b8f3",
@@ -515,7 +515,7 @@
       "NodeType": "CodeBlockNode",
       "Inputs": [
         {
-          "Id": "87f69b21600247a383bb63cdcd6aba07",
+          "Id": "f718944fae44473f989ba7d9454a62af",
           "Name": "t1",
           "Description": "t1",
           "UsingDefaultValue": false,
@@ -526,7 +526,7 @@
       ],
       "Outputs": [
         {
-          "Id": "04338919c667478ea2751f62161fc2d5",
+          "Id": "536cc1d9637d4fa4b6b2d3d8fcf49331",
           "Name": "",
           "Description": "coo",
           "UsingDefaultValue": false,
@@ -535,7 +535,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "2b7b70f5aa584badbfade224e9c7ff7c",
+          "Id": "93c8ed9a388f4af88a93571a3e961f41",
           "Name": "",
           "Description": "id",
           "UsingDefaultValue": false,
@@ -544,7 +544,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "45dfa0a7c9694e1082ff6029dd9cc666",
+          "Id": "a1eb6c9d03604a98bb59ed007f195e37",
           "Name": "",
           "Description": "uri",
           "UsingDefaultValue": false,
@@ -553,9 +553,18 @@
           "KeepListStructure": false
         },
         {
-          "Id": "f973023f3b904ad39d33aff5a71c990d",
+          "Id": "de37e4f1b16f41bfbf083865eb899303",
           "Name": "",
           "Description": "pset",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "9aeaffe1fd1a4cd2b34c3fb9105c2e0e",
+          "Name": "",
+          "Description": "layernaam",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -564,7 +573,7 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "coo = Dictionary.ValueAtKey(t1, \"coordinates\");\nid = Dictionary.ValueAtKey(t1, \"assetId.identificator\");\nuri = Dictionary.ValueAtKey(t1, \"typeURI\");\npset = Dictionary.ValueAtKey(t1, \"psetnaam\");"
+      "Code": "coo = Dictionary.ValueAtKey(t1, \"coordinates\");\nid = Dictionary.ValueAtKey(t1, \"assetId.identificator\");\nuri = Dictionary.ValueAtKey(t1, \"typeURI\");\npset = Dictionary.ValueAtKey(t1, \"psetnaam\");\nlayernaam = \"FromCSV_\" + pset;"
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
@@ -620,7 +629,7 @@
       "NodeType": "CodeBlockNode",
       "Inputs": [
         {
-          "Id": "68f1e0419a394c3cb7c7cfee8aaff9a4",
+          "Id": "a030c633fc454dbdbf5dd7eecb11818a",
           "Name": "t1",
           "Description": "t1",
           "UsingDefaultValue": false,
@@ -631,7 +640,7 @@
       ],
       "Outputs": [
         {
-          "Id": "0cc5ec27d75c407ab96286a7861b6799",
+          "Id": "286d2a2cdd72470c99070061b7cf53d5",
           "Name": "",
           "Description": "coo",
           "UsingDefaultValue": false,
@@ -640,7 +649,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "8a7bfad9da1c46c297a41957a780dd31",
+          "Id": "838dcdf14cd3456e9a103b0a4a92bf54",
           "Name": "",
           "Description": "id",
           "UsingDefaultValue": false,
@@ -649,7 +658,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "8b7fc1f6ca4b461f8bbccd89d0441cba",
+          "Id": "ec763a6511b54e94b014d676a92c9865",
           "Name": "",
           "Description": "uri",
           "UsingDefaultValue": false,
@@ -658,9 +667,18 @@
           "KeepListStructure": false
         },
         {
-          "Id": "da402894f58845d0921f2549e69ff35a",
+          "Id": "ae60c09bf9b14b74ae2d8ed43a2fc07f",
           "Name": "",
           "Description": "pset",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2923323152eb4db8a608746990c8b122",
+          "Name": "",
+          "Description": "layernaam",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -669,7 +687,7 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "coo = Dictionary.ValueAtKey(t1, \"coordinates\");\nid = Dictionary.ValueAtKey(t1, \"assetId.identificator\");\nuri = Dictionary.ValueAtKey(t1, \"typeURI\");\npset = Dictionary.ValueAtKey(t1, \"psetnaam\");"
+      "Code": "coo = Dictionary.ValueAtKey(t1, \"coordinates\");\nid = Dictionary.ValueAtKey(t1, \"assetId.identificator\");\nuri = Dictionary.ValueAtKey(t1, \"typeURI\");\npset = Dictionary.ValueAtKey(t1, \"psetnaam\");\nlayernaam = \"FromCSV_\" + pset;"
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
@@ -821,7 +839,7 @@
       "NodeType": "CodeBlockNode",
       "Inputs": [
         {
-          "Id": "8a4d659423c94f64907e383138da07eb",
+          "Id": "b22c41ce25d041f19302610df2879cb6",
           "Name": "t1",
           "Description": "t1",
           "UsingDefaultValue": false,
@@ -832,7 +850,7 @@
       ],
       "Outputs": [
         {
-          "Id": "c849af02123646e68b3c45ca516bdf95",
+          "Id": "e3dbeda27ff04d27bd71c9565ae39545",
           "Name": "",
           "Description": "coo",
           "UsingDefaultValue": false,
@@ -841,7 +859,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "128108dd66a04865a7ad428eb7c69e17",
+          "Id": "fbce54d17ea64ff68fc69d11d64999cc",
           "Name": "",
           "Description": "id",
           "UsingDefaultValue": false,
@@ -850,7 +868,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "2f3a637b7cab46bfb752365e561ce668",
+          "Id": "a3a86f08ba784ee5ab73d882d649a6b3",
           "Name": "",
           "Description": "uri",
           "UsingDefaultValue": false,
@@ -859,9 +877,18 @@
           "KeepListStructure": false
         },
         {
-          "Id": "1dcca16557af4cc28e66b03e65d594b2",
+          "Id": "711cb89d9b41432a9c73d2ed44b91b69",
           "Name": "",
           "Description": "pset",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "770f14e8a9084e67b38e5dcc26ab9a17",
+          "Name": "",
+          "Description": "layernaam",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -870,7 +897,7 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "coo = Dictionary.ValueAtKey(t1, \"coordinates\");\nid = Dictionary.ValueAtKey(t1, \"assetId.identificator\");\nuri = Dictionary.ValueAtKey(t1, \"typeURI\");\npset = Dictionary.ValueAtKey(t1, \"psetnaam\");"
+      "Code": "coo = Dictionary.ValueAtKey(t1, \"coordinates\");\nid = Dictionary.ValueAtKey(t1, \"assetId.identificator\");\nuri = Dictionary.ValueAtKey(t1, \"typeURI\");\npset = Dictionary.ValueAtKey(t1, \"psetnaam\");\nlayernaam = \"FromCSV_\" + pset;"
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
@@ -1353,7 +1380,7 @@
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Importeer de benodigde modules\r\nimport clr\r\nimport ctypes\r\n\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\nfrom Autodesk.Civil.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.Civil.Runtime import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nm = ctypes.windll.user32\r\n\r\ngeometrieobjecten = IN[0] #(lijst van Dynamo geometrie objecten)\r\nOTL_datadict = IN[1] #lijst van dictionaries met OTL data, bijv. \"psetnaam\" en andere eigenschappen\r\n\r\n#niet otl data verwijderen uit dict\r\nfor d in OTL_datadict:\r\n    del d[\"coordinates\"]\r\n    del d[\"geometry\"]\r\n        \r\n# Haal het actieve document en de database op\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\ndb = adoc.Database\r\neditor = adoc.Editor\r\n\r\n# Lijst om de ID's van de output in op te slaan\r\neindlijst = []\r\nmessagelist = []\r\nsuccess_count = 0\r\nprop_count = 0\r\nontbrekende_prop = 0\r\nfoutekeyvaluelijst = []\r\ntoegevoegdeKLopties = []\r\nnl = '\\n'\r\n\r\n# Start een transactie\r\nif geometrieobjecten:\r\n    with db.TransactionManager.StartTransaction() as tr:\r\n        try:\r\n            # Haal de PropertySetDefinitionManager op\r\n            dpsd = DictionaryPropertySetDefinitions(db)\r\n            dld = DictionaryListDefinition(db)\r\n            \r\n            # Loop door elk object en de bijbehorende data\r\n            for i, obj in enumerate(geometrieobjecten):\r\n                # Haal de data op die hoort bij het huidige object\r\n                if i >= len(OTL_datadict):\r\n                    message = \"FOUT: Onvoldoende data in OTL_datadict voor alle objecten.\"\r\n                    messagelist.append(message)\r\n                    break\r\n                \r\n                OTLdata = OTL_datadict[i]\r\n                psetnaam = OTLdata.get(\"psetnaam\")\r\n                \r\n                if psetnaam is None:\r\n                    message = f\"FOUT: Geen 'psetnaam' gevonden voor object {i}.\"\r\n                    messagelist.append(message)\r\n                    continue\r\n    \r\n                # Zoek de PropertySetDefinition op\r\n                psdefid = dpsd.GetAt(psetnaam)\r\n                psdef = tr.GetObject(psdefid, OpenMode.ForRead)\r\n                propertydefinitions = psdef.Definitions\r\n                \r\n                if psdefid.IsNull:\r\n                    message = f\"FOUT: PropertySetDefinition {psetnaam} niet gevonden.\"\r\n                    messagelist.append(message)\r\n                    continue\r\n    \r\n                # haal id uit dynamo object\r\n                try:\r\n                    h = obj.Handle\r\n                    ObjId = obj.InternalObjectId\r\n                    aeccObj = tr.GetObject(ObjId, OpenMode.ForWrite)    \r\n    \r\n                except Exception as e:\r\n                    message = f\"FOUT: Ongeldige object met handle {h}: {str(e)}\"\r\n                    messagelist.append(message)\r\n                    continue\r\n                \r\n                if aeccObj:\r\n                    # Koppel de PropertySet aan het Civil 3D object\r\n                    PropertyDataServices.AddPropertySet(aeccObj, psdefid)                                 \r\n                    # Haal de gekoppelde pset op voor dit object\r\n                    propertyset = PropertyDataServices.GetPropertySet(aeccObj, psdefid)\r\n                    psetn = propertyset.Open(OpenMode.ForWrite)\r\n                    propertysetnaam = psetn.PropertySetDefinitionName\r\n                    psetdatacoll = psetn.PropertySetData\r\n                        \r\n                    if psetdatacoll is not None:\r\n                        # Loop door de dictionary en stel de waarden in\r\n                        for propNaam, value in OTLdata.items():\r\n                            # Sla 'psetnaam' over, deze is al verwerkt\r\n                            if propNaam == \"psetnaam\":\r\n                                continue\r\n                            # Sla lege waarden over\r\n                            if not value:\r\n                                continue\r\n                            # Stel default lege waarde in\r\n                            convertvalue = \"\"\r\n                            \r\n                            # Kijk of property bestaat\r\n                            try:\r\n                                propId = psetn.PropertyNameToId(propNaam)\r\n                            except Exception as e:\r\n                                ontbrekende_prop += 1\r\n                                if [psetnaam,propNaam,\"property ontbreekt\"] not in foutekeyvaluelijst: \r\n                                    foutekeyvaluelijst.append([psetnaam,propNaam,\"property ontbreekt\"])\r\n                                continue\r\n                                \r\n                            try:\r\n                                prop = psetdatacoll[propId]\r\n                                propType = prop.DataType\r\n                                #waarde omzetten obv datatype van property in propertyset\r\n                                if propType == 0:\r\n                                    #integer\r\n                                    convertvalue = int(value)\r\n                                elif propType == 1:\r\n                                    #getal\r\n                                    convertvalue = float(value)\r\n                                elif propType == 6:\r\n                                    #keuzelijst\r\n                                    if value == \"\":\r\n                                        convertvalue = \"-\"\r\n                                    elif value == \"true\":\r\n                                        convertvalue = \"True\"\r\n                                    elif value == \"false\":\r\n                                        convertvalue = \"False\"\r\n                                    elif value == True:\r\n                                        convertvalue = \"True\"\r\n                                    elif value == False:\r\n                                        convertvalue = \"False\"\r\n                                    else: \r\n                                        convertvalue = str(value)\r\n    \r\n    \r\n                                    #haal de mogelijke keuzes op uit de listdefinitie\r\n                                    #als de keuzelijstoptie niet bestaat, creer een nieuwe\r\n                                    propdef = propertydefinitions[propId]\r\n                                    ldefid = propdef.ListDefinitionId\r\n                                    #open de lijstdefinitie en voeg toe indien nodig\r\n                                    ld = tr.GetObject(ldefid, OpenMode.ForWrite)\r\n                                    first = True                               \r\n                                    for oid in ld.GetListItems(): #loop door de keuzelijstopties\r\n                                        li = tr.GetObject(oid, OpenMode.ForRead)\r\n                                        if li.Name == convertvalue:\r\n                                            first = False\r\n                                            break\r\n                                    if first: #Als de opties niet bestaat, maak een nieuwe aan\r\n                                        if convertvalue:\r\n                                            if [psetnaam,propNaam,convertvalue] not in toegevoegdeKLopties:\r\n                                                toegevoegdeKLopties.append([psetnaam,propNaam,convertvalue])\r\n                                                ld.AddListItem(value)\r\n                                    \r\n                                else:\r\n                                    convertvalue = str(value)\r\n                                    \r\n                                #Value invullen\r\n                                prop.SetData(convertvalue)\r\n                                prop_count += 1\r\n                                \r\n                            except Exception as e:\r\n                                if [psetnaam,value,propNaam,\"Ongeldige waarde\"] not in foutekeyvaluelijst:\r\n                                    foutekeyvaluelijst.append([psetnaam,value,propNaam,\"Ongeldige waarde\"])\r\n                                continue\r\n                    \r\n                    eindlijst.append(obj)\r\n                    success_count += 1\r\n                    \r\n            if toegevoegdeKLopties:\r\n                printableklo = nl.join([str(ele) for ele in toegevoegdeKLopties])\r\n                m.MessageBoxW(0, f\"Volgende keuzelijstopties werden toegevoegd: {nl}{printableklo}\", \"KeuzelijstOpties toegevoegd\", 0)\r\n                \r\n            if foutekeyvaluelijst:\r\n                printablekvl = nl.join([str(ele) for ele in foutekeyvaluelijst])\r\n                if ontbrekende_prop:\r\n                    message = f\"Volgende attributen konden NIET worden ingevuld, {nl}kijk na of deze bestaan in de propertyset definities:{nl}{nl}{printablekvl}\"\r\n                else:\r\n                    message = f\"Volgende attributen konden NIET worden ingevuld:{nl}{nl}{printablekvl}\"\r\n                messagelist.append(message)\r\n                \r\n            if success_count > 0:\r\n                message = f\"{nl}TAAK VOLTOOID. {success_count} objecten aangemaakt en {prop_count} properties ingevuld.\"\r\n                messagelist.append(message)                \r\n                    \r\n        except Exception as ex:\r\n            message = f\"Er is een FOUT opgetreden: {str(ex)}\"\r\n            messagelist.append(message)\r\n    \r\n        tr.Commit()\r\n\r\nelse:#indien geen geometrieobjecten\r\n    m.MessageBoxW(0, \"GEEN objecten aangemaakt\", \"OTL attributen invullen\", 0)\r\n    \r\nif messagelist:\r\n    m.MessageBoxW(0, str(nl.join(messagelist)), \"OTL attributen invullen\", 0)\r\n    \r\n# Wijs de output toe aan de OUT variabele\r\nOUT = eindlijst",
+      "Code": "# Importeer de benodigde modules\r\nimport clr\r\nimport ctypes\r\n\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\nfrom Autodesk.Civil.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.Civil.Runtime import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nm = ctypes.windll.user32\r\n\r\ngeometrieobjecten = IN[0] #(lijst van Dynamo geometrie objecten)\r\nOTL_datadict = IN[1] #lijst van dictionaries met OTL data, bijv. \"psetnaam\" en andere eigenschappen\r\n\r\n        \r\n# Haal het actieve document en de database op\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\ndb = adoc.Database\r\neditor = adoc.Editor\r\n\r\n# Lijst om de ID's van de output in op te slaan\r\nnl = '\\n'\r\n\r\n#Functies\r\ndef remove_nonOTL_keys(OTL_datadict):\r\n    \"\"\"niet otl data verwijderen uit dict\"\"\"\r\n    for d in OTL_datadict:\r\n        del d[\"coordinates\"]\r\n        del d[\"geometry\"]\r\n    return OTL_datadict\r\n    \r\ndef koppel_OTLdata_aan_objecten(geometrieobjecten,OTL_datadict):\r\n    \"\"\"koppel de OTL data aan de aangemaakte geometrie-objecten\"\"\"    \r\n    eindlijst = []\r\n    messagelist = []\r\n    success_count = 0\r\n    prop_count = 0\r\n    ontbrekende_prop = 0\r\n    foutekeyvaluelijst = []\r\n    toegevoegdeKLopties = []\r\n    \r\n    with db.TransactionManager.StartTransaction() as tr:\r\n        try:\r\n            # Haal de PropertySetDefinitionManager op\r\n            dpsd = DictionaryPropertySetDefinitions(db)\r\n            dld = DictionaryListDefinition(db)\r\n            \r\n            # Loop door elk object en de bijbehorende data\r\n            for i, obj in enumerate(geometrieobjecten):\r\n                # Haal de data op die hoort bij het huidige object\r\n                if i >= len(OTL_datadict):\r\n                    message = \"FOUT: Onvoldoende data in OTL_datadict voor alle objecten.\"\r\n                    messagelist.append(message)\r\n                    break\r\n                \r\n                OTLdata = OTL_datadict[i]\r\n                psetnaam = OTLdata.get(\"psetnaam\")\r\n                \r\n                if psetnaam is None:\r\n                    message = f\"FOUT: Geen 'psetnaam' gevonden voor object {i}.\"\r\n                    messagelist.append(message)\r\n                    continue\r\n    \r\n                # Zoek de PropertySetDefinition op\r\n                psdefid = dpsd.GetAt(psetnaam)\r\n                psdef = tr.GetObject(psdefid, OpenMode.ForRead)\r\n                propertydefinitions = psdef.Definitions\r\n                \r\n                if psdefid.IsNull:\r\n                    message = f\"FOUT: PropertySetDefinition {psetnaam} niet gevonden.\"\r\n                    messagelist.append(message)\r\n                    continue\r\n    \r\n                # haal id uit dynamo object\r\n                try:\r\n                    h = obj.Handle\r\n                    ObjId = obj.InternalObjectId\r\n                    aeccObj = tr.GetObject(ObjId, OpenMode.ForWrite)    \r\n    \r\n                except Exception as e:\r\n                    message = f\"FOUT: Ongeldige object met handle {h}: {str(e)}\"\r\n                    messagelist.append(message)\r\n                    continue\r\n                \r\n                if aeccObj:\r\n                    # Koppel de PropertySet aan het Civil 3D object\r\n                    PropertyDataServices.AddPropertySet(aeccObj, psdefid)                                 \r\n                    # Haal de gekoppelde pset op voor dit object\r\n                    propertyset = PropertyDataServices.GetPropertySet(aeccObj, psdefid)\r\n                    psetn = propertyset.Open(OpenMode.ForWrite)\r\n                    propertysetnaam = psetn.PropertySetDefinitionName\r\n                    psetdatacoll = psetn.PropertySetData\r\n                        \r\n                    if psetdatacoll is not None:\r\n                        # Loop door de dictionary en stel de waarden in\r\n                        for propNaam, value in OTLdata.items():\r\n                            # Sla 'psetnaam' over, deze is al verwerkt\r\n                            if propNaam == \"psetnaam\":\r\n                                continue\r\n                            # Sla lege waarden over\r\n                            if not value:\r\n                                continue\r\n                            # Stel default lege waarde in\r\n                            convertvalue = \"\"\r\n                            \r\n                            # Kijk of property bestaat\r\n                            try:\r\n                                propId = psetn.PropertyNameToId(propNaam)\r\n                            except Exception as e:\r\n                                ontbrekende_prop += 1\r\n                                if [psetnaam,propNaam,\"property ontbreekt\"] not in foutekeyvaluelijst: \r\n                                    foutekeyvaluelijst.append([psetnaam,propNaam,\"property ontbreekt\"])\r\n                                continue\r\n                                \r\n                            try:\r\n                                prop = psetdatacoll[propId]\r\n                                propType = prop.DataType\r\n                                #waarde omzetten obv datatype van property in propertyset\r\n                                if propType == 0:\r\n                                    #integer\r\n                                    convertvalue = int(value)\r\n                                elif propType == 1:\r\n                                    #getal\r\n                                    convertvalue = float(value)\r\n                                elif propType == 6:\r\n                                    #keuzelijst\r\n                                    if value == \"\":\r\n                                        convertvalue = \"-\"\r\n                                    elif value == \"true\":\r\n                                        convertvalue = \"True\"\r\n                                    elif value == \"false\":\r\n                                        convertvalue = \"False\"\r\n                                    elif value == True:\r\n                                        convertvalue = \"True\"\r\n                                    elif value == False:\r\n                                        convertvalue = \"False\"\r\n                                    else: \r\n                                        convertvalue = str(value)\r\n    \r\n    \r\n                                    #haal de mogelijke keuzes op uit de listdefinitie\r\n                                    #als de keuzelijstoptie niet bestaat, creer een nieuwe\r\n                                    propdef = propertydefinitions[propId]\r\n                                    ldefid = propdef.ListDefinitionId\r\n                                    #open de lijstdefinitie en voeg toe indien nodig\r\n                                    ld = tr.GetObject(ldefid, OpenMode.ForWrite)\r\n                                    first = True                               \r\n                                    for oid in ld.GetListItems(): #loop door de keuzelijstopties\r\n                                        li = tr.GetObject(oid, OpenMode.ForRead)\r\n                                        if li.Name == convertvalue:\r\n                                            first = False\r\n                                            break\r\n                                    if first: #Als de opties niet bestaat, maak een nieuwe aan\r\n                                        if convertvalue:\r\n                                            if [psetnaam,propNaam,convertvalue] not in toegevoegdeKLopties:\r\n                                                toegevoegdeKLopties.append([psetnaam,propNaam,convertvalue])\r\n                                                ld.AddListItem(value)\r\n                                    \r\n                                else:\r\n                                    convertvalue = str(value)\r\n                                    \r\n                                #Value invullen\r\n                                prop.SetData(convertvalue)\r\n                                prop_count += 1\r\n                                \r\n                            except Exception as e:\r\n                                if [psetnaam,value,propNaam,\"Ongeldige waarde\"] not in foutekeyvaluelijst:\r\n                                    foutekeyvaluelijst.append([psetnaam,value,propNaam,\"Ongeldige waarde\"])\r\n                                continue\r\n                    \r\n                    eindlijst.append(obj)\r\n                    success_count += 1\r\n                    \r\n            if toegevoegdeKLopties:\r\n                printableklo = nl.join([str(ele) for ele in toegevoegdeKLopties])\r\n                m.MessageBoxW(0, f\"Volgende keuzelijstopties werden toegevoegd: {nl}{printableklo}\", \"KeuzelijstOpties toegevoegd\", 0)\r\n                \r\n            if foutekeyvaluelijst:\r\n                printablekvl = nl.join([str(ele) for ele in foutekeyvaluelijst])\r\n                if ontbrekende_prop:\r\n                    message = f\"Volgende attributen konden NIET worden ingevuld, {nl}kijk na of deze bestaan in de propertyset definities:{nl}{nl}{printablekvl}\"\r\n                else:\r\n                    message = f\"Volgende attributen konden NIET worden ingevuld:{nl}{nl}{printablekvl}\"\r\n                messagelist.append(message)\r\n                \r\n            if success_count > 0:\r\n                message = f\"{nl}TAAK VOLTOOID. {success_count} objecten aangemaakt en {prop_count} properties ingevuld.\"\r\n                messagelist.append(message)                \r\n                    \r\n        except Exception as ex:\r\n            message = f\"Er is een FOUT opgetreden: {str(ex)}\"\r\n            messagelist.append(message)\r\n    \r\n        tr.Commit()\r\n        return messagelist,eindlijst\r\n\r\n    \r\n#Uitvoeren\r\nif len(geometrieobjecten) > 0 and len(OTL_datadict) > 0:\r\n    OTL_datadict = remove_nonOTL_keys(OTL_datadict)\r\n    messagelist,eindlijst = koppel_OTLdata_aan_objecten(geometrieobjecten,OTL_datadict)\r\n    if messagelist:\r\n        m.MessageBoxW(0, str(nl.join(messagelist)), \"OTL attributen invullen\", 0)\r\n\r\nelif OTL_datadict and not geometrieobjecten:\r\n    #indien geen geometrieobjecten\r\n    m.MessageBoxW(0, \"GEEN objecten aangemaakt\", \"OTL attributen invullen\", 0)\r\n    eindlijst = \"GEEN objecten aangemaakt\"\r\n\r\nelse:\r\n    eindlijst = \"GEEN OTL data gevonden en GEEN objecten aangemaakt\"\r\n\r\n# Wijs de output toe aan de OUT variabele\r\nOUT = eindlijst",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "0e542257b5874b4aa8a523e582ae35b1",
@@ -1567,13 +1594,34 @@
       ],
       "Replication": "Disabled",
       "Description": "Concatenates all given lists into a single list.\n\nList.Join (lists: var[]..[]): var[]..[]"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "bcc4b8f973354fa9bcfc2f9aea1cbb3c",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f316c1c0522e4941aabaf0f5cb855025",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\ruben\\Desktop\\wkt met maar 1 type\\DA-2024-35924_export_legacty.csv",
+      "InputValue": "..\\..\\..\\Desktop\\wkt met maar 1 type\\DA-2024-35924_export_legacty.csv"
     }
   ],
   "Connectors": [
     {
       "Start": "5bca7fb080f441d28905dd32761fbcd3",
       "End": "1fa1e10038024e898cff44e4a3f03316",
-      "Id": "75998e6eee6e436e9190bf3643e347d7",
+      "Id": "1f1a9cd9d8724c6db961e31446bb7947",
       "IsHidden": "False"
     },
     {
@@ -1602,14 +1650,14 @@
     },
     {
       "Start": "3a5bc904951f4e248623e151346c3a97",
-      "End": "87f69b21600247a383bb63cdcd6aba07",
-      "Id": "2f78a286a1894601a10d8fbd908d1730",
+      "End": "c56d6f1273934f538d04930db2feb26b",
+      "Id": "7104ad489c024d208d6c6c68fc98695f",
       "IsHidden": "False"
     },
     {
       "Start": "3a5bc904951f4e248623e151346c3a97",
-      "End": "c56d6f1273934f538d04930db2feb26b",
-      "Id": "7104ad489c024d208d6c6c68fc98695f",
+      "End": "f718944fae44473f989ba7d9454a62af",
+      "Id": "f8ec185d9d014e88b00c8bf475a34e23",
       "IsHidden": "False"
     },
     {
@@ -1644,14 +1692,14 @@
     },
     {
       "Start": "aa4876b4613748dbb7d94328e49bba09",
-      "End": "8a4d659423c94f64907e383138da07eb",
-      "Id": "c7f588af8aee4687bf47eb5fbfeb3a75",
+      "End": "dbbb6f4e2ac54093a93ebc65d7e0e909",
+      "Id": "bd9191dc9ee841ab927c71953dcfdf02",
       "IsHidden": "False"
     },
     {
       "Start": "aa4876b4613748dbb7d94328e49bba09",
-      "End": "dbbb6f4e2ac54093a93ebc65d7e0e909",
-      "Id": "bd9191dc9ee841ab927c71953dcfdf02",
+      "End": "b22c41ce25d041f19302610df2879cb6",
+      "Id": "d910a6b831644c81ae94d9054e48e8bb",
       "IsHidden": "False"
     },
     {
@@ -1691,21 +1739,21 @@
       "IsHidden": "False"
     },
     {
-      "Start": "04338919c667478ea2751f62161fc2d5",
+      "Start": "536cc1d9637d4fa4b6b2d3d8fcf49331",
       "End": "598bc5cb9cd240848ecb7896f83c3655",
-      "Id": "10e9863ccecb439e8fcf6a63bab4f3bc",
+      "Id": "0dc565cb86b74c03b457fada2467341d",
       "IsHidden": "False"
     },
     {
-      "Start": "2b7b70f5aa584badbfade224e9c7ff7c",
+      "Start": "93c8ed9a388f4af88a93571a3e961f41",
       "End": "7150fa18e0f5420e81f68a2f34bf7c63",
-      "Id": "30b060707c0042319f8e72b8b8b9a0c4",
+      "Id": "1ac809d039f0496db0f664600f4a798f",
       "IsHidden": "False"
     },
     {
-      "Start": "f973023f3b904ad39d33aff5a71c990d",
+      "Start": "9aeaffe1fd1a4cd2b34c3fb9105c2e0e",
       "End": "c7ef5e7f5a54447fb11a9108f4ac2c3c",
-      "Id": "2ad1cca929784594827c59dada0b9909",
+      "Id": "609cb75352c3479cac8057638c361d54",
       "IsHidden": "False"
     },
     {
@@ -1727,21 +1775,21 @@
       "IsHidden": "False"
     },
     {
-      "Start": "0cc5ec27d75c407ab96286a7861b6799",
+      "Start": "286d2a2cdd72470c99070061b7cf53d5",
       "End": "09f1f5c7102f4f548a91a3d82f5479c7",
-      "Id": "119ac4ffa2814b00af3ec3fad198a5e4",
+      "Id": "d622409531d04c1cb793fc4430892da9",
       "IsHidden": "False"
     },
     {
-      "Start": "0cc5ec27d75c407ab96286a7861b6799",
+      "Start": "286d2a2cdd72470c99070061b7cf53d5",
       "End": "d776627eefdb4a3c8893181b4bab057a",
-      "Id": "0ab0049f45d44224883d875e6ba730f8",
+      "Id": "dc9562057f6b4910934daf841c72d5b6",
       "IsHidden": "False"
     },
     {
-      "Start": "da402894f58845d0921f2549e69ff35a",
+      "Start": "2923323152eb4db8a608746990c8b122",
       "End": "5ea932c7f29f4050be0316883a0dab2c",
-      "Id": "d5ae89f8741c4c38ae308878d32eeb84",
+      "Id": "972809552d224b89b498956b1e50f2a4",
       "IsHidden": "False"
     },
     {
@@ -1775,21 +1823,21 @@
       "IsHidden": "False"
     },
     {
-      "Start": "c849af02123646e68b3c45ca516bdf95",
+      "Start": "e3dbeda27ff04d27bd71c9565ae39545",
       "End": "f23559d0b19d446e95b8027081efc40f",
-      "Id": "1f070930e44c4500b8508919121f3a70",
+      "Id": "180ddb2dd32a4e29aafa23abed276989",
       "IsHidden": "False"
     },
     {
-      "Start": "c849af02123646e68b3c45ca516bdf95",
+      "Start": "e3dbeda27ff04d27bd71c9565ae39545",
       "End": "68ed8b982dd04c03a3838b1be288462b",
-      "Id": "4b903feec2d442e6b68769ee17baa695",
+      "Id": "4a50833a356f4cfbb044ca6b23cbe7d5",
       "IsHidden": "False"
     },
     {
-      "Start": "1dcca16557af4cc28e66b03e65d594b2",
+      "Start": "770f14e8a9084e67b38e5dcc26ab9a17",
       "End": "33b2f1e768ae424593c1181561b1aa7a",
-      "Id": "37492f6547a94062a509c9779d35f5cc",
+      "Id": "f08e1d859a7d462a986c20e6fc0edd39",
       "IsHidden": "False"
     },
     {
@@ -1830,14 +1878,14 @@
     },
     {
       "Start": "bdce83f2c8bf498b953939b442c1fd8a",
-      "End": "68f1e0419a394c3cb7c7cfee8aaff9a4",
-      "Id": "2ec721a8cf4441d8a709ae3e7f0adf8a",
+      "End": "071df18555f74106a0346b48b1b5cf97",
+      "Id": "6a23821c8ee240e694485fe3c13b8a2c",
       "IsHidden": "False"
     },
     {
       "Start": "bdce83f2c8bf498b953939b442c1fd8a",
-      "End": "071df18555f74106a0346b48b1b5cf97",
-      "Id": "6a23821c8ee240e694485fe3c13b8a2c",
+      "End": "a030c633fc454dbdbf5dd7eecb11818a",
+      "Id": "54302ba6e13e4233bb56c914f322c200",
       "IsHidden": "False"
     },
     {
@@ -1945,7 +1993,26 @@
     "warningCount": 0,
     "errorCount": 0
   },
-  "Bindings": [],
+  "Bindings": [
+    {
+      "NodeId": "0484f1fd-d9f5-4224-9360-77971bbcc138",
+      "Binding": {
+        "ByGeometry_InClassDecl-1_InFunctionScope-1_Instance0_0484f1fd-d9f5-4224-9360-77971bbcc138": "H4sIAAAAAAAACl3QK05EQRQA0b08jWj+DK7vbxMEQcJYDOMIe4fgOK5S8rx8HR/nz8v5vd4ub8fzy9fx/hdHnPr0cHxf/RuPjifHybEd4UhHOdoxjL0c144bx63jznHv0GPrsfXYemw9th5bj63H1mPrEXqEHqFH6BF6hB6hR+gReoQeoUfoEXqEHqFH6JF6pB6pR+qReqQeqUfqkXqkHqlH6pF6pB6pR+pRepQepUfpUXqUHqVH6VF6lB6lR+lRepQepUfp0Xq0Hq1H69F6tB6tR+vRerQerUfr0Xq0Hq1H6zF6jB6jx+gxeoweo8foMXqMHqPH6DF6jB6jx+AxC49ZeMzCYxYes/CYhccsPGbhMQuPWXjMwmMWHrPwmIXHrF+P1+/XHz0/fIcbCAAA"
+      }
+    },
+    {
+      "NodeId": "83572438-fbe6-48cb-8b63-22dc6bb699e3",
+      "Binding": {
+        "ByPoints_InClassDecl-1_InFunctionScope-1_Instance0_83572438-fbe6-48cb-8b63-22dc6bb699e3": "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"
+      }
+    },
+    {
+      "NodeId": "f74255b0-7dcc-4ce2-96f1-1132dda9fbaf",
+      "Binding": {
+        "ByPoints_InClassDecl-1_InFunctionScope-1_Instance0_f74255b0-7dcc-4ce2-96f1-1132dda9fbaf": "H4sIAAAAAAAACoVWvXKcIQx8l692wcevSIcAvYTnCs/YrZu4y9y7B9wk2kxQd7fDCmm1t9zrr+vz4+fXx/t4+3q7frz+8/X9+8PVhsR+PV/+ANNVD8CM1/Oxof/UmPctmuI9ARAYgDgAyHCtL3ii3kYffjhNCQTDhQqdBnZG0dChaLyrQYmhAYUtSvJwS5pWY0mipuQoBiVn0CPXYlEYFCsEiyqcAJiwfYrTuIU6+KPtTo+U1qum8IQ+erIk7AlqjIpAg/FHh+HGsFQfE5w80R9r2wCY4y/ZNUW2g44UCXr74opxizgOmhKjFlli1rNIJKSw9qlEuTWQgjb/AthoLG1L/U3JwUgpyRn6KLcRKFI8TEtRm18oNaMGZb0oIQLFaAebBrTHFqBdKNQyAtpjQlv1c2MMjVXLydLAuNIGtL6eC6vGhFnGtuWRMj3cItHIUxFSlmLnRjpS2N1J+WMBOVgUbf4F0ASgKgdt4DztOtGgDz/VL4pdcAyAP+uxTui4WICxKHbRKdXZpQiapgKNpV4AGCBQ9iBQpgyA8SStE02FNK8Yg2uLnPODHXn1Q15AyRZF5xi7tsPgSGkEErJ+tBaw38pjjR6A0sVa9nAqDNjNcE66dUL/U2In5Ts/Hs/Hb1zsME9MCgAA"
+      }
+    }
+  ],
   "View": {
     "Dynamo": {
       "ScaleFactor": 10000.0,
@@ -1977,17 +2044,17 @@
         "Excluded": false,
         "ShowGeometry": true,
         "X": 254.49039629674934,
-        "Y": 587.5929874215212
+        "Y": 532.0932424927288
       },
       {
         "Id": "0ff91343bfff47d9aa67e21e9177b8f3",
-        "Name": "Python Script",
+        "Name": "trans_OTL_csv_to_dict",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 861.2630256231201,
-        "Y": 594.8686549154424
+        "X": 811.8651889930793,
+        "Y": 589.4993248469598
       },
       {
         "Id": "3302f89450b347c483ae20d436d10dca",
@@ -2271,12 +2338,12 @@
       },
       {
         "Id": "d22b71e603354819a97326b09bf30477",
-        "Name": "Python Script",
+        "Name": "Generate colorcodes",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 4824.161729898231,
+        "X": 4718.739064201234,
         "Y": 1686.282595710666
       },
       {
@@ -2297,7 +2364,7 @@
         "Excluded": false,
         "ShowGeometry": true,
         "X": 7177.068657757015,
-        "Y": 807.2903084225727
+        "Y": 788.3861980586539
       },
       {
         "Id": "f84fd5cc202c4436b67204839c7535d0",
@@ -2338,6 +2405,16 @@
         "ShowGeometry": true,
         "X": 6764.568713941153,
         "Y": 1007.224531559998
+      },
+      {
+        "Id": "bcc4b8f973354fa9bcfc2f9aea1cbb3c",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 143.15623099269277,
+        "Y": 782.1624743480919
       }
     ],
     "Annotations": [
@@ -2449,7 +2526,7 @@
         "Left": 2060.0605412776813,
         "Top": 101.33042332882798,
         "Width": 1666.039407679088,
-        "Height": 332.04128113001303,
+        "Height": 348.04128113001303,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 174.33042332882798,
@@ -2473,7 +2550,7 @@
         "Left": 2063.7336645674413,
         "Top": 917.9043525667778,
         "Width": 1636.3137239054959,
-        "Height": 283.30770214602785,
+        "Height": 286.9109110188733,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 990.9043525667778,
@@ -2515,12 +2592,12 @@
         ],
         "HasNestedGroups": false,
         "Left": 7167.068657757015,
-        "Top": 667.7903084225727,
+        "Top": 648.8861980586539,
         "Width": 194.5,
         "Height": 301.5,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
-        "InitialTop": 807.2903084225727,
+        "InitialTop": 788.3861980586539,
         "InitialHeight": 145.0,
         "TextblockHeight": 129.5,
         "Background": "#FFA4E1FF"
@@ -2541,7 +2618,7 @@
         "Left": 2066.4092467575383,
         "Top": 2033.5531333066351,
         "Width": 1636.3137239054959,
-        "Height": 283.3077021460276,
+        "Height": 286.91091101887287,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 2106.553133306635,
@@ -2608,9 +2685,9 @@
           "a89c0f34118744de8f4ea34226d25d10"
         ],
         "HasNestedGroups": false,
-        "Left": 4814.161729898231,
+        "Left": 4708.739064201234,
         "Top": 1606.709687966902,
-        "Width": 1031.2983872198347,
+        "Width": 1136.7210529168315,
         "Height": 298.0955673780377,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
@@ -2687,8 +2764,8 @@
         "Background": "#FFC1D676"
       }
     ],
-    "X": -1469.637767624127,
-    "Y": 117.54382004985564,
-    "Zoom": 0.33726882733971136
+    "X": 254.24367339238313,
+    "Y": 535.9916498191543,
+    "Zoom": 0.10031697476190995
   }
 }

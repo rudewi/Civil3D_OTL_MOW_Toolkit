@@ -1,0 +1,389 @@
+{
+  "Uuid": "35df8591-e153-4f27-bad0-027508b6e657",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "OTL_Select_objects_gebruiksvoorbeeld",
+  "ElementResolver": {
+    "ResolutionMap": {
+      "Document": {
+        "Key": "Autodesk.AutoCAD.DynamoNodes.Document",
+        "Value": "AutoCADNodes.dll"
+      },
+      "Dictionary": {
+        "Key": "DesignScript.Builtin.Dictionary",
+        "Value": "DesignScriptBuiltin.dll"
+      }
+    }
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "b6d593d000df4efab2a34d292ae84259",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "2c264e8bc9a9491498126df381d01603",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\ruben\\Documents\\DYNAMO\\OTL Toolkit 25\\testfiles-dwg\\validatiefouten-DA-2025-dummy.csv",
+      "InputValue": "testfiles-dwg\\validatiefouten-DA-2025-dummy.csv"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "33f99e40696c437d9dac4224b81d8380",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "eae62d6d375f423385237b1be01ae8c4",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "\"14aaa032-f3fc-4773-8a69-44434ba5fde4-b25kZXJkZWVsI0RhdGFrYWJlbA\";"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "c7ef1c8066194a70a8722e1b594cb4c5",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "6d24827a1a78430da003a2ceec72349b",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "fe717da32b8142a2902014c2669fd265",
+          "Name": "",
+          "Description": "Value of expression at line 2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "1ba5fe3141e845fa8cb94153252dfeb5",
+          "Name": "",
+          "Description": "Value of expression at line 3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ded6b103d67a496ea63af414a7f4c7ea",
+          "Name": "",
+          "Description": "Value of expression at line 4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "\"handle\";\n\"assetId.identificator\";\n\"assetType\";\n\"OTL\";"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "6be6dea9ce9d47bf9c832e1ad38b86e9",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "16889a46d3cc4c20a48449044d6d2823",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "\"https://wegenenverkeer.data.vlaanderen.be/ns/onderdeel#Camera\";"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "06acbe8c-bf93-4b7f-9c5d-744cdb47c0ec",
+      "FunctionType": "Graph",
+      "Id": "5ce572e2f0ba46279f452d0d1c29db69",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "37f5bbd4affe473e8d884539c80eda8f",
+          "Name": "te_zoeken_waarde",
+          "Description": "De waarde voor de objecten die je wil selecteren. Dit kan een enkele waarde zijn, of het pad naar een CSV file (waarbij het zoektype voorkomt in de hoofding)\n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "eea2b3b7d9ed48ce93ba4075e01b0480",
+          "Name": "zoektype",
+          "Description": "Waarop wil je zoeken? Mogelijke zoektypes zijn \"handle\", \"assetId.identificator\",\"assetType\",\"OTL\"\n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "6bd3e8526e7241e9a2b32a8a0f64f58d",
+          "Name": "Gevonden_objecten",
+          "Description": "Overzicht van de gevonden objecten",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Data filteren op OTL aanwezigheid, handle, type of id. Aan de hand van een tekst input (bv. een typeURI) of een CSV file (bv. een DAVIE foutrapport)."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "1ba5fe3141e845fa8cb94153252dfeb5",
+      "End": "eea2b3b7d9ed48ce93ba4075e01b0480",
+      "Id": "710c69ee1a364226b17e7a66702596a4",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "16889a46d3cc4c20a48449044d6d2823",
+      "End": "37f5bbd4affe473e8d884539c80eda8f",
+      "Id": "fe615554f79b48639f92dcfaf511a7a7",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [
+    "06acbe8c-bf93-4b7f-9c5d-744cdb47c0ec"
+  ],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "OTL_Select_objects.dyf",
+      "ReferenceType": "DYFFile",
+      "Nodes": [
+        "5ce572e2f0ba46279f452d0d1c29db69"
+      ]
+    },
+    {
+      "Name": "validatiefouten-DA-2025-dummy.csv",
+      "ReferenceType": "External",
+      "Nodes": [
+        "b6d593d000df4efab2a34d292ae84259"
+      ]
+    }
+  ],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.15",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.4.1.7055",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "b6d593d000df4efab2a34d292ae84259",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -472.6836586718007,
+        "Y": 367.9407368236216
+      },
+      {
+        "Id": "33f99e40696c437d9dac4224b81d8380",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -651.0380366871245,
+        "Y": -27.963052271595984
+      },
+      {
+        "Id": "c7ef1c8066194a70a8722e1b594cb4c5",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -308.1240016707568,
+        "Y": 780.3157731332248
+      },
+      {
+        "Id": "6be6dea9ce9d47bf9c832e1ad38b86e9",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -640.747840831432,
+        "Y": 114.14075101729372
+      },
+      {
+        "Id": "5ce572e2f0ba46279f452d0d1c29db69",
+        "Name": "OTL_Select_objects",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 313.93990312035,
+        "Y": 350.1767211081022
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "048ff88668eb41dd8919698f6cbbc589",
+        "Title": "tekstinput",
+        "DescriptionText": "<Double click here to edit group description>",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "33f99e40696c437d9dac4224b81d8380",
+          "6be6dea9ce9d47bf9c832e1ad38b86e9"
+        ],
+        "HasNestedGroups": false,
+        "Left": -661.0380366871245,
+        "Top": -100.96305227159598,
+        "Width": 619.5,
+        "Height": 347.1038032888897,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -27.963052271595984,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 63.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "6ffde2211973498f99bbc8d83f3900d2",
+        "Title": "Zoeken op",
+        "DescriptionText": "<Double click here to edit group description>",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "c7ef1c8066194a70a8722e1b594cb4c5"
+        ],
+        "HasNestedGroups": false,
+        "Left": -318.1240016707568,
+        "Top": 707.3157731332248,
+        "Width": 291.5,
+        "Height": 247.5,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 780.3157731332248,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 63.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "4a7f376150c84598b304f7c482d84225",
+        "Title": "file-input",
+        "DescriptionText": "Description <Double click here to edit group description>",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "b6d593d000df4efab2a34d292ae84259"
+        ],
+        "HasNestedGroups": false,
+        "Left": -482.6836586718007,
+        "Top": 294.9407368236216,
+        "Width": 448.0,
+        "Height": 214.5,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 367.9407368236216,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 63.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "ea3b0782d755405cb5bd5a75d7c64e81",
+        "Title": "2023",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [],
+        "HasNestedGroups": false,
+        "Left": 441.0963143399599,
+        "Top": -1753.9439022049244,
+        "Width": 0.0,
+        "Height": 0.0,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 0.0,
+        "InitialHeight": 0.0,
+        "TextblockHeight": 0.0,
+        "Background": "#FFC1D676"
+      }
+    ],
+    "X": 600.5124424884166,
+    "Y": 121.46905603362103,
+    "Zoom": 0.670406172611691
+  }
+}

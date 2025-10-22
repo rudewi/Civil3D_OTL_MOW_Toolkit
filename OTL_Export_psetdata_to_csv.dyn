@@ -472,26 +472,6 @@
       "Description": "Returns the current document\n\nDocument.Current: Document"
     },
     {
-      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
-      "Id": "43ce69ccfb8e4166a29a40fb2f1788f9",
-      "NodeType": "CodeBlockNode",
-      "Inputs": [],
-      "Outputs": [
-        {
-          "Id": "0437682d97ec493c978efbb8c2a890ef",
-          "Name": "",
-          "Description": "csv_voor_schrijven",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "/*pad naar (lege) CSV-file waar data in weggeschreven kan worden*/\ncsv_voor_schrijven: string = \"\";"
-    },
-    {
       "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
       "Id": "cb22f191829e4e709b3b77f300738e84",
       "NodeType": "FunctionNode",
@@ -569,7 +549,7 @@
       ],
       "Replication": "Disabled",
       "Description": "Enables selection between True and False",
-      "InputValue": true
+      "InputValue": false
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
@@ -639,58 +619,8 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows you to select a file on the system and returns its file path",
-      "HintPath": "C:\\Users\\ruben\\Desktop\\csv-out-test\\OTL_Export_psetdata.csv",
-      "InputValue": "..\\..\\..\\Desktop\\csv-out-test\\OTL_Export_psetdata.csv"
-    },
-    {
-      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "import ctypes\r\nfrom os import path\r\nm = ctypes.windll.user32\r\n\r\n#Module uit package ophalen\r\nfrom OTL_Export_psetdata_to_csv.OTL_csv_from_dict import *\r\n\r\n#inputs\r\npset_dicts = IN[0]\r\ninputpath = IN[1]\r\naparte_file = IN[2]\r\n\r\n#variabelen\r\nnl = \"\\n\"\r\nmessagelist = []\r\n\r\nif pset_dicts[0]:#Check of er psets zijn\r\n    if path.isfile(inputpath):\r\n        result = alles_in_een_OTL_file(pset_dicts,inputpath)\r\n    elif path.isdir(inputpath):\r\n        if aparte_file:\r\n            result = file_per_OTL_type(pset_dicts,inputpath)\r\n        else:\r\n            filenaam = \"OTL_Export_psetdata\"\r\n            filepath = inputpath + \"\\\\\" + filenaam + \".csv\"\r\n            result = alles_in_een_OTL_file(pset_dicts,filepath)\r\n    else:\r\n        message = f\"Geen geldige folder of file om csv naar te schrijven\"\r\n        result = message\r\n        m.MessageBoxW(0, message, \"OTL_Export psetdata to CSV\", 0)\r\nelse:\r\n    message = f\"Geen propertysetinfo gevonden om te extraheren\"\r\n    result = message\r\n    m.MessageBoxW(0, message, \"OTL_Export psetdata to CSV\", 0)\r\n    \r\nOUT = result",
-      "Engine": "CPython3",
-      "VariableInputPorts": true,
-      "Id": "f3ae303c5dd84636a1bd39f4d4748897",
-      "NodeType": "PythonScriptNode",
-      "Inputs": [
-        {
-          "Id": "f0f4627382324661bc1e512cd184a138",
-          "Name": "IN[0]",
-          "Description": "Input #0",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "9296175cf699483da9d458f949a7c286",
-          "Name": "IN[1]",
-          "Description": "Input #1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "26b3cd77bdc2461e8e24c63906718e06",
-          "Name": "IN[2]",
-          "Description": "Input #2",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "ee8b7b89fbbc4a90884372ad469499e4",
-          "Name": "OUT",
-          "Description": "Result of the python script",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Runs an embedded Python script."
+      "HintPath": "C:\\Users\\ruben\\Desktop\\csv-out-test\\Voorbeeld.csv",
+      "InputValue": "..\\..\\..\\Desktop\\csv-out-test\\Voorbeeld.csv"
     }
   ],
   "Connectors": [
@@ -722,12 +652,6 @@
       "Start": "308f12b83a8a440facc383ac54613cf6",
       "End": "023c0dfad46b4555b27c8052843dd4e1",
       "Id": "dde4e1e9cbca4db5bca75f5485013d01",
-      "IsHidden": "False"
-    },
-    {
-      "Start": "308f12b83a8a440facc383ac54613cf6",
-      "End": "f0f4627382324661bc1e512cd184a138",
-      "Id": "2636d36914a64e42acf53200ec575eab",
       "IsHidden": "False"
     },
     {
@@ -811,13 +735,7 @@
     {
       "Start": "347b22c69fde4ab3b2c64be9be5a93e0",
       "End": "a6c8a89bb79443c0829faafc53b647e7",
-      "Id": "153b1c29f492485ca9c5a3b3e55ef199",
-      "IsHidden": "False"
-    },
-    {
-      "Start": "347b22c69fde4ab3b2c64be9be5a93e0",
-      "End": "9296175cf699483da9d458f949a7c286",
-      "Id": "cd24806394fd416f85aa2082197e84b0",
+      "Id": "78273a79db7e40b78e2de13990094715",
       "IsHidden": "False"
     },
     {
@@ -825,16 +743,18 @@
       "End": "3c0389770c484a4b8f3ec05ce05d48cb",
       "Id": "5f9d4935e37d443fa2e7e521d2711178",
       "IsHidden": "False"
-    },
-    {
-      "Start": "137eb4aff28a4133ba76defcf790540f",
-      "End": "26b3cd77bdc2461e8e24c63906718e06",
-      "Id": "85a9506c5b6646f9a44754d511fa0e13",
-      "IsHidden": "False"
     }
   ],
   "Dependencies": [],
-  "NodeLibraryDependencies": [],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "Voorbeeld.csv",
+      "ReferenceType": "External",
+      "Nodes": [
+        "04bff6d242144f01aebfe96de8079764"
+      ]
+    }
+  ],
   "EnableLegacyPolyCurveBehavior": true,
   "Thumbnail": "",
   "GraphDocumentationURL": null,
@@ -857,7 +777,7 @@
     {
       "NodeId": "ecb36d32-d3af-495e-af87-e2212ccf1dd9",
       "Binding": {
-        "get_PropertySets_InClassDecl-1_InFunctionScope-1_Instance0_ecb36d32-d3af-495e-af87-e2212ccf1dd9": "H4sIAAAAAAAACouuVspLLS5JTXFJLElUsoqurtXBjpRSwAqUlEbZo+EwmgZG08BoGhhNA6NpYFClAYq0x9bGAgBR0TjGDQgAAA=="
+        "get_PropertySets_InClassDecl-1_InFunctionScope-1_Instance0_ecb36d32-d3af-495e-af87-e2212ccf1dd9": "H4sIAAAAAAAACu3SsQnAIBQE0F1+nQlSu4VYCNraxE7cPWCXBVI9uOK48nh5xejP7C3VWePOa1+fRDt7hO4HBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggIFfDZRdXjJRB7xNWwAA"
       }
     }
   ],
@@ -1025,16 +945,6 @@
         "Y": -121.56433474546537
       },
       {
-        "Id": "43ce69ccfb8e4166a29a40fb2f1788f9",
-        "Name": "Code Block",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": 1944.2398293337421,
-        "Y": -69.57581508765605
-      },
-      {
         "Id": "cb22f191829e4e709b3b77f300738e84",
         "Name": "List.Flatten",
         "IsSetAsInput": false,
@@ -1051,8 +961,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": -2932.164229180768,
-        "Y": 738.361395694679
+        "X": -3050.922330821547,
+        "Y": 651.7669465816109
       },
       {
         "Id": "704dda200dfb44e0a643371fcd9c1b95",
@@ -1069,7 +979,7 @@
         "Name": "Python Script",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
-        "Excluded": true,
+        "Excluded": false,
         "ShowGeometry": true,
         "X": 1502.411715309876,
         "Y": -115.12170145424034
@@ -1081,18 +991,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": -2533.450056314291,
-        "Y": 573.2901677769632
-      },
-      {
-        "Id": "f3ae303c5dd84636a1bd39f4d4748897",
-        "Name": "Python Script",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": 1503.3822090840176,
-        "Y": 345.13492687784725
+        "X": -3057.965005227731,
+        "Y": 795.9453475157488
       }
     ],
     "Annotations": [
@@ -1118,16 +1018,14 @@
           "47516205ecca478ab852b4feab45fd8e",
           "c894f3fbe8f542b0a358d5a1985bd60d",
           "e5862781e858425f9db2a88438f520fb",
-          "43ce69ccfb8e4166a29a40fb2f1788f9",
           "cb22f191829e4e709b3b77f300738e84",
-          "3b67f5ddd553481592192c1ca07a56e4",
-          "f3ae303c5dd84636a1bd39f4d4748897"
+          "3b67f5ddd553481592192c1ca07a56e4"
         ],
         "HasNestedGroups": false,
         "Left": -2525.823253585195,
         "Top": -466.14908927355754,
-        "Width": 5079.563082918937,
-        "Height": 1008.2840161514048,
+        "Width": 4212.734968895071,
+        "Height": 842.313572566213,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": -393.14908927355754,
@@ -1137,7 +1035,7 @@
       },
       {
         "Id": "f80f172688e94dbd8c7277f78eaf9fbf",
-        "Title": "KIES HIER EEN FOLDER OM DE CSVs IN WEG TE SCHRIJVEN",
+        "Title": "KIES HIER EEN FOLDER OM DE CSVs IN WEG TE SCHRIJVEN, OF EEN LEGE CSV FILE",
         "DescriptionText": "<Double click here to edit group description>",
         "IsExpanded": true,
         "WidthAdjustment": 0.0,
@@ -1146,15 +1044,15 @@
           "2962566352774612b66467b975fb2c84"
         ],
         "HasNestedGroups": false,
-        "Left": -2942.164229180768,
-        "Top": 535.361395694679,
+        "Left": -3060.922330821547,
+        "Top": 405.7669465816109,
         "Width": 345.5,
-        "Height": 344.5,
+        "Height": 387.5,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
-        "InitialTop": 738.361395694679,
+        "InitialTop": 651.7669465816109,
         "InitialHeight": 145.0,
-        "TextblockHeight": 193.0,
+        "TextblockHeight": 236.0,
         "Background": "#FFFF7BAC"
       },
       {
@@ -1180,8 +1078,8 @@
         "Background": "#FFFF7BAC"
       }
     ],
-    "X": 282.93571379809305,
-    "Y": 434.99896281931876,
-    "Zoom": 0.32990686453872575
+    "X": -710.1894357819704,
+    "Y": 269.41351839864166,
+    "Zoom": 0.7734475700054554
   }
 }

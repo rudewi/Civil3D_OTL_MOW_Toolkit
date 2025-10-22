@@ -6,6 +6,7 @@ import ctypes
 import clr
 import random
 
+
 # Add Assemblies for AutoCAD and Civil3D
 clr.AddReference('AcMgd')
 clr.AddReference('AcCoreMgd')
@@ -68,22 +69,36 @@ csv_dicts = []
 filecount = 0
 
 if CSVMap:
-    for root, dirs, files in os.walk(CSVMap):
-        for file in files:
-            if file.endswith(".csv"):
-                filecount = filecount + 1
-                filedir= CSVMap + "\\" + file
-                with open(filedir, encoding='utf-8') as csvfile:
-                    ingelezen_csv = csv.DictReader(csvfile, delimiter=";")
-                    csv_dicts.append(list(ingelezen_csv))
-    if filecount == 0:
-        foutgevonden = 1
-        if message == "":
-            message = f"Kon geen CSV bestanden vinden in de folder: {nl}{str(CSVMap)}"
+    if os.path.isdir(CSVMap):#bij folder
+        for root, dirs, files in os.walk(CSVMap):
+            for file in files:
+                if file.endswith(".csv"):
+                    filecount = filecount + 1
+                    filedir= CSVMap + "\\" + file
+                    with open(filedir, encoding='utf-8') as csvfile:
+                        ingelezen_csv = csv.DictReader(csvfile, delimiter=";")
+                        csv_dicts.append(list(ingelezen_csv))
+        if filecount == 0:
+            foutgevonden = 1
+            if message == "":
+                message = f"Kon geen CSV bestanden vinden in de folder: {nl}{str(CSVMap)}"
+                
+    if os.path.isfile(CSVMap):#bij file
+        filedir = CSVMap
+        if filedir.endswith(".csv"):
+            filecount = filecount + 1
+            with open(filedir, encoding='utf-8') as csvfile:
+                ingelezen_csv = csv.DictReader(csvfile, delimiter=";")
+                csv_dicts.append(list(ingelezen_csv))
+        else:
+            foutgevonden = 1
+            if message == "":
+                message = f"Opgegeven file is geen csv file: {nl}{str(CSVMap)}{nl}{nl}Geef een CSV file, of een folder met CSV files op"
+
 else:
     foutgevonden = 1
     if message == "":
-        message = f"Ongeldige input folder: {nl}{str(CSVMap)}"
+        message = f"Ongeldige input:{nl}{str(CSVMap)}{nl}{nl}Geef een CSV file, of een folder met CSV files op"
 
 
 #Lege items skippen

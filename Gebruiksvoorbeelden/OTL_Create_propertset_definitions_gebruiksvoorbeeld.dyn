@@ -1,0 +1,385 @@
+{
+  "Uuid": "971a0979-6551-405c-bdcc-0f001e61bcb2",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "OTL_Create_propertset_definitions_gebruiksvoorbeeld",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "65ee8573-951a-44fe-86e1-e658617ad313",
+      "FunctionType": "Graph",
+      "Id": "a864a3bba2bf48b1a2548e2cc226e37a",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "b9159649a88c49d59756890d7e8851cf",
+          "Name": "Library_Downlaod",
+          "Description": "Bij 'true' worden de OTLMOW libraries (opnieuw) gedownload naar de OTL_libraries_folder\n\nbool\nDefault value : True",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ab90e7f1e4ab4298b02469fc6c289b63",
+          "Name": "OTL_libraries_folder",
+          "Description": "Folder waar de OTLMOW library opgeslagen mag worden. Bij geen input zal de folder waarin de dwg staat worden gebruikt.\n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c259b31f187c458f97d660dc39294433",
+          "Name": "OTL_SUBSET",
+          "Description": "pad naar OTL subset db in sqlite\n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "b181580b04454e94a8893fcfa516768f",
+          "Name": "Attribuut_filter",
+          "Description": "Bij 'True' worden enkel de attributen uit de susbet aangemaakt, bij 'False' alle OTL attributen voor de klasses in de subset\n\nbool\nDefault value : True",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b69571d7a59c4e35881069854fe91b89",
+          "Name": "Propertyset_Info",
+          "Description": "Aangemaakte propertysets",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Methode om vanuit een OTL subset property set definitions aan te maken in een dwg. Download en gebruikt hiervoor de Python OTLMOW libraries. Bruikbaar in dynamo 3.0 (vanaf civil3D 2025)"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "f40e20798e4b41ebbbfc9425e308ed95",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7d3fb7f765a84a17b3bce07700ee5254",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": false
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Directory, CoreNodeModels",
+      "Id": "a96e3a7b587e463a95f9cb00624c3d9d",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "6e77a39691e846d1a5c52af23e80e677",
+          "Name": "",
+          "Description": "Directory path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a directory on the system and returns its path",
+      "HintPath": "C:\\Users\\ruben\\Desktop\\test_45",
+      "InputValue": "C:\\Users\\ruben\\Desktop\\test_45"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "b8a9f16104b44e10a12ad28b98afcd0b",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "68078132cbac4800bb63e27d22bb1fa5",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\ruben\\Documents\\DYNAMO\\OTL Toolkit 25\\subsets\\leeg.db",
+      "InputValue": "..\\subsets\\leeg.db"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "3a8a5daa205049db803b807f9ed63dc2",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "62d0e618885c43a297eeac66d0bffa75",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "7d3fb7f765a84a17b3bce07700ee5254",
+      "End": "b9159649a88c49d59756890d7e8851cf",
+      "Id": "b086ccd4ca184b59b1eb8062adfdc3db",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "6e77a39691e846d1a5c52af23e80e677",
+      "End": "ab90e7f1e4ab4298b02469fc6c289b63",
+      "Id": "0fce17194e6c4531996a5d7d084c10fc",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "68078132cbac4800bb63e27d22bb1fa5",
+      "End": "c259b31f187c458f97d660dc39294433",
+      "Id": "510b98870a28449a942493a7bec60740",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "62d0e618885c43a297eeac66d0bffa75",
+      "End": "b181580b04454e94a8893fcfa516768f",
+      "Id": "b2d451356a214ea79670fc42f5aff901",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [
+    "65ee8573-951a-44fe-86e1-e658617ad313"
+  ],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "OTL_Create_propertset_definitions.dyf",
+      "ReferenceType": "DYFFile",
+      "Nodes": [
+        "a864a3bba2bf48b1a2548e2cc226e37a"
+      ]
+    },
+    {
+      "Name": "leeg.db",
+      "ReferenceType": "External",
+      "Nodes": [
+        "b8a9f16104b44e10a12ad28b98afcd0b"
+      ]
+    }
+  ],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.15",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.4.1.7055",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "a864a3bba2bf48b1a2548e2cc226e37a",
+        "Name": "OTL_Create_propertset_definitions",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 699.0773429382841,
+        "Y": 481.4313906188023
+      },
+      {
+        "Id": "f40e20798e4b41ebbbfc9425e308ed95",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 143.61756011632042,
+        "Y": 148.0
+      },
+      {
+        "Id": "a96e3a7b587e463a95f9cb00624c3d9d",
+        "Name": "Directory Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 140.16476779668642,
+        "Y": 430.1564960317322
+      },
+      {
+        "Id": "b8a9f16104b44e10a12ad28b98afcd0b",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 136.61567443538365,
+        "Y": 724.410579250432
+      },
+      {
+        "Id": "3a8a5daa205049db803b807f9ed63dc2",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 133.5,
+        "Y": 1003.9553899387561
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "0134cb5cb20e4f87aaa76fb6586f3eac",
+        "Title": "Library_download",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 79.68846168179277,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "f40e20798e4b41ebbbfc9425e308ed95"
+        ],
+        "HasNestedGroups": false,
+        "Left": 133.61756011632042,
+        "Top": 75.0,
+        "Width": 300.55333333333334,
+        "Height": 205.0,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 148.0,
+        "InitialHeight": 162.0,
+        "TextblockHeight": 63.0,
+        "Background": "#FFFFB8D8"
+      },
+      {
+        "Id": "246f638729704bd0974012c919ce84b6",
+        "Title": "Subset db",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 118.59610061571505,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "b8a9f16104b44e10a12ad28b98afcd0b"
+        ],
+        "HasNestedGroups": false,
+        "Left": 126.61567443538365,
+        "Top": 651.410579250432,
+        "Width": 318.59610061571505,
+        "Height": 214.5,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 724.410579250432,
+        "InitialHeight": 171.5,
+        "TextblockHeight": 63.0,
+        "Background": "#FFFFB8D8"
+      },
+      {
+        "Id": "5691e10fe09a484d9c4008f66748955f",
+        "Title": "Doelpad",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 105.37231948204385,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "a96e3a7b587e463a95f9cb00624c3d9d"
+        ],
+        "HasNestedGroups": false,
+        "Left": 130.16476779668642,
+        "Top": 357.1564960317322,
+        "Width": 414.87231948204385,
+        "Height": 214.5,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 430.1564960317322,
+        "InitialHeight": 171.5,
+        "TextblockHeight": 63.0,
+        "Background": "#FFFFB8D8"
+      },
+      {
+        "Id": "da7a9b2a5d254736ab20076568b0d339",
+        "Title": "Subset filter",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 96.02527167047629,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "3a8a5daa205049db803b807f9ed63dc2"
+        ],
+        "HasNestedGroups": false,
+        "Left": 123.5,
+        "Top": 930.9553899387561,
+        "Width": 310.0252716704763,
+        "Height": 205.0,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 1003.9553899387561,
+        "InitialHeight": 162.0,
+        "TextblockHeight": 63.0,
+        "Background": "#FFFFB8D8"
+      }
+    ],
+    "X": 108.06731734225025,
+    "Y": 69.99908857755706,
+    "Zoom": 0.5866725002636757
+  }
+}

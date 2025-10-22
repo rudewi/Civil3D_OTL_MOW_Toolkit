@@ -20,10 +20,6 @@ m = ctypes.windll.user32
 geometrieobjecten = IN[0] #(lijst van Dynamo geometrie objecten)
 OTL_datadict = IN[1] #lijst van dictionaries met OTL data, bijv. "psetnaam" en andere eigenschappen
 
-#niet otl data verwijderen uit dict
-for d in OTL_datadict:
-    del d["coordinates"]
-    del d["geometry"]
         
 # Haal het actieve document en de database op
 adoc = Application.DocumentManager.MdiActiveDocument
@@ -31,17 +27,26 @@ db = adoc.Database
 editor = adoc.Editor
 
 # Lijst om de ID's van de output in op te slaan
-eindlijst = []
-messagelist = []
-success_count = 0
-prop_count = 0
-ontbrekende_prop = 0
-foutekeyvaluelijst = []
-toegevoegdeKLopties = []
 nl = '\n'
 
-# Start een transactie
-if geometrieobjecten:
+#Functies
+def remove_nonOTL_keys(OTL_datadict):
+    """niet otl data verwijderen uit dict"""
+    for d in OTL_datadict:
+        del d["coordinates"]
+        del d["geometry"]
+    return OTL_datadict
+    
+def koppel_OTLdata_aan_objecten(geometrieobjecten,OTL_datadict):
+    """koppel de OTL data aan de aangemaakte geometrie-objecten"""    
+    eindlijst = []
+    messagelist = []
+    success_count = 0
+    prop_count = 0
+    ontbrekende_prop = 0
+    foutekeyvaluelijst = []
+    toegevoegdeKLopties = []
+    
     with db.TransactionManager.StartTransaction() as tr:
         try:
             # Haal de PropertySetDefinitionManager op
@@ -195,12 +200,23 @@ if geometrieobjecten:
             messagelist.append(message)
     
         tr.Commit()
+        return messagelist,eindlijst
 
-else:#indien geen geometrieobjecten
+    
+#Uitvoeren
+if geometrieobjecten and OTL_datadict:
+    OTL_datadict = remove_nonOTL_keys(OTL_datadict)
+    messagelist,eindlijst = koppel_OTLdata_aan_objecten(geometrieobjecten,OTL_datadict)
+    if messagelist:
+        m.MessageBoxW(0, str(nl.join(messagelist)), "OTL attributen invullen", 0)
+
+elif OTL_datadict and not geometrieobjecten:
+    #indien geen geometrieobjecten
     m.MessageBoxW(0, "GEEN objecten aangemaakt", "OTL attributen invullen", 0)
-    
-if messagelist:
-    m.MessageBoxW(0, str(nl.join(messagelist)), "OTL attributen invullen", 0)
-    
+    eindlijst = "GEEN objecten aangemaakt"
+
+else:
+    eindlijst = "GEEN OTL data gevonden en GEEN objecten aangemaakt"
+
 # Wijs de output toe aan de OUT variabele
 OUT = eindlijst

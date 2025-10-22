@@ -1,0 +1,206 @@
+{
+  "Uuid": "9b81fc3d-c29d-468b-bf4d-116f9b367d4e",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "OTL_Export_psetdata_to_csv_gebruiksvoorbeeld",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "cd14b43a-9339-4ab8-9a7e-04ae7b06dc32",
+      "FunctionType": "Graph",
+      "Id": "d06d139527a54aa2a35cb06c74e18c07",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "782231dd57c04bf1b745e752765f9110",
+          "Name": "doel_folder_of_csv_filepad",
+          "Description": "Het pad naar een folder om een CSV of meerdere CSV files in weg te schrijven\n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "64ac1c0ab0e0489bb95d1a8ca83e5549",
+          "Name": "Aparte_Files",
+          "Description": "Bij 'True' word voor elk OTL type een aparte CSV file aangemaakt (enkel indien folderpad)\n\nbool\nDefault value : False",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "2def1910a47e435f9440d4e4e7316b19",
+          "Name": "Result",
+          "Description": "Aantal weggeschreven rijen naar CSV",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "OTL-data uit de .dwg exporteren naar CSV, om deze data in te zetten in andere processen. Bijvoorbeeld om te gebruiken in de OTL wizard 2, met OTL_Export_psetdata_to_csv"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "5fafc4e2cae4430fbfbdd00d263858d7",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "a95abbbaa9a14a55a0d2516309288cde",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Directory, CoreNodeModels",
+      "Id": "8a34be2dba9244bc8510db065981e603",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "01840388dd3e49b9a4dd2eaf1f5bd3a3",
+          "Name": "",
+          "Description": "Directory path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a directory on the system and returns its path",
+      "HintPath": "C:\\Users\\ruben\\Desktop\\csv-out-test",
+      "InputValue": "C:\\Users\\ruben\\Desktop\\csv-out-test"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "a95abbbaa9a14a55a0d2516309288cde",
+      "End": "64ac1c0ab0e0489bb95d1a8ca83e5549",
+      "Id": "d331490bf345441ca6009805c786b8a7",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "01840388dd3e49b9a4dd2eaf1f5bd3a3",
+      "End": "782231dd57c04bf1b745e752765f9110",
+      "Id": "99a0006ca2ca4cbda36103b50a43d44f",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [
+    "cd14b43a-9339-4ab8-9a7e-04ae7b06dc32"
+  ],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "OTL_Export_psetdata_to_csv.dyf",
+      "ReferenceType": "DYFFile",
+      "Nodes": [
+        "d06d139527a54aa2a35cb06c74e18c07"
+      ]
+    }
+  ],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.15",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [
+    {
+      "NodeId": "d06d1395-27a5-4aa2-a35c-b06c74e18c07",
+      "Binding": {
+        "__func_cd14b43a93394ab89a7e04ae7b06dc32_InClassDecl-1_InFunctionScope-1_Instance0_d06d1395-27a5-4aa2-a35c-b06c74e18c07;GetAllObjectsOnLayer_InClassDecl-1_InFunctionScope164_Instance0_04b50635-dc8f-4a65-9ddb-ee1fe77ddda4": "H4sIAAAAAAAACouuVspLLS5JTXFJLElUsoqurtUZRbQNAaUUcFArGRoYGbtamitRySwjU0OwWShCjk6oQobObs4YQi7mzhiqHN2UamNrYwFi1c3aHwIAAA==",
+        "__func_cd14b43a93394ab89a7e04ae7b06dc32_InClassDecl-1_InFunctionScope-1_Instance0_d06d1395-27a5-4aa2-a35c-b06c74e18c07;get_PropertySets_InClassDecl-1_InFunctionScope164_Instance0_3551d82e-734a-49d7-9802-5fd2d901a4e3": "H4sIAAAAAAAACu3SsQnAIBQE0F1+nQlSu4VYCNraxE7cPWCXBVI9uOK48nh5xejP7C3VWePOa1+fRDt7hO4HBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggIFfDZRdXjJRB7xNWwAA"
+      }
+    }
+  ],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.4.1.7055",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "d06d139527a54aa2a35cb06c74e18c07",
+        "Name": "OTL_Export_psetdata_to_csv",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 643.5,
+        "Y": 383.75
+      },
+      {
+        "Id": "5fafc4e2cae4430fbfbdd00d263858d7",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 280.5,
+        "Y": 534.75
+      },
+      {
+        "Id": "8a34be2dba9244bc8510db065981e603",
+        "Name": "Directory Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 118.5,
+        "Y": 305.75
+      }
+    ],
+    "Annotations": [],
+    "X": 0.0,
+    "Y": 0.0,
+    "Zoom": 1.0
+  }
+}

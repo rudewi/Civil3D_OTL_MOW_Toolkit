@@ -1,0 +1,274 @@
+{
+  "Uuid": "c45bfc7e-a2a3-434f-98dd-91528eaef3e9",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "OTL_Set_attribute_value_gebruiksvoorbeeld",
+  "ElementResolver": {
+    "ResolutionMap": {
+      "Autodesk.AutoCAD.DynamoNodes.Document": {
+        "Key": "Autodesk.AutoCAD.DynamoNodes.Document",
+        "Value": "AutoCADNodes.dll"
+      }
+    }
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "0298b5a888bc42ac95ef67efc1f9e1c9",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "67f13ce1e463456491f375051a56f176",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "df9e0bce249147cf8b55cda20d95618d",
+          "Name": "",
+          "Description": "Value of expression at line 2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "\"random\";\n\"RDW\";"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "9244e5d0ddcb48a1b451a8cb33bb13f6",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "34c78ab9371d4d7b9136d5bf5e4ce902",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c88d4d1c785c444f93529767d81ae4a7",
+          "Name": "",
+          "Description": "Value of expression at line 2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "\"assetId.identificator\";\n\"assetId.toegekendDoor\";"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "5ab80de5941d46afb78da3de6694295c",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "9121bd6ce5e34463a5759bab9e86a941",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "\"\";"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "270d8c10-36ee-403a-abf7-d23b39ca3c3d",
+      "FunctionType": "Graph",
+      "Id": "7d4a848671854a47a90cb95cb765f83a",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "6f1b06846e2c4c78a46ecb4e79c1c1cc",
+          "Name": "attribuutnaam",
+          "Description": "De attribuut die vervangen mag worden. Bijvoorbeeld \"assetId.identificator\"  \n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "dafe9df769da487686c7623c584151ef",
+          "Name": "te_vervangen_waarde",
+          "Description": "De waarde die vervangen mag worden, bij geen input is dit een lege waarde \n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "975c41e5affa487394c5e9e27151b26f",
+          "Name": "in_te_vullen_waarde",
+          "Description": "De waarde die ingevuld mag worden. Bij leeg laten zal een willekeurige waarde genereerd worden \n\nstring\nDefault value : \"random\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "0d52f48514f5441db47dced01c33b53f",
+          "Name": "Objecten_met_gewijzigde_attributen",
+          "Description": " Objecten waarvoor ID toegevoegd werd",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Het in bulk aanpassen van OTL attribuutwaarden"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "df9e0bce249147cf8b55cda20d95618d",
+      "End": "975c41e5affa487394c5e9e27151b26f",
+      "Id": "a0cb7ddf63ff4a77909a16a39c6ce87e",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c88d4d1c785c444f93529767d81ae4a7",
+      "End": "6f1b06846e2c4c78a46ecb4e79c1c1cc",
+      "Id": "e73d5c22f657407898a8f8de16b2db85",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "9121bd6ce5e34463a5759bab9e86a941",
+      "End": "dafe9df769da487686c7623c584151ef",
+      "Id": "c4cee9f7fdd04a728c7fdf75d8bacdde",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [
+    "270d8c10-36ee-403a-abf7-d23b39ca3c3d"
+  ],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "OTL_Set_attribute_value.dyf",
+      "ReferenceType": "DYFFile",
+      "Nodes": [
+        "7d4a848671854a47a90cb95cb765f83a"
+      ]
+    }
+  ],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.12",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [
+    {
+      "NodeId": "7d4a8486-7185-4a47-a90c-b95cb765f83a",
+      "Binding": {
+        "__func_270d8c1036ee403aabf7d23b39ca3c3d_InClassDecl-1_InFunctionScope-1_Instance0_7d4a8486-7185-4a47-a90c-b95cb765f83a;GetAllObjectsOnLayer_InClassDecl-1_InFunctionScope247_Instance0_be066dee-c57c-49f1-b0de-52c037987a8f": "H4sIAAAAAAAACouuVspLLS5JTXFJLElUsoqurtUZRbQNAaUUcFArGRoYGbtamitRySwjU0OwWShCjk6oQobObs4YQi7mzhiqHN2UamNrYwFi1c3aHwIAAA==",
+        "__func_270d8c1036ee403aabf7d23b39ca3c3d_InClassDecl-1_InFunctionScope-1_Instance0_7d4a8486-7185-4a47-a90c-b95cb765f83a;get_PropertySets_InClassDecl-1_InFunctionScope247_Instance0_b4c25bb6-b1a8-4049-a09b-1aa2d805bc53": "H4sIAAAAAAAACu3SsQnAIBQE0F1+nQlSu4VYCNraxE7cPWCXBVI9uOK48nh5xejP7C3VWePOa1+fRDt7hO4HBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggIFfDZRdXjJRB7xNWwAA",
+        "__func_270d8c1036ee403aabf7d23b39ca3c3d_InClassDecl-1_InFunctionScope-1_Instance0_7d4a8486-7185-4a47-a90c-b95cb765f83a;UpdateProperty_InClassDecl-1_InFunctionScope247_Instance0_f92bb5d9-3ec6-4e07-8a02-966daf56a633": "H4sIAAAAAAAACu3WKw6AMAwA0LtUcwI0t1gqlmwWwxzp3UmwXADxXJu6pp/X7jjnteY4+uqxt0863iCisjZFTTAJ1sFNcBh9By+SE2AJCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqHwByjMygdPx9l5Z9wAAA=="
+      }
+    }
+  ],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.4.1.7055",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "0298b5a888bc42ac95ef67efc1f9e1c9",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 639.1636268170222,
+        "Y": 2303.2052647226274
+      },
+      {
+        "Id": "9244e5d0ddcb48a1b451a8cb33bb13f6",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 538.3058939293288,
+        "Y": 1842.8081949866514
+      },
+      {
+        "Id": "5ab80de5941d46afb78da3de6694295c",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 640.4720385634893,
+        "Y": 2075.949070016737
+      },
+      {
+        "Id": "7d4a848671854a47a90cb95cb765f83a",
+        "Name": "OTL_Set_attribute_value",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1029.352676495045,
+        "Y": 2019.3391785297881
+      }
+    ],
+    "Annotations": [],
+    "X": -90.84864363733902,
+    "Y": -822.1165107343913,
+    "Zoom": 0.5653431643697259
+  }
+}

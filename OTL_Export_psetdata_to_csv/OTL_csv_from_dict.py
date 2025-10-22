@@ -1,11 +1,17 @@
 import collections
 import csv
 import ctypes
-
+from os import path
 m = ctypes.windll.user32
+
+#inputs
+pset_dicts = IN[0]
+inputpath = IN[1]
+aparte_file = IN[2]
 
 #variabelen
 nl = "\n"
+messagelist = []
 
 def csv_schrijven(data,filepath):
     """CSV wegschrijven"""
@@ -21,9 +27,7 @@ def csv_schrijven(data,filepath):
 
 def create_otl_datalist(dictlijst,headerkeys):
     """lijst deconstrueren & defaults overschrijven"""
-
     totalvaluelist = [headerkeys]
-
     for d in dictlijst:
         itemvaluelist = [] 
         for header in headerkeys:
@@ -40,7 +44,6 @@ def create_otl_datalist(dictlijst,headerkeys):
 
 def file_per_OTL_type(pset_dicts,folderpath):
     """maakt een aparte lijst van pset_dicts per typeURI waarde, en schrijf voor elk een file als csv"""
-    messagelist = []
     result = collections.defaultdict(list)
     for d in pset_dicts:
         if 'typeURI' in d.keys():
@@ -73,15 +76,36 @@ def file_per_OTL_type(pset_dicts,folderpath):
 
 def alles_in_een_OTL_file(pset_dicts,filepath):
     """zet alles in 1 lijst en schrijft naar een file in csv"""
-    messagelist = []
     headerkeys = ["assetId.identificator","typeURI"]
     for d in pset_dicts:
         for k in d.keys():
             if k not in headerkeys:
                 headerkeys.append(k)
-    
     dl = create_otl_datalist(pset_dicts,headerkeys)
     c = csv_schrijven(dl,filepath)
     messagelist.append(c)
     m.MessageBoxW(0, f"{nl.join(messagelist)}", "OTL_Export psetdata to CSV", 0)
     return messagelist
+
+    
+#MAIN
+if pset_dicts[0]:#Check of er psets zijn
+    if path.isfile(inputpath):
+        result = alles_in_een_OTL_file(pset_dicts,inputpath)
+    elif path.isdir(inputpath):
+        if aparte_file:
+            result = file_per_OTL_type(pset_dicts,inputpath)
+        else:
+            filenaam = "OTL_Export_psetdata"
+            filepath = inputpath + "\\" + filenaam + ".csv"
+            result = alles_in_een_OTL_file(pset_dicts,filepath)
+    else:
+        message = f"Geen geldige folder of file om csv naar te schrijven"
+        result = message
+        m.MessageBoxW(0, message, "OTL_Export psetdata to CSV", 0)
+else:
+    message = f"Geen propertysetinfo gevonden om te extraheren"
+    result = message
+    m.MessageBoxW(0, message, "OTL_Export psetdata to CSV", 0)
+    
+OUT = result

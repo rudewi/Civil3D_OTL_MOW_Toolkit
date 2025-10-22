@@ -1,0 +1,153 @@
+{
+  "Uuid": "bc4831ed-ce30-413e-9728-4302702e7b20",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "OTL_Create_objects_from_csv_gebruiksvoorbeeld",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "ae180f93-3f84-499a-99a8-9617b5e6d343",
+      "FunctionType": "Graph",
+      "Id": "1dd7a327aae44ef2a03e6b9d39658700",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "8dd79b1fe42e4cc9842c523c03bbcc27",
+          "Name": "OTL_CSV_file_or_folder",
+          "Description": "Geef het pad naar een CSV file met OTL data, of een folder met meerdere CSV files met OTL data\n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "8b0667332b1043da9b8c109424891d75",
+          "Name": "Aangemaakte_Objecten",
+          "Description": "Aangemaakte dwg objecten met OTL data",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Maak objecten uit een OTL conforme CSV als Civil3D objecten met data in de OTL propertysets. Gebruik hiervoor een dwg met OTL propertyset definitions."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Directory, CoreNodeModels",
+      "Id": "df911ceea85a4a94beea48d85d5eadc9",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "220632346f5a47179ac73ae93687fdff",
+          "Name": "",
+          "Description": "Directory path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a directory on the system and returns its path",
+      "HintPath": "C:\\Users\\ruben\\Desktop\\voorbeeld wkt download",
+      "InputValue": "C:\\Users\\ruben\\Desktop\\voorbeeld wkt download"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "220632346f5a47179ac73ae93687fdff",
+      "End": "8dd79b1fe42e4cc9842c523c03bbcc27",
+      "Id": "d02ae8ca263442efb9dbfc4957199665",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [
+    "ae180f93-3f84-499a-99a8-9617b5e6d343"
+  ],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "OTL_Create_objects_from_csv.dyf",
+      "ReferenceType": "DYFFile",
+      "Nodes": [
+        "1dd7a327aae44ef2a03e6b9d39658700"
+      ]
+    }
+  ],
+  "EnableLegacyPolyCurveBehavior": null,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "3.4",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.4.1.7055",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "1dd7a327aae44ef2a03e6b9d39658700",
+        "Name": "OTL_Create_objects_from_csv",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 643.5,
+        "Y": 383.75
+      },
+      {
+        "Id": "df911ceea85a4a94beea48d85d5eadc9",
+        "Name": "Directory Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 92.5,
+        "Y": 380.75
+      }
+    ],
+    "Annotations": [],
+    "X": 0.0,
+    "Y": 0.0,
+    "Zoom": 1.0
+  }
+}

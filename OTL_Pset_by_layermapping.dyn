@@ -1,0 +1,570 @@
+{
+  "Uuid": "4c7a008f-b66d-45d7-b043-2b44947544ee",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "OTL_Pset_by_layermapping",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "3efd700d8a8d4297a6e534e2241d29e6",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "7d68ba04367f4ee3b654a5de0e4486a8",
+          "Name": "filePath",
+          "Description": "string",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "0337459c99d0401da760ea84b9072fa8",
+          "Name": "transpose",
+          "Description": "bool\nDefault value : false",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "d9f1a9b776ba41da842eeb8eac006a25",
+          "Name": "var[]..[]",
+          "Description": "var[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "DSOffice.Data.ImportCSV@string,bool",
+      "Replication": "Auto",
+      "Description": "Data.ImportCSV (filePath: string, transpose: bool = false): var[]..[]"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "6ef4706a9ff9498f8168af4de70c365d",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "3e173a4791c54a8591b6f512ccd0a448",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "D:\\AWV\\BIM Workshop\\oef 3\\layermapping.csv",
+      "InputValue": ".\\layermapping.csv"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "77abb6fcc91948b4846ac751cc3418bf",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "ae703a1b9ed443e58bef65f0a438a89f",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": false
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "0cf46dd8947e4beba3ec3e8c314b7a31",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "c652130c33004b1192da0e2176d8f0e0",
+          "Name": "list",
+          "Description": "List to get the first item from.\n\nvar[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "189c623f3d1a4c43a6cbc2a79626e9f3",
+          "Name": "item",
+          "Description": "First item in the list.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "DSCore.List.FirstItem@var[]..[]",
+      "Replication": "Auto",
+      "Description": "Returns the first item in a list.\n\nList.FirstItem (list: var[]..[]): var[]..[]"
+    },
+    {
+      "ConcreteType": "Autodesk.AutoCAD.DynamoNodes.AcObjectsOnLayer, AutoCADNodesUI",
+      "Id": "a0f60f4eb96f414d9e253405facd8d2b",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "62ff9d6402a54324b90f2d07beb54e2d",
+          "Name": "layerName",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2ad2997515e24b77b69e2f97c821397e",
+          "Name": "block",
+          "Description": " (disabled)",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "704cf269ea1140529813789985d864e4",
+          "Name": "Object[]",
+          "Description": "Object[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Returns all object on the given layer within a block"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "19b729bc65524c5aaab32441cb0362bd",
+      "NodeType": "FunctionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "0c9cab29a8ed460589366a1132b9f43f",
+          "Name": "Document",
+          "Description": "Current document",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "Autodesk.AutoCAD.DynamoNodes.Document.Current",
+      "Replication": "Auto",
+      "Description": "Returns the current document\n\nDocument.Current: Document"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "cb0bdca3546148f38e5f0f0bb67b2066",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "763ccef7214e467593eaacb2e34d06dd",
+          "Name": "document",
+          "Description": "Autodesk.AutoCAD.DynamoNodes.Document",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "2f72feacc68f43d28043bc133dbef793",
+          "Name": "Block",
+          "Description": "Model space of document",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "Autodesk.AutoCAD.DynamoNodes.Document.ModelSpace",
+      "Replication": "Auto",
+      "Description": "Returns the model space block of a document\n\nDocument.ModelSpace: Block"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "e796852647c847f3834aa05311069c53",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "1d9b9f09177b49818c37f89d295e57fa",
+          "Name": "object",
+          "Description": "Autodesk.AutoCAD.DynamoNodes.Object",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "bc6ec70d020d4c02b0e5b58c0ddc29d8",
+          "Name": "propertySetDefinitionName",
+          "Description": "Name of the property set definition to attach\n\nstring",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "25c457b33c354286953c19134498b96c",
+          "Name": "Object",
+          "Description": "Object",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "Autodesk.AutoCAD.DynamoNodes.Object.AddPropertySet@string",
+      "Replication": "Auto",
+      "Description": "Adds a property set to an object\n\nObject.AddPropertySet (propertySetDefinitionName: string): Object"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "0577a95ee5d8497ea3b5817e81476eef",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "185a271524cb4dfc980ca80ec231b554",
+          "Name": "list",
+          "Description": "List to get the last item of\n\nvar[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "a8a03da0ecba495d9bf85a4b4602405f",
+          "Name": "item",
+          "Description": "Last item in the list",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "DSCore.List.LastItem@var[]..[]",
+      "Replication": "Auto",
+      "Description": "Retrieves the last item in a list.\n\nList.LastItem (list: var[]..[]): var[]..[]"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "d9f1a9b776ba41da842eeb8eac006a25",
+      "End": "c652130c33004b1192da0e2176d8f0e0",
+      "Id": "602554f031de435a9aadc1ed9d81adfc",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "d9f1a9b776ba41da842eeb8eac006a25",
+      "End": "185a271524cb4dfc980ca80ec231b554",
+      "Id": "c7b8d589c9ed4131b46dfe5f65a625e5",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3e173a4791c54a8591b6f512ccd0a448",
+      "End": "7d68ba04367f4ee3b654a5de0e4486a8",
+      "Id": "85accf9dd96e471691e77bb16b74dd37",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "ae703a1b9ed443e58bef65f0a438a89f",
+      "End": "0337459c99d0401da760ea84b9072fa8",
+      "Id": "396e829d87dc4a4bb21eab2d89c1942a",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "189c623f3d1a4c43a6cbc2a79626e9f3",
+      "End": "62ff9d6402a54324b90f2d07beb54e2d",
+      "Id": "4d88659c983a4cee832cb50321adbdad",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "704cf269ea1140529813789985d864e4",
+      "End": "1d9b9f09177b49818c37f89d295e57fa",
+      "Id": "e23768c18501400a85e366d2c99a91a2",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0c9cab29a8ed460589366a1132b9f43f",
+      "End": "763ccef7214e467593eaacb2e34d06dd",
+      "Id": "ea3ed0b6bbc2446e9e6fac170c0e1573",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2f72feacc68f43d28043bc133dbef793",
+      "End": "2ad2997515e24b77b69e2f97c821397e",
+      "Id": "0a9d3de385f241a480d1c42b08f1e8c9",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "a8a03da0ecba495d9bf85a4b4602405f",
+      "End": "bc6ec70d020d4c02b0e5b58c0ddc29d8",
+      "Id": "d77fd14af7a141769b5e26e8f1f5db49",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "EnableLegacyPolyCurveBehavior": true,
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.12",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "3.4.1.7055",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "3efd700d8a8d4297a6e534e2241d29e6",
+        "Name": "Data.ImportCSV",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 540.7999999999998,
+        "Y": 258.4
+      },
+      {
+        "Id": "6ef4706a9ff9498f8168af4de70c365d",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 292.7999999999999,
+        "Y": 201.5999999999999
+      },
+      {
+        "Id": "77abb6fcc91948b4846ac751cc3418bf",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 283.99999999999994,
+        "Y": 365.6000000000001
+      },
+      {
+        "Id": "0cf46dd8947e4beba3ec3e8c314b7a31",
+        "Name": "List.FirstItem",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 901.2442209349791,
+        "Y": 401.89545628724125
+      },
+      {
+        "Id": "a0f60f4eb96f414d9e253405facd8d2b",
+        "Name": "All Objects on Layer",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1230.7422953678254,
+        "Y": 651.8653821739476
+      },
+      {
+        "Id": "19b729bc65524c5aaab32441cb0362bd",
+        "Name": "Document.Current",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 594.5748402983172,
+        "Y": 697.7680742955929
+      },
+      {
+        "Id": "cb0bdca3546148f38e5f0f0bb67b2066",
+        "Name": "Document.ModelSpace",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 871.3985788997466,
+        "Y": 698.700332244494
+      },
+      {
+        "Id": "e796852647c847f3834aa05311069c53",
+        "Name": "Object.AddPropertySet",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1546.4584602671289,
+        "Y": 314.59991256823025
+      },
+      {
+        "Id": "0577a95ee5d8497ea3b5817e81476eef",
+        "Name": "List.LastItem",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 894.6736572188081,
+        "Y": 61.147110184974565
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "bb06a26c169b4892b447fce5b3b45043",
+        "Title": "Layermapping CSV inlezen",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "3efd700d8a8d4297a6e534e2241d29e6",
+          "6ef4706a9ff9498f8168af4de70c365d",
+          "77abb6fcc91948b4846ac751cc3418bf"
+        ],
+        "HasNestedGroups": false,
+        "Left": 273.99999999999994,
+        "Top": 128.5999999999999,
+        "Width": 509.2999999999999,
+        "Height": 369.00000000000017,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 201.5999999999999,
+        "InitialHeight": 309.00000000000017,
+        "TextblockHeight": 63.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "72c29fdc81aa422290adad8db4d6aeb3",
+        "Title": "Lijstitems selecteren",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "0cf46dd8947e4beba3ec3e8c314b7a31",
+          "0577a95ee5d8497ea3b5817e81476eef"
+        ],
+        "HasNestedGroups": false,
+        "Left": 884.6736572188081,
+        "Top": -55.352889815025435,
+        "Width": 203.07056371617114,
+        "Height": 589.2483461022666,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 61.147110184974565,
+        "InitialHeight": 485.7483461022667,
+        "TextblockHeight": 106.5,
+        "Background": "#FFFFB8D8"
+      },
+      {
+        "Id": "c4f883e4399b4b42b18921722236e322",
+        "Title": "Objecten opvragen in deze layers",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "a0f60f4eb96f414d9e253405facd8d2b",
+          "19b729bc65524c5aaab32441cb0362bd",
+          "cb0bdca3546148f38e5f0f0bb67b2066"
+        ],
+        "HasNestedGroups": false,
+        "Left": 584.5748402983172,
+        "Top": 578.8653821739476,
+        "Width": 877.1674550695082,
+        "Height": 251.83495007054637,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 651.8653821739476,
+        "InitialHeight": 191.83495007054637,
+        "TextblockHeight": 63.0,
+        "Background": "#FFA4E1FF"
+      },
+      {
+        "Id": "cf80e8c7707d43a4b9f5118bb360b9ea",
+        "Title": "Property set koppelen aan objecten",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "e796852647c847f3834aa05311069c53"
+        ],
+        "HasNestedGroups": false,
+        "Left": 1536.4584602671289,
+        "Top": 155.09991256823025,
+        "Width": 345.5,
+        "Height": 321.5,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 314.59991256823025,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 149.5,
+        "Background": "#FFFFAA45"
+      }
+    ],
+    "X": 80.04873742603661,
+    "Y": 198.78440633767576,
+    "Zoom": 0.4820190472080408
+  }
+}
