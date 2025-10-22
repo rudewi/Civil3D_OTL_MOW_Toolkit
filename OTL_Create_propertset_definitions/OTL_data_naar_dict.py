@@ -230,9 +230,10 @@ def OTL_to_dict(OTL_subset, filter_subsetattributen:bool):
 
 
 #UITVOEREN
-subsetpad = IN[0]
-subset_filter = IN[1]
-go = IN[2]
+doelpad = [0]
+subsetpad = IN[1]
+subset_filter = IN[2]
+go = IN[3]
 
 OUT = ""
 if go:
@@ -250,9 +251,15 @@ if go:
         from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField
         from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut
         from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri
+
+
+    except Exception as e:
+        ctypes.windll.user32.MessageBoxW(0, f"Fout bij inladen van libraries:{e}", "OTL data naar dict", 0)   
         
+    try:
         #OMZETTING STARTEN
         OUT = OTL_to_dict(subsetpad,subset_filter)
         
-    except:
-        ctypes.windll.user32.MessageBoxW(0, "Er liep iets mis in het omzetten van de OTL data naar dynamo", "OTL data naar dict", 0)        
+    except Exception as e:
+        ctypes.windll.user32.MessageBoxW(0, f"Er liep iets mis in het omzetten van de OTL data naar dynamo:{e}", "OTL data naar dict", 0)        
+

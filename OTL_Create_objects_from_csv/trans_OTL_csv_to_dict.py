@@ -44,11 +44,6 @@ message = ""
 m = ctypes.windll.user32
 nl = '\n'
 
-#coomsg = "Kijk aub na of je dwg hetzelfde coordinatenstelsel gebruikt als de WKTs in de CSV"
-#m.MessageBoxW(0, coomsg , "OTL objecten uit CSV omzetting", 0)
-
-
-
 def getCoo(wktstring):
     nums = re.findall(r'\d+(?:\.\d*)?', wktstring)
     coords = zip(*[iter(nums)] * 3)
@@ -140,6 +135,7 @@ puntobjecten = []
 lijnobjecten = []
 single_polygoonobjecten = []
 donut_polygoonobjecten = []
+geofouten = []
 
 #PROPERTSET DEFINITIONS CHECKEN
 with adoc.LockDocument():
@@ -160,7 +156,7 @@ with adoc.LockDocument():
         with db.TransactionManager.StartTransaction() as t:
             layertable = t.GetObject(db.LayerTableId,OpenMode.ForRead)
             for dict_y in lijstdictszonderlege:
-                layernaam = psetnaam(dict_y['typeURI']) #de naam van de layer afleiden uit typeURI
+                layernaam = f"FromCSV_{psetnaam(dict_y['typeURI'])}" #de naam van de layer afleiden uit typeURI
                 if not layertable.Has(layernaam):
                     newlayer = LayerTableRecord()
                     newlayer.Name = layernaam
@@ -195,11 +191,21 @@ if len(ongevonden_psets) == 0: #bij alles gevonden
                     donutcoolist.append(getCoo(polygon))
                 dict_b["coordinates"] = donutcoolist
                 donut_polygoonobjecten.append(dict_b)
+        else:
+            #onverwerkbaar geotype
+            geofouten.append(f'{nl}assetId: {dict_b["assetId.identificator"]}{nl}type: {psetnaam(dict_b["typeURI"])}{nl}wkt: {dict_b["geometry"][:30]}...')
+    
+    if len(geofouten) > 0:
+        if len(geofouten) < 5:
+            geofoutmessage = f'Volgende objecten werden NIET toegevoegd vanwegen een ongeldig WKT geometrietype:{nl}{nl.join(geofouten)}'
+        else:
+            geofoutmessage = f'Meerdere objecten werden NIET toegevoegd vanwegen een ongeldig WKT geometrietype, waaronder:{nl}{nl.join(geofouten)}{nl}En meer..'            
+        m.MessageBoxW(0, str(geofoutmessage), "OTL objecten uit CSV omzetting", 0)
+
 else:
    foutgevonden = 1
    if message == "":
         message = f"Kon objecten niet aanmaken omdat de nodige propertysetdefinitie niet bestaat in de dwg. Voeg volgende propertysetdefinities toe: {nl}{nl}{nl.join(ongevonden_psets)}"   
-
 
 
 m.MessageBoxW(0, str(message), "OTL objecten uit CSV omzetting", 0)

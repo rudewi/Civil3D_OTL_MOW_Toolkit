@@ -3,7 +3,6 @@ import sys
 from zipfile import ZipFile
 import os.path
 import ctypes
-import imp
 
 
 #DE JUISTE FOLDERS OPHALEN VIA INPUT
@@ -78,12 +77,10 @@ def checkOTLmodules(message):
             finalmessage = f"{nl}FOUT bij inladen OTL modules en libraries:{nl}De gebruikte python versie ({current_major}.{current_minor}) is te laag {nl}Minimum vereist = 3.9{nl}Probeer een recentere versie van Dynamo voor Civil3D, bv. 2025 of nieuwer"
     
         else:
-            finalmessage = f"{nl}FOUT bij inladen OTL modules en libraries:{nl}{message}{nl}fout:{e}"
-
+            finalmessage = f"{nl}FOUT bij inladen OTL modules en libraries:{nl}{message}{nl}fout:{e}{nl}{nl}Herstart civil3D en Dynamo indien deze fout zich blijft voordoen."
 
     return finalmessage,go
     
-
 
 def getOTLmodules(doelpad,downloadcheck):
     """referentie welke modules waar opgehaald moeten worden. Toevoeging aan het python Path en testing"""

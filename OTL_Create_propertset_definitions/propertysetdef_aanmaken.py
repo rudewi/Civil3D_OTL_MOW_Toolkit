@@ -175,3 +175,4 @@ OUT = "GEEN propertysets aangemaakt"
 OTL_datadict = IN[0]
 if OTL_datadict:
     OUT = dict_to_psetdef(OTL_datadict)
+    

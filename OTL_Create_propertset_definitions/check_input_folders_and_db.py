@@ -27,7 +27,7 @@ def downloadfolder_in_dwg_folder():
         
         
         if filepath.endswith(r'enu\Template'):
-            downloadfolder = "dwg templade folder (dwg file niet gesaved?)"
+            downloadfolder = "dwg templade folder"
         else:
             downloadfolder = filepath + r'\OTLmodelDownload'
             if not os.path.isdir(downloadfolder):
@@ -43,10 +43,10 @@ def check_pad_geldigheid(pad):
     message = ""
     if isinstance(pad, str):
         if not os.path.isdir(pad):
-            message = f"{pad}{nl}Kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Folder bestaat niet"
+            message = f"{pad}{nl}Kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Geef een ander pad op aub"
             pad = "ongeldig_pad"
     else:
-        message = f"{pad}{nl} kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Geef het pad op als tekstwaarde"
+        message = f"{pad}{nl} kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Geef het pad op aub"
         pad = "ongeldig_pad"
 
     return pad,message
