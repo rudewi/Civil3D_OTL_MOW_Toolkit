@@ -1,5 +1,5 @@
 {
-  "Uuid": "90d9fa46-396e-4c50-bb41-21bf7b6dc234",
+  "Uuid": "fa1b6b38-986c-404b-b671-005779733d54",
   "IsCustomNode": false,
   "Description": "",
   "Name": "OTL_Create_propertset_definitions",
@@ -57,7 +57,7 @@
       ],
       "Replication": "Disabled",
       "Description": "Enables selection between True and False",
-      "InputValue": true
+      "InputValue": false
     },
     {
       "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
@@ -77,8 +77,8 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows you to select a file on the system and returns its file path",
-      "HintPath": "C:\\Users\\ruben\\Documents\\DYNAMO\\OTL Toolkit 25\\subsets\\camera.db",
-      "InputValue": "subsets\\camera.db"
+      "HintPath": "C:\\Users\\ruben\\Documents\\DYNAMO\\OTL Toolkit 25\\subsets\\testsubset.db",
+      "InputValue": "subsets\\testsubset.db"
     },
     {
       "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
@@ -98,32 +98,11 @@
       ],
       "Replication": "Disabled",
       "Description": "Enables selection between True and False",
-      "InputValue": false
-    },
-    {
-      "ConcreteType": "CoreNodeModels.Input.Directory, CoreNodeModels",
-      "Id": "3d694781a1e64082870e08a8b9b95510",
-      "NodeType": "ExtensionNode",
-      "Inputs": [],
-      "Outputs": [
-        {
-          "Id": "2d2218077f0c426f8a3722f36ac41ae6",
-          "Name": "",
-          "Description": "Directory path",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Allows you to select a directory on the system and returns its path",
-      "HintPath": "C:\\Users\\ruben\\Desktop\\test R",
-      "InputValue": "C:\\Users\\ruben\\Desktop\\test R"
+      "InputValue": true
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport sys\r\nimport os.path\r\nfrom System.Reflection import Assembly\r\nimport xml.etree.ElementTree as et\r\nimport ctypes\r\nimport sqlite3\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\ntoolkit_update = IN[0]\r\ninputpad = IN[1]\r\nsubset_db = IN[2]\r\nsubset_filter = IN[3]\r\n\r\n# Main variables\r\nnl = \"\\n\"\r\n\r\n# Functies\r\ndef check_pad_geldigheid(pad):\r\n    \"\"\"kijkt of het pad naar een bruikbare folder wijst\"\"\"\r\n    \r\n    message = \"\"\r\n\r\n    if isinstance(pad, str):\r\n        if os.path.isdir(pad):\r\n            message = f\"{pad}{nl}Zal worden gebruikt om de OTLMOW libraries op te slaan\"\r\n        else:\r\n            message = f\"{pad}{nl}Kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Folder bestaat niet\"\r\n            pad = \"ongeldig_pad\"\r\n    else:\r\n        message = f\"{pad}{nl} kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Geef het pad op als tekstwaarde\"\r\n        pad = \"ongeldig_pad\"\r\n\r\n    return pad,message\r\n\r\ndef packagefolderfinder():\r\n    \"\"\"Zoekt de folder waar het package is opgeslagen\"\"\"\r\n    \r\n    folderstring_na_version = r'\\packages\\OTL_MOW_Toolkit\\extra' #einde van het pad\r\n    message = \"\"\r\n\r\n    try:    \r\n        appDataPath = os.getenv('APPDATA') #de appdata locatie\r\n        dynamo = Assembly.Load('DynamoCore')\r\n        civil_version = str(dynamo.CodeBase).split(\"AutoCAD\", 1)[1][1:5] #Civil versie opzoeken adhv locatie van dyn assembly\r\n        dynamo_version = \".\".join(str(dynamo.GetName().Version).split(\".\", 2)[:2]) #dynamo versie ophalen\r\n        found_dynpath = appDataPath + r'\\Autodesk\\C3D ' + civil_version + r'\\Dynamo' + '\\\\' + dynamo_version\r\n        \r\n        if os.path.isdir(found_dynpath):\r\n            #Open de dynamo settings XML en bekijk de folders waar packages zijn opgeslagen:\r\n            pad = found_dynpath + r'\\packages' #voor wanneer OTL_MOW_Toolkit package folder niet bestaat\r\n            root = et.parse(found_dynpath + \"\\DynamoSettings.xml\").getroot()\r\n            for child in root:\r\n                if child.tag == \"CustomPackageFolders\":\r\n                    for path in child:\r\n                        path_packages = path.text + folderstring_na_version\r\n                        if os.path.isdir(path_packages):\r\n                            pad = path_packages\r\n    \r\n            message = f\"{pad}{nl} zal worden gebruikt om de OTLMOW libraries op te slaan\"\r\n        \r\n        else:\r\n            pad = \"ongeldig_pad\"\r\n            message = f\"Het gezochte package pad:{nl}{pad}{nl}kan NIET worden gebruikt om de OTLMOW libraries op te slaan. Gelieve een ander pad te kiezen\"\r\n    \r\n    except Exception as e:\r\n        pad = \"ongeldig_pad\"\r\n        message = f\"Het gezochte package pad:{nl}{pad}{nl}kan NIET worden gebruikt om de OTLMOW libraries op te slaan.{nl}{e}{nl} Gelieve een ander pad te kiezen\"\r\n\r\n    return pad,message\r\n\r\ndef doelpad_opzoeken(user_input_path):\r\n    \"\"\"Zoekt het juiste pad om de OTLMOW library naar te downloaden en op te slaan\"\"\"\r\n    if user_input_path and user_input_path != \"null\" and user_input_path != \"\":\r\n        #Er werd een pad opgegeven door de user\r\n        doelpad, foldermessage = check_pad_geldigheid(user_input_path)       \r\n    else:\r\n        doelpad, foldermessage = packagefolderfinder()\r\n    return doelpad,foldermessage\r\n\r\ndef create_connection(db_file):\r\n    \"\"\" maak connectie naar de SQLite database\"\"\"\r\n    conn = None\r\n    try:\r\n        conn = sqlite3.connect(db_file)\r\n    except Error as e:\r\n        print(e)\r\n    return conn\r\n\r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    klasses_in_subset = []\r\n    with conn:\r\n        cur = conn.cursor()\r\n        cur.execute(\"SELECT name FROM sqlite_master WHERE type='table' AND name='OSLOClass';\")\r\n        bestaat_klassetabel = cur.fetchall()\r\n        if bestaat_klassetabel:\r\n            cur.execute(\"SELECT uri FROM OSLOClass WHERE abstract = '0';\")\r\n            klasses_in_subset = cur.fetchall()\r\n            klasses_in_subset = klasses_in_subset[0]\r\n    return klasses_in_subset\r\n\r\ndef check_subset_geldigheid(db_pad):\r\n    \"\"\"Kijkt na of de input een geldige OTL db is\"\"\"\r\n    geldige_db_pad = \"\"\r\n    message = \"\"\r\n    if isinstance(db_pad, str):\r\n        if os.path.exists(db_pad) and db_pad:\r\n            extensie = db_pad.split(\".\")[-1]\r\n            if extensie == \"db\":\r\n                geldige_db_pad = db_pad\r\n                message = f\"Geldige subset input:{nl}{db_pad}\"\r\n            else:\r\n                message = f\"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}\"\r\n        else:\r\n            message = f\"ONGELDIGE subset input: bestand is geen geldige subset gevonden:{nl}{db_pad}\"\r\n    else:\r\n        message = f\"ONGELDIGE subset input: bestand kon niet worden gevonden:{nl}{db_pad}\"\r\n\r\n    if geldige_db_pad:\r\n        onderdelen = select_klasses(geldige_db_pad)\r\n        if len(onderdelen) == 0:\r\n            message = f\"ONGELDIGE subset input: Geen OTL klassen gevonden in db file:{nl}{db_pad}\"\r\n            geldige_db_pad = \"\"\r\n\r\n    return geldige_db_pad,message\r\n\r\n\r\n# MAIN\r\ndoelpad, foldermessage = doelpad_opzoeken(inputpad)\r\nsubsetpad, subsetmessage = check_subset_geldigheid(subset_db)\r\n\r\nendmessage = f\"{foldermessage}{nl}{nl}{subsetmessage}\"\r\nctypes.windll.user32.MessageBoxW(0, endmessage, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n\r\n# OUT variable\r\nOUT = doelpad,subsetpad,subset_filter,toolkit_update",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport os.path\r\nimport ctypes\r\nimport sqlite3\r\n\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\ntoolkit_update = IN[0]\r\ninputpad = IN[1]\r\nsubset_db = IN[2]\r\nsubset_filter = IN[3]\r\n\r\n# Main variables\r\nnl = \"\\n\"\r\n\r\n# Functies\r\ndef downloadfolder_in_dwg_folder():\r\n    \"\"\"Haal de foldernaam van de huidge dwg file op\"\"\"\r\n    try:\r\n        adoc = Application.DocumentManager.MdiActiveDocument\r\n        editor = adoc.Editor\r\n        with adoc.LockDocument():\r\n            with adoc.Database as db:\r\n                dwg_filepath = db.OriginalFileName\r\n                filepath = dwg_filepath.rsplit('\\\\',1)[0]#filenaam weglaten\r\n        \r\n        \r\n        if filepath.endswith(r'enu\\Template'):\r\n            downloadfolder = \"dwg templade folder\"\r\n        else:\r\n            downloadfolder = filepath + r'\\OTLmodelDownload'\r\n            if not os.path.isdir(downloadfolder):\r\n                os.mkdir(downloadfolder)\r\n        \r\n    except:\r\n        downloadfolder = \"ongeldig pad\"\r\n    \r\n    return downloadfolder\r\n\r\ndef check_pad_geldigheid(pad):\r\n    \"\"\"kijkt of het pad naar een bruikbare folder wijst\"\"\"\r\n    message = \"\"\r\n    if isinstance(pad, str):\r\n        if not os.path.isdir(pad):\r\n            message = f\"{pad}{nl}Kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Geef een ander pad op aub\"\r\n            pad = \"ongeldig_pad\"\r\n    else:\r\n        message = f\"{pad}{nl} kan NIET worden gebruikt om de OTLMOW libraries op te slaan:{nl}Geef het pad op aub\"\r\n        pad = \"ongeldig_pad\"\r\n\r\n    return pad,message\r\n\r\ndef doelpad_opzoeken(user_input_path):\r\n    \"\"\"Zoekt het juiste pad om de OTLMOW library naar te downloaden en op te slaan\"\"\"\r\n    if user_input_path and user_input_path != \"null\" and user_input_path != \"\":\r\n        #Er werd een pad opgegeven door de user\r\n        doelpad, foldermessage = check_pad_geldigheid(user_input_path)       \r\n    else:\r\n        doelpad, foldermessage = check_pad_geldigheid(downloadfolder_in_dwg_folder())\r\n    return doelpad,foldermessage\r\n\r\ndef create_connection(db_file):\r\n    \"\"\" maak connectie naar de SQLite database\"\"\"\r\n    conn = None\r\n    try:\r\n        conn = sqlite3.connect(db_file)\r\n    except Error as e:\r\n        print(e)\r\n    return conn\r\n\r\n\r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    klasses_in_subset = []\r\n    with conn:\r\n        cur = conn.cursor()\r\n        cur.execute(\"SELECT name FROM sqlite_master WHERE type='table' AND name='OSLOClass';\")\r\n        bestaat_klassetabel = cur.fetchall()\r\n        if bestaat_klassetabel:\r\n            cur.execute(\"SELECT uri FROM OSLOClass WHERE abstract = '0';\")\r\n            klasses_in_subset = cur.fetchall()\r\n            klasses_in_subset = klasses_in_subset[0]\r\n    return klasses_in_subset\r\n\r\ndef check_subset_geldigheid(db_pad):\r\n    \"\"\"Kijkt na of de input een geldige OTL db is\"\"\"\r\n    geldige_db_pad = \"\"\r\n    message = \"\"\r\n    if isinstance(db_pad, str):\r\n        if os.path.exists(db_pad) and db_pad:\r\n            extensie = db_pad.split(\".\")[-1]\r\n            if extensie == \"db\":\r\n                geldige_db_pad = db_pad\r\n                #message = f\"Geldige subset input:{nl}{db_pad}\"\r\n            else:\r\n                message = f\"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}\"\r\n        else:\r\n            message = f\"ONGELDIGE subset input: bestand is geen geldige subset gevonden:{nl}{db_pad}\"\r\n    else:\r\n        message = f\"ONGELDIGE subset input: bestand kon niet worden gevonden:{nl}{db_pad}\"\r\n\r\n    if geldige_db_pad:\r\n        onderdelen = select_klasses(geldige_db_pad)\r\n        if len(onderdelen) == 0:\r\n            message = f\"ONGELDIGE subset input: Geen OTL klassen gevonden in db file:{nl}{db_pad}\"\r\n            geldige_db_pad = \"\"\r\n\r\n    return geldige_db_pad,message\r\n\r\n\r\n# MAIN\r\ndoelpad, foldermessage = doelpad_opzoeken(inputpad)\r\nsubsetpad, subsetmessage = check_subset_geldigheid(subset_db)\r\n\r\n# Enkel bij probleem pop-up geven\r\nif foldermessage and subsetmessage:\r\n    endmessage = f\"{foldermessage}{nl}{nl}{subsetmessage}\"\r\nelif foldermessage:\r\n    endmessage = foldermessage\r\nelif subsetmessage:\r\n    endmessage = subsetmessage\r\nelse:\r\n    endmessage = \"\"\r\n\r\nif endmessage:\r\n    ctypes.windll.user32.MessageBoxW(0, endmessage, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n\r\n# OUT variable\r\nOUT = doelpad,subsetpad,subset_filter,toolkit_update",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "e8ddd1eeb0814cf48a9b341129dea51b",
@@ -239,7 +218,7 @@
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "import urllib.request\r\nimport sys\r\nfrom zipfile import ZipFile\r\nimport os.path\r\nimport ctypes\r\n\r\n\r\n#DE JUISTE FOLDERS OPHALEN VIA INPUT\r\ndoelpad = IN[0]\r\nsubsetpad = IN[1]\r\nsubset_filter = IN[2]\r\ntoolkit_update = IN[3]\r\n\r\nnl = '\\n'\r\n\r\n#FUNCTIE VOOR AFLADEN MODULES\r\ndef moduleDownloadenViaZiplink(naam,link,doelpad):\r\n    \"\"\"Gebruikt een Github link om python modules af te laden en bruikbaar te maken\"\"\"\r\n    ziplocatie = f'{doelpad}\\\\{naam}.zip'\r\n\r\n    try:\r\n        urllib.request.urlretrieve(link,ziplocatie)\r\n        #downloadmsg = f'De package {naam} werd gedownload naar locatie {ziplocatie}'\r\n        #ctypes.windll.user32.MessageBoxW(0, downloadmsg , \"Donwload library\", 0)\r\n        with ZipFile(ziplocatie, 'r') as zObject: \r\n            zObject.extractall(path=doelpad)\r\n            message = f'Download van {naam} geslaagd'\r\n        if not os.path.isdir(doelpad): #kijken of de folder bestaat\r\n            message = f'FOUT in downloaden of unzippen van {naam} python library'\r\n    except:\r\n        message = f'FOUT in downloaden of unzippen van {naam} python library'\r\n\r\n    return message\r\n                  \r\n#FUNCTIE VOOR MODULE TOEVOEGEN AAN PATH\r\ndef moduleToevoegenAanPath(modulefolder,naam):\r\n    if os.path.isdir(modulefolder): #kijken of de folder bestaat\r\n        if modulefolder not in sys.path:\r\n            try:\r\n                sys.path.insert(0, modulefolder)\r\n                message = f'Toevoegen van {naam} aan PATH geslaagd'\r\n    \r\n            except:\r\n                message = f'FOUT in toevoegen van {naam} python library'\r\n        else:\r\n            message = f'modulefolder met {naam} reeds toegevoegd aan sys.path'\r\n   \r\n    else:\r\n        message = f'FOUT in toevoegen van python libraries, folder {modulefolder} bestaat niet, mogelijk zijn ze nog niet gedownload'\r\n    \r\n    return message\r\n\r\n\r\ndef checkOTLmodules(message):\r\n    \"\"\"controleer of de modules correct zijn ingeladen\"\"\"\r\n    try:\r\n        from otlmow_model.OtlmowModel.Classes.ImplementatieElement import AIMObject\r\n        from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter\r\n        finalmessage = f\"{nl}OTL modules en libraries zijn succesvol ingeladen{nl}{message}\"\r\n\r\n    except:\r\n        finalmessage = f\"{nl}FOUT bij inladen OTL modules en libraries:{nl}{message}\"\r\n\r\n    return finalmessage\r\n    \r\n\r\n\r\ndef getOTLmodules(doelpad,downloadcheck):\r\n    \"\"\"referentie welke modules waar opgehaald moeten worden. Toevoeging aan het python Path en testing\"\"\"\r\n\r\n    message = \"\"\r\n    if downloadcheck: #voor het geval de libs gedownload moeten worden\r\n        #OTLMOW MODEL\r\n        naam = \"otlmow_model\"\r\n        githublink = r'https://raw.githubusercontent.com/davidvlaminck/OTLMOW-Model/refs/heads/master/source.zip'\r\n        message = message + \"\\n\" + moduleDownloadenViaZiplink(str(naam),githublink,doelpad)\r\n        \r\n        #OTLMOW CONVERTER\r\n        naam = \"otlmow_converter\"\r\n        githublink = r'https://raw.githubusercontent.com/davidvlaminck/OTLMOW-Converter/refs/heads/master/source.zip'\r\n        message = message + \"\\n\" + moduleDownloadenViaZiplink(str(naam),githublink,doelpad)\r\n\r\n    #PAD TOEVOEGEN\r\n    message = message + \"\\n\" + \"\\n\" + moduleToevoegenAanPath(doelpad,\"OTL modules en libraries\")\r\n    \r\n    #CHECK OF MODULES WERKEN\r\n    outputmessage = checkOTLmodules(message)\r\n\r\n    return outputmessage\r\n\r\n#UITVOEREN\r\nif doelpad and doelpad != \"ongeldig_pad\":\r\n    outputmessage = getOTLmodules(doelpad,toolkit_update)\r\n    ctypes.windll.user32.MessageBoxW(0, outputmessage, \"Inladen OTLMOW libraries\", 0)\r\n    go = 1\r\nelse:\r\n    go = 0\r\n\r\nOUT = [subsetpad,subset_filter,go]",
+      "Code": "import urllib.request\r\nimport sys\r\nfrom zipfile import ZipFile\r\nimport os.path\r\nimport ctypes\r\n\r\n\r\n#DE JUISTE FOLDERS OPHALEN VIA INPUT\r\ndoelpad = IN[0]\r\nsubsetpad = IN[1]\r\nsubset_filter = IN[2]\r\ntoolkit_update = IN[3]\r\n\r\nnl = '\\n'\r\n\r\n\r\n#FUNCTIE VOOR AFLADEN MODULES\r\ndef moduleDownloadenViaZiplink(naam,link,doelpad):\r\n    \"\"\"Gebruikt een Github link om python modules af te laden en bruikbaar te maken\"\"\"\r\n    ziplocatie = f'{doelpad}\\\\{naam}.zip'\r\n\r\n    try:\r\n        urllib.request.urlretrieve(link,ziplocatie)\r\n        with ZipFile(ziplocatie, 'r') as zObject: \r\n            zObject.extractall(path=doelpad)\r\n            message = f'Download van {naam} geslaagd'\r\n        if not os.path.isdir(doelpad): #kijken of de folder bestaat\r\n            message = f'FOUT in downloaden of unzippen van {naam} python library'\r\n    except:\r\n        message = f'FOUT in downloaden of unzippen van {naam} python library'\r\n\r\n    return message\r\n                  \r\n#FUNCTIE VOOR MODULE TOEVOEGEN AAN PATH\r\ndef moduleToevoegenAanPath(modulefolder,naam):\r\n    if os.path.isdir(modulefolder): #kijken of de folder bestaat\r\n        if os.path.isdir(modulefolder + r'/otlmow_model'): #kijken of de otl model in de folder staat\r\n\r\n            if modulefolder in sys.path:\r\n                sys.path.remove(modulefolder) #Verwijderen om opniew te kunnen inladen, bv na nieuwe download\r\n\r\n            try:\r\n                sys.path.insert(0, modulefolder)\r\n                #message = f'Toevoegen van {naam} aan PATH geslaagd'\r\n                message = \"\"\r\n    \r\n            except:\r\n                message = f'FOUT in toevoegen van {naam} python library'\r\n\r\n        else:\r\n            message = f'De OTL library werd niet gevonden in de folder {modulefolder}, mogelijk zijn ze nog niet gedownload'\r\n   \r\n    else:\r\n        message = f'FOUT in toevoegen van python libraries, folder {modulefolder} bestaat niet'\r\n    \r\n    return message\r\n\r\n\r\ndef checkOTLmodules(message):\r\n    \"\"\"controleer of de modules correct zijn ingeladen\"\"\"\r\n    try:\r\n        from otlmow_model.OtlmowModel.Classes.ImplementatieElement import AIMObject\r\n        from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter\r\n        \r\n        finalmessage = f\"{nl}OTL modules en libraries zijn succesvol ingeladen{nl}{message}\"\r\n        go = 1\r\n\r\n    except Exception as e:\r\n        go = 0\r\n        # Controleer of de gebruikte python versie lager is dan 3.9\r\n        MIN_MAJOR = 3\r\n        MIN_MINOR = 9\r\n        current_major = sys.version_info.major\r\n        current_minor = sys.version_info.minor\r\n\r\n        if current_major < MIN_MAJOR or (current_major == MIN_MAJOR and current_minor < MIN_MINOR):\r\n            finalmessage = f\"{nl}FOUT bij inladen OTL modules en libraries:{nl}De gebruikte python versie ({current_major}.{current_minor}) is te laag {nl}Minimum vereist = 3.9{nl}Probeer een recentere versie van Dynamo voor Civil3D, bv. 2025 of nieuwer\"\r\n    \r\n        else:\r\n            finalmessage = f\"{nl}FOUT bij inladen OTL modules en libraries:{nl}{message}{nl}fout:{e}{nl}{nl}Herstart civil3D en Dynamo indien deze fout zich blijft voordoen.\"\r\n\r\n    return finalmessage,go\r\n    \r\n\r\ndef getOTLmodules(doelpad,downloadcheck):\r\n    \"\"\"referentie welke modules waar opgehaald moeten worden. Toevoeging aan het python Path en testing\"\"\"\r\n\r\n    message = \"\"\r\n    if downloadcheck: #voor het geval de libs gedownload moeten worden\r\n        #OTLMOW MODEL\r\n        naam = \"otlmow_model\"\r\n        githublink = r'https://raw.githubusercontent.com/davidvlaminck/OTLMOW-Model/refs/heads/master/source.zip'\r\n        message = message + \"\\n\" + moduleDownloadenViaZiplink(str(naam),githublink,doelpad)\r\n        \r\n        #OTLMOW CONVERTER\r\n        naam = \"otlmow_converter\"\r\n        githublink = r'https://raw.githubusercontent.com/davidvlaminck/OTLMOW-Converter/refs/heads/master/source.zip'\r\n        message = message + \"\\n\" + moduleDownloadenViaZiplink(str(naam),githublink,doelpad)\r\n\r\n    #PAD TOEVOEGEN\r\n    message = message + \"\\n\" + \"\\n\" + moduleToevoegenAanPath(doelpad,\"OTL modules en libraries\")\r\n    \r\n    #CHECK OF MODULES WERKEN\r\n    outputmessage,go = checkOTLmodules(message)\r\n\r\n    return outputmessage,go\r\n\r\n#UITVOEREN\r\nif doelpad and doelpad != \"ongeldig_pad\":\r\n    outputmessage, go = getOTLmodules(doelpad,toolkit_update)\r\n    if outputmessage:\r\n        ctypes.windll.user32.MessageBoxW(0, outputmessage, \"Inladen OTLMOW libraries\", 0)\r\n\r\nelse:\r\n    go = 0\r\n\r\nOUT = [doelpad,subsetpad,subset_filter,go]",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "7da443a6070e42d39e1edc50913bf586",
@@ -302,7 +281,7 @@
       "NodeType": "CodeBlockNode",
       "Inputs": [
         {
-          "Id": "54d034bf623e49659e83530b63c8f212",
+          "Id": "83631da8323347e081a7b4906a22768e",
           "Name": "out",
           "Description": "out",
           "UsingDefaultValue": false,
@@ -313,7 +292,16 @@
       ],
       "Outputs": [
         {
-          "Id": "c0585cf63a4f4be9b28add8ec3f27ecc",
+          "Id": "55c86e4e459e482ba95bc04bc57d93a9",
+          "Name": "",
+          "Description": "doelpad",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "7e5ca9c7006d4e6680412cc333ee256d",
           "Name": "",
           "Description": "subsetpad",
           "UsingDefaultValue": false,
@@ -322,7 +310,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "a7ec6c90c1e84e6abae4aff2dd8d0fc1",
+          "Id": "a090f2ce5beb4626a17064561eb19a25",
           "Name": "",
           "Description": "subset_filter",
           "UsingDefaultValue": false,
@@ -331,7 +319,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "9da549a046464b9881806d2ba0f0d23c",
+          "Id": "6507ff79af8a4935830f3e9351be6ad7",
           "Name": "",
           "Description": "go",
           "UsingDefaultValue": false,
@@ -342,11 +330,11 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "subsetpad = out[0];\nsubset_filter = out[1];\ngo = out[2];"
+      "Code": "doelpad = out[0];\nsubsetpad = out[1];\nsubset_filter = out[2];\ngo = out[3];"
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "import importlib\r\nimport sqlite3\r\nfrom sqlite3 import Error\r\nfrom os.path import exists\r\nimport ctypes\r\n\r\n#NODIGE MODULES UIT OTLMOW CONVERTER INLADEN\r\n# OPM > Te bekijken of we deze helemaal nodig hebben\r\nfrom otlmow_converter.DotnotationDictConverter import DotnotationDictConverter\r\nfrom otlmow_converter.DotnotationHelper import DotnotationHelper\r\n\r\n#NODIGE MODULES UIT OTLMOW MODEL INLADEN\r\nfrom otlmow_model.OtlmowModel.BaseClasses.KeuzelijstField import KeuzelijstField\r\nfrom otlmow_model.OtlmowModel.BaseClasses.StringField import StringField\r\nfrom otlmow_model.OtlmowModel.BaseClasses.BooleanField import BooleanField\r\nfrom otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDecimalField\r\nfrom otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField\r\nfrom otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField\r\nfrom otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut\r\nfrom otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri\r\n\r\n\r\n#FUNCTIES\r\ndef create_connection(db_file):\r\n        \"\"\" maak connectie naar de SQLite database\"\"\"\r\n        conn = None\r\n        try:\r\n            conn = sqlite3.connect(db_file)\r\n        except Error as e:\r\n            ctypes.windll.user32.MessageBoxW(0, str(e), \"SQlite lezen gefaald\", 0)\r\n        return conn\r\n    \r\n    \r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten\r\n        cur.execute(\"\"\"\r\n             SELECT k.uri FROM OSLOClass k \r\n                WHERE abstract = '0' \r\n                AND name NOT LIKE 'Agent' \r\n                AND name NOT LIKE 'Bijlage' \r\n                AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'\r\n                AND k.uri NOT IN (\r\n                SELECT DISTINCT uri\r\n                FROM OSLORelaties\r\n                );\"\"\")\r\n        klasses_onderdelen_tuple = cur.fetchall()\r\n        klasses_onderdelen = []\r\n        for k in klasses_onderdelen_tuple:\r\n            klasses_onderdelen.append(k[0])\r\n\r\n        if len(klasses_onderdelen) > 100:\r\n            ctypes.windll.user32.MessageBoxW(0, \"Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..\", \"Inlezen OTL SQLite\", 0)\r\n\r\n    return(klasses_onderdelen)\r\n\r\ndef select_attributen(conn, klasse_uri):\r\n    \"\"\"attributen voor klasse uit SQlite halen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #attributen voor bepaalde klasse ophalen\r\n        cur.execute(\"\"\"\r\n                    SELECT a.name FROM OSLOAttributen a\r\n                    WHERE class_uri = ?\r\n                    \"\"\", (klasse_uri,))\r\n        attributen_tuple = cur.fetchall()\r\n        attributen = []\r\n        for attr in attributen_tuple:\r\n            attributen.append(attr[0])\r\n    return(attributen)\r\n\r\n\r\ndef dummydict():\r\n    onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n    \r\n    onderdeeldict[\"propertysetnaam\"] = \"OTL_dummy\"\r\n    onderdeeldict[\"definitie\"] = \"Een dummy object\"\r\n    onderdeeldict[\"typeURI\"] = \"dummyURI\"\r\n    onderdeeldict[\"attributen\"] = []\r\n    \r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n    \r\n    attribuutdict[\"dotnotatie_attribuutnaam\"] = \"dummy.attribuut\"\r\n    attribuutdict[\"attribuutdefinitie\"] = \"Een dummy attribuut\"\r\n    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n    attribuutdict[\"default_value\"] = '-'\r\n    attribuutdict[\"keuzelijstopties\"] = ['dummywaarde-A','dummywaarde-B','-']\r\n    attribuutdict[\"keuzelijstnaam\"] = 'dummy-lijst'\r\n    \r\n    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n    return onderdeeldict\r\n\r\n\r\ndef attribute_info_to_dict(obj, attribute):\r\n    \"\"\"verzamelt de info van het attribuut (in dotnatatie) in een dict\"\"\"\r\n\r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n\r\n    #SPECIALE ATTRIBUTEN\r\n    if attribute == \"typeURI\": #kan geen attr ophalen voor typeURI\r\n        #attr = getattr(obj,\"_typeURI\")\r\n        attribuutdict[\"attribuutdefinitie\"] = \"De URI van het object\"\r\n        attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n        attribuutdict[\"default_value\"] = obj.typeURI\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n\r\n    elif attribute == \"geometry\": \r\n        attribuutdict = {} #Geometrie attribuut niet nodig in civil3D, \r\n\r\n    #NORMALE ATTRIBUTEN\r\n    else:\r\n        #ATTRIBUUTNAAM\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n        attr = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=False) #haalt het attribuut-object op\r\n        attr_ws = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=True)\r\n\r\n        #DEFINTIE\r\n        attribuutdict[\"attribuutdefinitie\"] = (attr.definition[:250] + '..') if len(attr.definition) > 250 else attr.definition\r\n        \r\n        if type(attr) == OTLAttribuut:\r\n            OTL_datatype = attr_ws.field\r\n            \r\n        #DATATYPE & DEFAULT VALUE(civil3D datatypes)\r\n        if OTL_datatype == StringField:\r\n            attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n            attribuutdict[\"default_value\"] = \"\"\r\n        elif OTL_datatype == FloatOrDecimalField:\r\n            attribuutdict[\"datatype_attribuut\"] = \"Real\"\r\n            attribuutdict[\"default_value\"] = -999999999.000000\r\n        elif OTL_datatype == NonNegIntegerField or OTL_datatype == IntegerField: \r\n            attribuutdict[\"datatype_attribuut\"] = \"Integer\"\r\n            attribuutdict[\"default_value\"] = -999999999\r\n        elif OTL_datatype == BooleanField:\r\n            if attribute == \"isActief\":\r\n                attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                attribuutdict[\"default_value\"] = 'True'\r\n                attribuutdict[\"keuzelijstopties\"] = ['True','False','-']\r\n                attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst-true-default'\r\n            else:\r\n                attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                attribuutdict[\"default_value\"] = '-'\r\n                attribuutdict[\"keuzelijstopties\"] = ['-','True','False']\r\n                attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst'\r\n\r\n        #KEUZELIJSTOPTIES\r\n        elif OTL_datatype.naam.startswith(\"Kl\"):\r\n            attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n            attribuutdict[\"default_value\"] = '-'\r\n            keuzelijstopties = [\"-\"] #Default value voor keuzelijst moet in lijst voorkomen\r\n            for i, k in enumerate(attr.field.options.keys()):\r\n                keuzelijstopties.append(k)\r\n            attribuutdict[\"keuzelijstopties\"] = keuzelijstopties\r\n            attribuutdict[\"keuzelijstnaam\"] = str(attr.field.naam)       \r\n        else: #DateField, URIField, ..\r\n            attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n            attribuutdict[\"default_value\"] = \"\"\r\n\r\n    return attribuutdict\r\n\r\ndef create_psetnaam(obj, urilijst):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n\r\n    #Naam en soort van de klasse\r\n    objectnaam = obj.__class__.__name__\r\n    objectsoort = obj.typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n\r\n    #Deprecation label toevoegen\r\n    if hasattr(obj, 'deprecated_version'):\r\n        depr = \"_DEPR-\" + str(obj.deprecated_version)\r\n    else:\r\n        depr = \"\"\r\n\r\n    #Controle of naam reeds voorkomt\r\n    if sum(s.endswith('#' + objectnaam) for s in urilijst) == 1:\r\n        propertysetnaam = \"OTL_\" + objectnaam + depr\r\n    else: \r\n        propertysetnaam = \"OTL_\" + objectnaam + \"_\" + objectsoort + depr \r\n\r\n    return propertysetnaam\r\n\r\n\r\ndef get_dotnotation(obj):\r\n    \"\"\"creer de dotnotatie weergave voor de attributen\"\"\"\r\n    \r\n    obj.fill_with_dummy_data() #Vul het object met dummy data, zodat deze bruikbaar is voor dotnotationdict\r\n\r\n    #Workaround voor ListOfList error bij dotnotatie creatie:\r\n    if obj.typeURI == \"https://wegenenverkeer.data.vlaanderen.be/ns/implementatieelement#Toegangsprocedure\": \r\n        obj.bijlage = None\r\n\r\n    try:\r\n        d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie\r\n    except Error as e:\r\n        ctypes.windll.user32.MessageBoxW(0, str(e), \"Dotnotatie aanmaken gefaald\", 0)\r\n        pass\r\n\r\n    return d_dict\r\n    \r\n#MAIN FUNCTION\r\ndef OTL_to_dict(OTL_subset, filter_subsetattributen:bool):\r\n    \"\"\"Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets\"\"\"\r\n\r\n    if exists(OTL_subset):\r\n        eindlijst = [] \r\n\r\n        urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset\r\n\r\n        for uri in urilijst:\r\n\r\n            obj = dynamic_create_instance_from_uri(uri) #Instantieer de klasse via het OTLMOW model\r\n            dotnotatie_attributen = get_dotnotation(obj) #Haalt alle dotnotatie attributen op voor het object \r\n            subsetattributen = select_attributen(OTL_subset, obj.typeURI) #haal een lijst van de attributen voor het object uit de subset\r\n\r\n            #Verzamel info over het onderdeel (of installatie, implemenatieelement, ...)\r\n            onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n            onderdeeldict[\"propertysetnaam\"] = create_psetnaam(obj, urilijst) #creert een unieke propertysetnaam\r\n            onderdeeldict[\"definitie\"] = (obj.__doc__[:250] + '..') if len(obj.__doc__) > 250 else obj.__doc__\r\n            onderdeeldict[\"typeURI\"] = obj.typeURI\r\n            onderdeeldict[\"attributen\"] = []\r\n    \r\n            #Verzamel info per attribuut, indien gevraagd volgens subset\r\n            for attribute in dotnotatie_attributen:\r\n                if filter_subsetattributen: #Enkel de attributen uit de subset meenemen\r\n                    if attribute.split(\".\")[0] in subsetattributen:\r\n                        attribuutdict = attribute_info_to_dict(obj,attribute)\r\n                    else:\r\n                        attribuutdict = {}\r\n\r\n                else: attribuutdict = attribute_info_to_dict(obj,attribute) #Alle attributen uit het OTL model meenemen\r\n\r\n                if attribuutdict: #Voegt enkel toe aan attributenlijst in dict als er een attribuutdict werd gemaakt.\r\n                    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n\r\n            eindlijst.append(onderdeeldict)\r\n\r\n\r\n    else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt\r\n        eindlijst = []\r\n        onderdeeldict = dummydict()\r\n\r\n    return eindlijst\r\n\r\n\r\n#UITVOEREN\r\nsubsetpad = IN[0]\r\nsubset_filter = IN[1]\r\ngo = IN[2]\r\n\r\nOUT = \"\"\r\nif go:\r\n    try:\r\n        OUT = OTL_to_dict(subsetpad,subset_filter)\r\n    except:\r\n        ctypes.windll.user32.MessageBoxW(0, \"Er liep iets mis in het omzetten van de OTL data naar dynamo\", \"OTL data naar dict\", 0)        \r\n",
+      "Code": "import importlib\r\nimport sqlite3\r\nfrom sqlite3 import Error\r\nfrom os.path import exists\r\nimport ctypes\r\n\r\n#FUNCTIES\r\ndef create_connection(db_file):\r\n        \"\"\" maak connectie naar de SQLite database\"\"\"\r\n        conn = None\r\n        try:\r\n            conn = sqlite3.connect(db_file)\r\n        except Error as e:\r\n            ctypes.windll.user32.MessageBoxW(0, str(e), \"SQlite lezen gefaald\", 0)\r\n        return conn\r\n    \r\n    \r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten\r\n        cur.execute(\"\"\"\r\n             SELECT k.uri FROM OSLOClass k \r\n                WHERE abstract = '0' \r\n                AND name NOT LIKE 'Agent' \r\n                AND name NOT LIKE 'Bijlage' \r\n                AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'\r\n                AND k.uri NOT IN (\r\n                SELECT DISTINCT uri\r\n                FROM OSLORelaties\r\n                );\"\"\")\r\n        klasses_onderdelen_tuple = cur.fetchall()\r\n        klasses_onderdelen = []\r\n        for k in klasses_onderdelen_tuple:\r\n            klasses_onderdelen.append(k[0])\r\n\r\n        if len(klasses_onderdelen) > 100:\r\n            ctypes.windll.user32.MessageBoxW(0, \"Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..\", \"Inlezen OTL SQLite\", 0)\r\n\r\n    return(klasses_onderdelen)\r\n\r\ndef select_attributen(conn, klasse_uri):\r\n    \"\"\"attributen voor klasse uit SQlite halen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #attributen voor bepaalde klasse ophalen\r\n        cur.execute(\"\"\"\r\n                    SELECT a.name FROM OSLOAttributen a\r\n                    WHERE class_uri = ?\r\n                    \"\"\", (klasse_uri,))\r\n        attributen_tuple = cur.fetchall()\r\n        attributen = []\r\n        for attr in attributen_tuple:\r\n            attributen.append(attr[0])\r\n    return(attributen)\r\n\r\n\r\ndef dummydict():\r\n    onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n    \r\n    onderdeeldict[\"propertysetnaam\"] = \"OTL_dummy\"\r\n    onderdeeldict[\"definitie\"] = \"Een dummy object\"\r\n    onderdeeldict[\"typeURI\"] = \"dummyURI\"\r\n    onderdeeldict[\"attributen\"] = []\r\n    \r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n    \r\n    attribuutdict[\"dotnotatie_attribuutnaam\"] = \"dummy.attribuut\"\r\n    attribuutdict[\"attribuutdefinitie\"] = \"Een dummy attribuut\"\r\n    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n    attribuutdict[\"default_value\"] = '-'\r\n    attribuutdict[\"keuzelijstopties\"] = ['dummywaarde-A','dummywaarde-B','-']\r\n    attribuutdict[\"keuzelijstnaam\"] = 'dummy-lijst'\r\n    \r\n    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n    return onderdeeldict\r\n\r\n\r\ndef attribute_info_to_dict(obj, attribute):\r\n    \"\"\"verzamelt de info van het attribuut (in dotnatatie) in een dict\"\"\"\r\n\r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n\r\n    #SPECIALE ATTRIBUTEN\r\n    if attribute == \"typeURI\": #kan geen attr ophalen voor typeURI\r\n        #attr = getattr(obj,\"_typeURI\")\r\n        attribuutdict[\"attribuutdefinitie\"] = \"De URI van het object\"\r\n        attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n        attribuutdict[\"default_value\"] = obj.typeURI\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n\r\n    elif attribute == \"geometry\": \r\n        attribuutdict = {} #Geometrie attribuut niet nodig in civil3D, \r\n\r\n    #NORMALE ATTRIBUTEN\r\n    else:\r\n        #ATTRIBUUTNAAM\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n        attr = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=False) #haalt het attribuut-object op\r\n        attr_ws = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=True)\r\n\r\n        #DEFINTIE\r\n        attribuutdict[\"attribuutdefinitie\"] = (attr.definition[:250] + '..') if len(attr.definition) > 250 else attr.definition\r\n        \r\n        if type(attr) == OTLAttribuut:\r\n            OTL_datatype = attr_ws.field\r\n            \r\n        #DATATYPE & DEFAULT VALUE(civil3D datatypes)\r\n        if OTL_datatype == StringField:\r\n            attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n            attribuutdict[\"default_value\"] = \"\"\r\n        elif OTL_datatype == FloatOrDecimalField:\r\n            attribuutdict[\"datatype_attribuut\"] = \"Real\"\r\n            attribuutdict[\"default_value\"] = -999999999.000000\r\n        elif OTL_datatype == NonNegIntegerField or OTL_datatype == IntegerField: \r\n            attribuutdict[\"datatype_attribuut\"] = \"Integer\"\r\n            attribuutdict[\"default_value\"] = -999999999\r\n        elif OTL_datatype == BooleanField:\r\n            if attribute == \"isActief\":\r\n                attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                attribuutdict[\"default_value\"] = 'True'\r\n                attribuutdict[\"keuzelijstopties\"] = ['True','False','-']\r\n                attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst-true-default'\r\n            else:\r\n                attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                attribuutdict[\"default_value\"] = '-'\r\n                attribuutdict[\"keuzelijstopties\"] = ['-','True','False']\r\n                attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst'\r\n\r\n        #KEUZELIJSTOPTIES\r\n        elif OTL_datatype.naam.startswith(\"Kl\"):\r\n            attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n            attribuutdict[\"default_value\"] = '-'\r\n            keuzelijstopties = [\"-\"] #Default value voor keuzelijst moet in lijst voorkomen\r\n            for i, k in enumerate(attr.field.options.keys()):\r\n                keuzelijstopties.append(k)\r\n            attribuutdict[\"keuzelijstopties\"] = keuzelijstopties\r\n            attribuutdict[\"keuzelijstnaam\"] = str(attr.field.naam)       \r\n        else: #DateField, URIField, ..\r\n            attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n            attribuutdict[\"default_value\"] = \"\"\r\n\r\n    return attribuutdict\r\n\r\ndef create_psetnaam(obj, urilijst):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n\r\n    #Naam en soort van de klasse\r\n    objectnaam = obj.__class__.__name__\r\n    objectsoort = obj.typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n\r\n    #Deprecation label toevoegen\r\n    if hasattr(obj, 'deprecated_version'):\r\n        depr = \"_DEPR-\" + str(obj.deprecated_version)\r\n    else:\r\n        depr = \"\"\r\n\r\n    #Controle of naam reeds voorkomt\r\n    if sum(s.endswith('#' + objectnaam) for s in urilijst) == 1:\r\n        propertysetnaam = \"OTL_\" + objectnaam + depr\r\n    else: \r\n        propertysetnaam = \"OTL_\" + objectnaam + \"_\" + objectsoort + depr \r\n\r\n    return propertysetnaam\r\n\r\n\r\ndef get_dotnotation(obj):\r\n    \"\"\"creer de dotnotatie weergave voor de attributen\"\"\"\r\n    \r\n    obj.fill_with_dummy_data() #Vul het object met dummy data, zodat deze bruikbaar is voor dotnotationdict\r\n\r\n    #Workaround voor ListOfList error bij dotnotatie creatie:\r\n    if obj.typeURI == \"https://wegenenverkeer.data.vlaanderen.be/ns/implementatieelement#Toegangsprocedure\": \r\n        obj.bijlage = None\r\n\r\n    try:\r\n        d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie\r\n    except Error as e:\r\n        ctypes.windll.user32.MessageBoxW(0, str(e), \"Dotnotatie aanmaken gefaald\", 0)\r\n        pass\r\n\r\n    return d_dict\r\n    \r\n#MAIN FUNCTION\r\ndef OTL_to_dict(OTL_subset, filter_subsetattributen:bool):\r\n    \"\"\"Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets\"\"\"\r\n\r\n    if exists(OTL_subset):\r\n        eindlijst = [] \r\n\r\n        urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset\r\n\r\n        for uri in urilijst:\r\n\r\n            obj = dynamic_create_instance_from_uri(uri) #Instantieer de klasse via het OTLMOW model\r\n            dotnotatie_attributen = get_dotnotation(obj) #Haalt alle dotnotatie attributen op voor het object \r\n            subsetattributen = select_attributen(OTL_subset, obj.typeURI) #haal een lijst van de attributen voor het object uit de subset\r\n\r\n            #Verzamel info over het onderdeel (of installatie, implemenatieelement, ...)\r\n            onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n            onderdeeldict[\"propertysetnaam\"] = create_psetnaam(obj, urilijst) #creert een unieke propertysetnaam\r\n            onderdeeldict[\"definitie\"] = (obj.__doc__[:250] + '..') if len(obj.__doc__) > 250 else obj.__doc__\r\n            onderdeeldict[\"typeURI\"] = obj.typeURI\r\n            onderdeeldict[\"attributen\"] = []\r\n    \r\n            #Verzamel info per attribuut, indien gevraagd volgens subset\r\n            for attribute in dotnotatie_attributen:\r\n                if filter_subsetattributen: #Enkel de attributen uit de subset meenemen\r\n                    if attribute.split(\".\")[0] in subsetattributen:\r\n                        attribuutdict = attribute_info_to_dict(obj,attribute)\r\n                    else:\r\n                        attribuutdict = {}\r\n\r\n                else: attribuutdict = attribute_info_to_dict(obj,attribute) #Alle attributen uit het OTL model meenemen\r\n\r\n                if attribuutdict: #Voegt enkel toe aan attributenlijst in dict als er een attribuutdict werd gemaakt.\r\n                    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n\r\n            eindlijst.append(onderdeeldict)\r\n\r\n\r\n    else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt\r\n        eindlijst = []\r\n        onderdeeldict = dummydict()\r\n\r\n    return eindlijst\r\n\r\n\r\n#UITVOEREN\r\ndoelpad = [0]\r\nsubsetpad = IN[1]\r\nsubset_filter = IN[2]\r\ngo = IN[3]\r\n\r\nOUT = \"\"\r\nif go:\r\n    try:\r\n        #NODIGE MODULES UIT OTLMOW CONVERTER INLADEN\r\n        from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter\r\n        from otlmow_converter.DotnotationHelper import DotnotationHelper\r\n        \r\n        #NODIGE MODULES UIT OTLMOW MODEL INLADEN\r\n        from otlmow_model.OtlmowModel.BaseClasses.KeuzelijstField import KeuzelijstField\r\n        from otlmow_model.OtlmowModel.BaseClasses.StringField import StringField\r\n        from otlmow_model.OtlmowModel.BaseClasses.BooleanField import BooleanField\r\n        from otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDecimalField\r\n        from otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField\r\n        from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField\r\n        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut\r\n        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri\r\n\r\n\r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Fout bij inladen van libraries:{e}\", \"OTL data naar dict\", 0)   \r\n        \r\n    try:\r\n        #OMZETTING STARTEN\r\n        OUT = OTL_to_dict(subsetpad,subset_filter)\r\n        \r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Er liep iets mis in het omzetten van de OTL data naar dynamo:{e}\", \"OTL data naar dict\", 0)        \r\n\r\n",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "a1e05d9dab574489a9697ceab36dc93b",
@@ -374,6 +362,15 @@
           "Id": "7804385e1be74134a7c409aa4161357e",
           "Name": "IN[2]",
           "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "64fe2b1949b944dfbcf895b8a245b74c",
+          "Name": "IN[3]",
+          "Description": "Input #3",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -425,6 +422,27 @@
       ],
       "Replication": "Disabled",
       "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Directory, CoreNodeModels",
+      "Id": "303b8bae380d462ab6eb29fd47c7db06",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "710fec1a3c2f4b45aeeeca7762bddde9",
+          "Name": "",
+          "Description": "Directory path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a directory on the system and returns its path",
+      "HintPath": "C:\\Users\\ruben\\Desktop\\test_45",
+      "InputValue": "C:\\Users\\ruben\\Desktop\\test_45"
     }
   ],
   "Connectors": [
@@ -437,19 +455,13 @@
     {
       "Start": "25db8817de45484ebe9505e9120660e9",
       "End": "4933dc822ff741a0a29a9ec4ba5bedf6",
-      "Id": "8a8b4b0878d64a3e96d54dce819cf60f",
+      "Id": "60efe3ed58994a44b45343e3f5862415",
       "IsHidden": "False"
     },
     {
       "Start": "7af5be466d5b440999735bce392887a6",
       "End": "b08d2223dcbd49e182063ca7567a572f",
       "Id": "6ab77b30c90a42ff85e52e07e8be2ca1",
-      "IsHidden": "False"
-    },
-    {
-      "Start": "2d2218077f0c426f8a3722f36ac41ae6",
-      "End": "46b18e09405f4a4ebc473b91f91b9844",
-      "Id": "4a435645a5a44a50b0b62b81b4031508",
       "IsHidden": "False"
     },
     {
@@ -484,26 +496,32 @@
     },
     {
       "Start": "92dea4b9fd764fe0aeb936972bcbafd6",
-      "End": "54d034bf623e49659e83530b63c8f212",
-      "Id": "4d52fecfcd17450a883d9683863dc18d",
+      "End": "83631da8323347e081a7b4906a22768e",
+      "Id": "811daa8221064586855c6a6f4f9b4781",
       "IsHidden": "False"
     },
     {
-      "Start": "c0585cf63a4f4be9b28add8ec3f27ecc",
+      "Start": "55c86e4e459e482ba95bc04bc57d93a9",
       "End": "49911be189044f998daab56b906b8a61",
-      "Id": "51df6d8f3baf4f2eb12247a9023e5758",
+      "Id": "655a29893e3542439c320f287f889a21",
       "IsHidden": "False"
     },
     {
-      "Start": "a7ec6c90c1e84e6abae4aff2dd8d0fc1",
+      "Start": "7e5ca9c7006d4e6680412cc333ee256d",
       "End": "9625f316a4c94a2d97ba145d4ce1e043",
-      "Id": "b4797ed00f55450d88cfda9e273fb9e7",
+      "Id": "83ef6af03e194fd582cf96cad19efe64",
       "IsHidden": "False"
     },
     {
-      "Start": "9da549a046464b9881806d2ba0f0d23c",
+      "Start": "a090f2ce5beb4626a17064561eb19a25",
       "End": "7804385e1be74134a7c409aa4161357e",
-      "Id": "ae5764aef85c4886b79471b3e5bf643d",
+      "Id": "85206ddab2694bd39c2596234486de95",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "6507ff79af8a4935830f3e9351be6ad7",
+      "End": "64fe2b1949b944dfbcf895b8a245b74c",
+      "Id": "a01137019b2b456e95f802d9ba8b0aed",
       "IsHidden": "False"
     },
     {
@@ -517,20 +535,16 @@
       "End": "fcb062d8b7534383a1571765dcfd7bff",
       "Id": "4c7dc63520014677b8acbfa2b6788260",
       "IsHidden": "False"
+    },
+    {
+      "Start": "710fec1a3c2f4b45aeeeca7762bddde9",
+      "End": "46b18e09405f4a4ebc473b91f91b9844",
+      "Id": "b12cd6e301bd406f82ec990be9ecf5cb",
+      "IsHidden": "False"
     }
   ],
   "Dependencies": [],
-  "NodeLibraryDependencies": [
-    {
-      "Name": "camera.db",
-      "ReferenceType": "External",
-      "Nodes": [
-        "316586707805433392d410b416a95c43",
-        "7c7aabaf2b1545c591c7cd0621e56498",
-        "b006db26d55b44c9aadfc995f0ad487f"
-      ]
-    }
-  ],
+  "NodeLibraryDependencies": [],
   "EnableLegacyPolyCurveBehavior": true,
   "Thumbnail": "",
   "GraphDocumentationURL": null,
@@ -590,8 +604,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": -1579.70061565747,
-        "Y": -1147.4654091435063
+        "X": -1618.690214814956,
+        "Y": -1149.0899757750683
       },
       {
         "Id": "316586707805433392d410b416a95c43",
@@ -600,8 +614,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": -1562.3340018649776,
-        "Y": -560.6950678757478
+        "X": -1625.6921004958929,
+        "Y": -572.6793965246362
       },
       {
         "Id": "56f93a992b414c7a92c586451f8c6d39",
@@ -610,18 +624,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": -1555.7022765109898,
-        "Y": -267.1415197313212
-      },
-      {
-        "Id": "3d694781a1e64082870e08a8b9b95510",
-        "Name": "Directory Path",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": -1613.2729923556167,
-        "Y": -889.750351336371
+        "X": -1628.8077749312765,
+        "Y": -293.1345858363121
       },
       {
         "Id": "e8ddd1eeb0814cf48a9b341129dea51b",
@@ -650,8 +654,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": -262.97492382436974,
-        "Y": -857.7019304588621
+        "X": -252.57366346047775,
+        "Y": -857.1122928405711
       },
       {
         "Id": "b006db26d55b44c9aadfc995f0ad487f",
@@ -682,27 +686,37 @@
         "ShowGeometry": true,
         "X": 730.3221245556874,
         "Y": -871.4102584997672
+      },
+      {
+        "Id": "303b8bae380d462ab6eb29fd47c7db06",
+        "Name": "Directory Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -1622.14300713459,
+        "Y": -866.9334797433361
       }
     ],
     "Annotations": [
       {
         "Id": "9205be6d2b7f48f4ab1e7185f15ee02b",
-        "Title": "Library_update",
+        "Title": "Library_download",
         "DescriptionText": null,
         "IsExpanded": true,
-        "WidthAdjustment": 0.0,
+        "WidthAdjustment": 79.68846168179277,
         "HeightAdjustment": 0.0,
         "Nodes": [
           "86c8f8ae8e0f49d7beeeda3739187807"
         ],
         "HasNestedGroups": false,
-        "Left": -1589.70061565747,
-        "Top": -1220.4654091435063,
-        "Width": 254.62,
+        "Left": -1628.690214814956,
+        "Top": -1222.0899757750683,
+        "Width": 300.55333333333334,
         "Height": 205.0,
         "FontSize": 36.0,
-        "GroupStyleId": "883066aa-1fe2-44a4-9bd1-c3df86bfe9f6",
-        "InitialTop": -1147.4654091435063,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -1149.0899757750683,
         "InitialHeight": 145.0,
         "TextblockHeight": 63.0,
         "Background": "#FFFFB8D8"
@@ -723,7 +737,7 @@
         "Width": 481.0,
         "Height": 214.5,
         "FontSize": 36.0,
-        "GroupStyleId": "07655dc1-2d65-4fed-8d6a-37235d3e3a8d",
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": -872.6175437604265,
         "InitialHeight": 145.0,
         "TextblockHeight": 63.0,
@@ -734,19 +748,19 @@
         "Title": "Subset db",
         "DescriptionText": null,
         "IsExpanded": true,
-        "WidthAdjustment": 0.0,
+        "WidthAdjustment": 118.59610061571505,
         "HeightAdjustment": 0.0,
         "Nodes": [
           "316586707805433392d410b416a95c43"
         ],
         "HasNestedGroups": false,
-        "Left": -1572.3340018649776,
-        "Top": -633.6950678757478,
-        "Width": 209.0,
+        "Left": -1635.6921004958929,
+        "Top": -645.6793965246362,
+        "Width": 352.59610061571505,
         "Height": 214.5,
         "FontSize": 36.0,
-        "GroupStyleId": "883066aa-1fe2-44a4-9bd1-c3df86bfe9f6",
-        "InitialTop": -560.6950678757478,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -572.6793965246362,
         "InitialHeight": 145.0,
         "TextblockHeight": 63.0,
         "Background": "#FFFFB8D8"
@@ -756,19 +770,19 @@
         "Title": "Subset filter",
         "DescriptionText": null,
         "IsExpanded": true,
-        "WidthAdjustment": 0.0,
+        "WidthAdjustment": 96.02527167047629,
         "HeightAdjustment": 0.0,
         "Nodes": [
           "56f93a992b414c7a92c586451f8c6d39"
         ],
         "HasNestedGroups": false,
-        "Left": -1565.7022765109898,
-        "Top": -340.1415197313212,
-        "Width": 214.0,
+        "Left": -1638.8077749312765,
+        "Top": -366.1345858363121,
+        "Width": 310.0252716704763,
         "Height": 205.0,
         "FontSize": 36.0,
-        "GroupStyleId": "883066aa-1fe2-44a4-9bd1-c3df86bfe9f6",
-        "InitialTop": -267.1415197313212,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -293.1345858363121,
         "InitialHeight": 145.0,
         "TextblockHeight": 63.0,
         "Background": "#FFFFB8D8"
@@ -778,19 +792,19 @@
         "Title": "Doelpad",
         "DescriptionText": null,
         "IsExpanded": true,
-        "WidthAdjustment": 0.0,
+        "WidthAdjustment": 105.37231948204385,
         "HeightAdjustment": 0.0,
         "Nodes": [
-          "3d694781a1e64082870e08a8b9b95510"
+          "303b8bae380d462ab6eb29fd47c7db06"
         ],
         "HasNestedGroups": false,
-        "Left": -1623.2729923556167,
-        "Top": -962.750351336371,
-        "Width": 296.5,
+        "Left": -1632.14300713459,
+        "Top": -939.9334797433361,
+        "Width": 414.87231948204385,
         "Height": 214.5,
         "FontSize": 36.0,
-        "GroupStyleId": "883066aa-1fe2-44a4-9bd1-c3df86bfe9f6",
-        "InitialTop": -889.750351336371,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -866.9334797433361,
         "InitialHeight": 145.0,
         "TextblockHeight": 63.0,
         "Background": "#FFFFB8D8"
@@ -816,15 +830,15 @@
         "Width": 1925.3979927363137,
         "Height": 326.0550417559125,
         "FontSize": 36.0,
-        "GroupStyleId": "4d68be4a-a04d-4945-9dd5-cdf61079d790",
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": -871.4102584997672,
-        "InitialHeight": 283.0550417559125,
+        "InitialHeight": 170.71546062146945,
         "TextblockHeight": 63.0,
         "Background": "#FFB9F9E1"
       }
     ],
-    "X": 717.993348286818,
-    "Y": 678.0544869192861,
-    "Zoom": 0.42541169907587995
+    "X": 759.5958969592358,
+    "Y": 705.4503010652388,
+    "Zoom": 0.43098110616076435
   }
 }
