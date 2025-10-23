@@ -2,7 +2,7 @@
 
 
 **De Civil3D_OTL_MOW_Toolkit kan het makkelijkst vanuit Dynamo geinstalleerd worden door in de package manager te zoeken op 'Civil3D_OTL_MOW_Toolkit'.**
-![Zoek hem nu via de package manager en installeer, om toe te voegen aan je dynamo Add-ons](Afbeeldingen/MOW_OTL_Toolkit_Downloadtip.png)
+![Zoek hem nu via de package manager en installeer, om toe te voegen aan je dynamo Add-ons](Afbeeldingen/MOW_OTL_Toolkit_Downloadtip2.jpg)
 
 ## Wat is het
 
