@@ -109,16 +109,22 @@ def attribute_info_to_dict(obj, attribute):
         if attr_ws.field:
             OTL_datatype = attr_ws.field
         
-            if OTL_datatype == StringField:
+            if OTL_datatype.naam == "String":
                 attribuutdict["datatype_attribuut"] = "Text"
                 attribuutdict["default_value"] = ""
-            elif OTL_datatype == FloatOrDecimalField:
+            elif OTL_datatype.naam == "Decimal":
                 attribuutdict["datatype_attribuut"] = "Real"
                 attribuutdict["default_value"] = -999999999.000000
-            elif OTL_datatype == NonNegIntegerField or OTL_datatype == IntegerField: 
+            elif OTL_datatype.naam == "Date":
+                attribuutdict["datatype_attribuut"] = "Text"
+                attribuutdict["default_value"] = ""
+            elif OTL_datatype.naam == "AnyURI":
+                attribuutdict["datatype_attribuut"] = "Text"
+                attribuutdict["default_value"] = ""
+            elif OTL_datatype.naam == "NonNegativeInteger" or OTL_datatype.naam == "Integer": 
                 attribuutdict["datatype_attribuut"] = "Integer"
                 attribuutdict["default_value"] = -999999999
-            elif OTL_datatype == BooleanField:
+            elif OTL_datatype.naam == "Boolean":
                 if attribute == "isActief":
                     attribuutdict["datatype_attribuut"] = 'keuzelijst'
                     attribuutdict["default_value"] = 'True'
@@ -139,7 +145,7 @@ def attribute_info_to_dict(obj, attribute):
                     keuzelijstopties.append(k)
                 attribuutdict["keuzelijstopties"] = keuzelijstopties
                 attribuutdict["keuzelijstnaam"] = str(attr.field.naam)       
-            else: #DateField, URIField, ..
+            else: #Speciale gevallen altijd string nemen
                 attribuutdict["datatype_attribuut"] = "Text"
                 attribuutdict["default_value"] = ""
         else:#indien geen datatype gevonden

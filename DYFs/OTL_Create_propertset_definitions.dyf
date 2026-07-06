@@ -119,8 +119,8 @@
       "Outputs": [
         {
           "Id": "f91d016d811641018c60a87ac1e892ee",
-          "Name": "",
-          "Description": "doelpad",
+          "Name": "doelpad",
+          "Description": "doelpad = DesignScript.Builtin.Get.ValueAtIndex(out, 0)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -128,8 +128,8 @@
         },
         {
           "Id": "9805354a9b714f948c82597eac8fec39",
-          "Name": "",
-          "Description": "subsetpad",
+          "Name": "subsetpad",
+          "Description": "subsetpad = DesignScript.Builtin.Get.ValueAtIndex(out, 1)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -137,8 +137,8 @@
         },
         {
           "Id": "b9c99719ce464e98966b6d47bd305be3",
-          "Name": "",
-          "Description": "subset_filter",
+          "Name": "subset_filter",
+          "Description": "subset_filter = DesignScript.Builtin.Get.ValueAtIndex(out, 2)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -146,8 +146,8 @@
         },
         {
           "Id": "db5e1d5d38fa4f198e4b486ff1991d33",
-          "Name": "",
-          "Description": "toolkit_update",
+          "Name": "toolkit_update",
+          "Description": "toolkit_update = DesignScript.Builtin.Get.ValueAtIndex(out, 3)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -235,8 +235,8 @@
       "Outputs": [
         {
           "Id": "3f1d795306384d90b10b1278a25ac922",
-          "Name": "",
-          "Description": "doelpad",
+          "Name": "doelpad",
+          "Description": "doelpad = DesignScript.Builtin.Get.ValueAtIndex(out, 0)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -244,8 +244,8 @@
         },
         {
           "Id": "8504c41ac57747599eb5f2ee0c8483df",
-          "Name": "",
-          "Description": "subsetpad",
+          "Name": "subsetpad",
+          "Description": "subsetpad = DesignScript.Builtin.Get.ValueAtIndex(out, 1)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -253,8 +253,8 @@
         },
         {
           "Id": "f836968bbc304606b8c9f6ec2106af5a",
-          "Name": "",
-          "Description": "subset_filter",
+          "Name": "subset_filter",
+          "Description": "subset_filter = DesignScript.Builtin.Get.ValueAtIndex(out, 2)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -262,8 +262,8 @@
         },
         {
           "Id": "14f81006dc704c3eab819687cf672c1f",
-          "Name": "",
-          "Description": "go",
+          "Name": "go",
+          "Description": "go = DesignScript.Builtin.Get.ValueAtIndex(out, 3)",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -276,7 +276,7 @@
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "import importlib\r\nimport sqlite3\r\nfrom sqlite3 import Error\r\nfrom os.path import exists\r\nimport ctypes\r\n\r\n#FUNCTIES\r\ndef create_connection(db_file):\r\n        \"\"\" maak connectie naar de SQLite database\"\"\"\r\n        conn = None\r\n        try:\r\n            conn = sqlite3.connect(db_file)\r\n        except Error as e:\r\n            ctypes.windll.user32.MessageBoxW(0, str(e), \"SQlite lezen gefaald\", 0)\r\n        return conn\r\n    \r\n    \r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten\r\n        cur.execute(\"\"\"\r\n             SELECT k.uri FROM OSLOClass k \r\n                WHERE abstract = '0' \r\n                AND name NOT LIKE 'Agent' \r\n                AND name NOT LIKE 'Bijlage' \r\n                AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'\r\n                AND k.uri NOT IN (\r\n                SELECT DISTINCT uri\r\n                FROM OSLORelaties\r\n                );\"\"\")\r\n        klasses_onderdelen_tuple = cur.fetchall()\r\n        klasses_onderdelen = []\r\n        for k in klasses_onderdelen_tuple:\r\n            klasses_onderdelen.append(k[0])\r\n\r\n        if len(klasses_onderdelen) > 100:\r\n            ctypes.windll.user32.MessageBoxW(0, \"Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..\", \"Inlezen OTL SQLite\", 0)\r\n\r\n    return(klasses_onderdelen)\r\n\r\ndef select_attributen(conn, klasse_uri):\r\n    \"\"\"attributen voor klasse uit SQlite halen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #attributen voor bepaalde klasse ophalen\r\n        cur.execute(\"\"\"\r\n                    SELECT a.name FROM OSLOAttributen a\r\n                    WHERE class_uri = ?\r\n                    \"\"\", (klasse_uri,))\r\n        attributen_tuple = cur.fetchall()\r\n        attributen = []\r\n        for attr in attributen_tuple:\r\n            attributen.append(attr[0])\r\n    return(attributen)\r\n\r\n\r\ndef dummydict():\r\n    onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n    \r\n    onderdeeldict[\"propertysetnaam\"] = \"OTL_dummy\"\r\n    onderdeeldict[\"definitie\"] = \"Een dummy object\"\r\n    onderdeeldict[\"typeURI\"] = \"dummyURI\"\r\n    onderdeeldict[\"attributen\"] = []\r\n    \r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n    \r\n    attribuutdict[\"dotnotatie_attribuutnaam\"] = \"dummy.attribuut\"\r\n    attribuutdict[\"attribuutdefinitie\"] = \"Een dummy attribuut\"\r\n    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n    attribuutdict[\"default_value\"] = '-'\r\n    attribuutdict[\"keuzelijstopties\"] = ['dummywaarde-A','dummywaarde-B','-']\r\n    attribuutdict[\"keuzelijstnaam\"] = 'dummy-lijst'\r\n    \r\n    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n    return onderdeeldict\r\n\r\n\r\ndef attribute_info_to_dict(obj, attribute):\r\n    \"\"\"verzamelt de info van het attribuut (in dotnatatie) in een dict\"\"\"\r\n\r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n\r\n    #SPECIALE ATTRIBUTEN\r\n    if attribute == \"typeURI\": #kan geen attr ophalen voor typeURI\r\n        #attr = getattr(obj,\"_typeURI\")\r\n        attribuutdict[\"attribuutdefinitie\"] = \"De URI van het object\"\r\n        attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n        attribuutdict[\"default_value\"] = obj.typeURI\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n\r\n    elif attribute == \"geometry\": \r\n        attribuutdict = {} #Geometrie attribuut niet nodig in civil3D, \r\n\r\n    #NORMALE ATTRIBUTEN\r\n    else:\r\n        #ATTRIBUUTNAAM\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n        attr = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=False) #haalt het attribuut-object op\r\n        attr_ws = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=True)\r\n\r\n        #DEFINTIE\r\n        attribuutdict[\"attribuutdefinitie\"] = (attr.definition[:250] + '..') if len(attr.definition) > 250 else attr.definition\r\n        \r\n        if type(attr) == OTLAttribuut:\r\n            OTL_datatype = attr_ws.field\r\n            \r\n        #DATATYPE & DEFAULT VALUE(civil3D datatypes)\r\n        if OTL_datatype == StringField:\r\n            attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n            attribuutdict[\"default_value\"] = \"\"\r\n        elif OTL_datatype == FloatOrDecimalField:\r\n            attribuutdict[\"datatype_attribuut\"] = \"Real\"\r\n            attribuutdict[\"default_value\"] = -999999999.000000\r\n        elif OTL_datatype == NonNegIntegerField or OTL_datatype == IntegerField: \r\n            attribuutdict[\"datatype_attribuut\"] = \"Integer\"\r\n            attribuutdict[\"default_value\"] = -999999999\r\n        elif OTL_datatype == BooleanField:\r\n            if attribute == \"isActief\":\r\n                attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                attribuutdict[\"default_value\"] = 'True'\r\n                attribuutdict[\"keuzelijstopties\"] = ['True','False','-']\r\n                attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst-true-default'\r\n            else:\r\n                attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                attribuutdict[\"default_value\"] = '-'\r\n                attribuutdict[\"keuzelijstopties\"] = ['-','True','False']\r\n                attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst'\r\n\r\n        #KEUZELIJSTOPTIES\r\n        elif OTL_datatype.naam.startswith(\"Kl\"):\r\n            attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n            attribuutdict[\"default_value\"] = '-'\r\n            keuzelijstopties = [\"-\"] #Default value voor keuzelijst moet in lijst voorkomen\r\n            for i, k in enumerate(attr.field.options.keys()):\r\n                keuzelijstopties.append(k)\r\n            attribuutdict[\"keuzelijstopties\"] = keuzelijstopties\r\n            attribuutdict[\"keuzelijstnaam\"] = str(attr.field.naam)       \r\n        else: #DateField, URIField, ..\r\n            attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n            attribuutdict[\"default_value\"] = \"\"\r\n\r\n    return attribuutdict\r\n\r\ndef create_psetnaam(obj, urilijst):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n\r\n    #Naam en soort van de klasse\r\n    objectnaam = obj.__class__.__name__\r\n    objectsoort = obj.typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n\r\n    #Deprecation label toevoegen\r\n    if hasattr(obj, 'deprecated_version'):\r\n        depr = \"_DEPR-\" + str(obj.deprecated_version)\r\n    else:\r\n        depr = \"\"\r\n\r\n    #Controle of naam reeds voorkomt\r\n    if sum(s.endswith('#' + objectnaam) for s in urilijst) == 1:\r\n        propertysetnaam = \"OTL_\" + objectnaam + depr\r\n    else: \r\n        propertysetnaam = \"OTL_\" + objectnaam + \"_\" + objectsoort + depr \r\n\r\n    return propertysetnaam\r\n\r\n\r\ndef get_dotnotation(obj):\r\n    \"\"\"creer de dotnotatie weergave voor de attributen\"\"\"\r\n    \r\n    obj.fill_with_dummy_data() #Vul het object met dummy data, zodat deze bruikbaar is voor dotnotationdict\r\n\r\n    #Workaround voor ListOfList error bij dotnotatie creatie:\r\n    if obj.typeURI == \"https://wegenenverkeer.data.vlaanderen.be/ns/implementatieelement#Toegangsprocedure\": \r\n        obj.bijlage = None\r\n\r\n    try:\r\n        d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie\r\n    except Error as e:\r\n        ctypes.windll.user32.MessageBoxW(0, str(e), \"Dotnotatie aanmaken gefaald\", 0)\r\n        pass\r\n\r\n    return d_dict\r\n    \r\n#MAIN FUNCTION\r\ndef OTL_to_dict(OTL_subset, filter_subsetattributen:bool):\r\n    \"\"\"Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets\"\"\"\r\n\r\n    if exists(OTL_subset):\r\n        eindlijst = [] \r\n\r\n        urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset\r\n\r\n        for uri in urilijst:\r\n\r\n            obj = dynamic_create_instance_from_uri(uri) #Instantieer de klasse via het OTLMOW model\r\n            dotnotatie_attributen = get_dotnotation(obj) #Haalt alle dotnotatie attributen op voor het object \r\n            subsetattributen = select_attributen(OTL_subset, obj.typeURI) #haal een lijst van de attributen voor het object uit de subset\r\n\r\n            #Verzamel info over het onderdeel (of installatie, implemenatieelement, ...)\r\n            onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n            onderdeeldict[\"propertysetnaam\"] = create_psetnaam(obj, urilijst) #creert een unieke propertysetnaam\r\n            onderdeeldict[\"definitie\"] = (obj.__doc__[:250] + '..') if len(obj.__doc__) > 250 else obj.__doc__\r\n            onderdeeldict[\"typeURI\"] = obj.typeURI\r\n            onderdeeldict[\"attributen\"] = []\r\n    \r\n            #Verzamel info per attribuut, indien gevraagd volgens subset\r\n            for attribute in dotnotatie_attributen:\r\n                if filter_subsetattributen: #Enkel de attributen uit de subset meenemen\r\n                    if attribute.split(\".\")[0] in subsetattributen:\r\n                        attribuutdict = attribute_info_to_dict(obj,attribute)\r\n                    else:\r\n                        attribuutdict = {}\r\n\r\n                else: attribuutdict = attribute_info_to_dict(obj,attribute) #Alle attributen uit het OTL model meenemen\r\n\r\n                if attribuutdict: #Voegt enkel toe aan attributenlijst in dict als er een attribuutdict werd gemaakt.\r\n                    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n\r\n            eindlijst.append(onderdeeldict)\r\n\r\n\r\n    else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt\r\n        eindlijst = []\r\n        onderdeeldict = dummydict()\r\n\r\n    return eindlijst\r\n\r\n\r\n#UITVOEREN\r\ndoelpad = [0]\r\nsubsetpad = IN[1]\r\nsubset_filter = IN[2]\r\ngo = IN[3]\r\n\r\nOUT = \"\"\r\nif go:\r\n    try:\r\n        #NODIGE MODULES UIT OTLMOW CONVERTER INLADEN\r\n        from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter\r\n        from otlmow_converter.DotnotationHelper import DotnotationHelper\r\n        \r\n        #NODIGE MODULES UIT OTLMOW MODEL INLADEN\r\n        from otlmow_model.OtlmowModel.BaseClasses.KeuzelijstField import KeuzelijstField\r\n        from otlmow_model.OtlmowModel.BaseClasses.StringField import StringField\r\n        from otlmow_model.OtlmowModel.BaseClasses.BooleanField import BooleanField\r\n        from otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDecimalField\r\n        from otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField\r\n        from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField\r\n        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut\r\n        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri\r\n\r\n\r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Fout bij inladen van libraries:{e}\", \"OTL data naar dict\", 0)   \r\n        \r\n    try:\r\n        #OMZETTING STARTEN\r\n        OUT = OTL_to_dict(subsetpad,subset_filter)\r\n        \r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Er liep iets mis in het omzetten van de OTL data naar dynamo:{e}\", \"OTL data naar dict\", 0)        \r\n\r\n",
+      "Code": "import importlib\r\nimport sqlite3\r\nfrom sqlite3 import Error\r\nfrom os.path import exists\r\nimport ctypes\r\n\r\n#FUNCTIES\r\ndef create_connection(db_file):\r\n        \"\"\" maak connectie naar de SQLite database\"\"\"\r\n        conn = None\r\n        try:\r\n            conn = sqlite3.connect(db_file)\r\n        except Error as e:\r\n            ctypes.windll.user32.MessageBoxW(0, str(e), \"SQlite lezen gefaald\", 0)\r\n        return conn\r\n    \r\n    \r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten\r\n        cur.execute(\"\"\"\r\n             SELECT k.uri FROM OSLOClass k \r\n                WHERE abstract = '0' \r\n                AND name NOT LIKE 'Agent' \r\n                AND name NOT LIKE 'Bijlage' \r\n                AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'\r\n                AND k.uri NOT IN (\r\n                SELECT DISTINCT uri\r\n                FROM OSLORelaties\r\n                );\"\"\")\r\n        klasses_onderdelen_tuple = cur.fetchall()\r\n        klasses_onderdelen = []\r\n        for k in klasses_onderdelen_tuple:\r\n            klasses_onderdelen.append(k[0])\r\n\r\n        if len(klasses_onderdelen) > 100:\r\n            ctypes.windll.user32.MessageBoxW(0, \"Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..\", \"Inlezen OTL SQLite\", 0)\r\n\r\n    return(klasses_onderdelen)\r\n\r\ndef select_attributen(conn, klasse_uri):\r\n    \"\"\"attributen voor klasse uit SQlite halen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #attributen voor bepaalde klasse ophalen\r\n        cur.execute(\"\"\"\r\n                    SELECT a.name FROM OSLOAttributen a\r\n                    WHERE class_uri = ?\r\n                    \"\"\", (klasse_uri,))\r\n        attributen_tuple = cur.fetchall()\r\n        attributen = []\r\n        for attr in attributen_tuple:\r\n            attributen.append(attr[0])\r\n    return(attributen)\r\n\r\n\r\ndef dummydict():\r\n    onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n    \r\n    onderdeeldict[\"propertysetnaam\"] = \"OTL_dummy\"\r\n    onderdeeldict[\"definitie\"] = \"Een dummy object\"\r\n    onderdeeldict[\"typeURI\"] = \"dummyURI\"\r\n    onderdeeldict[\"attributen\"] = []\r\n    \r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n    \r\n    attribuutdict[\"dotnotatie_attribuutnaam\"] = \"dummy.attribuut\"\r\n    attribuutdict[\"attribuutdefinitie\"] = \"Een dummy attribuut\"\r\n    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n    attribuutdict[\"default_value\"] = '-'\r\n    attribuutdict[\"keuzelijstopties\"] = ['dummywaarde-A','dummywaarde-B','-']\r\n    attribuutdict[\"keuzelijstnaam\"] = 'dummy-lijst'\r\n    \r\n    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n    return onderdeeldict\r\n\r\n\r\ndef attribute_info_to_dict(obj, attribute):\r\n    \"\"\"verzamelt de info van het attribuut (in dotnatatie) in een dict\"\"\"\r\n\r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n\r\n    #SPECIALE ATTRIBUTEN\r\n    if attribute == \"typeURI\": #kan geen attr ophalen voor typeURI\r\n        #attr = getattr(obj,\"_typeURI\")\r\n        attribuutdict[\"attribuutdefinitie\"] = \"De URI van het object\"\r\n        attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n        attribuutdict[\"default_value\"] = obj.typeURI\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n\r\n    elif attribute == \"geometry\": \r\n        attribuutdict = {} #Geometrie attribuut niet nodig in civil3D, \r\n\r\n    #NORMALE ATTRIBUTEN\r\n    else:\r\n        #ATTRIBUUTNAAM\r\n        attribuutdict[\"dotnotatie_attribuutnaam\"] = attribute\r\n        attr = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=False) #haalt het attribuut-object op\r\n        attr_ws = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=True)\r\n\r\n        #DEFINTIE\r\n        attribuutdict[\"attribuutdefinitie\"] = (attr.definition[:250] + '..') if len(attr.definition) > 250 else attr.definition\r\n        \r\n        #DATATYPE & DEFAULT VALUE(civil3D datatypes)\r\n        if attr_ws.field:\r\n            OTL_datatype = attr_ws.field\r\n        \r\n            if OTL_datatype.naam == \"String\":\r\n                attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n                attribuutdict[\"default_value\"] = \"\"\r\n            elif OTL_datatype.naam == \"Decimal\":\r\n                attribuutdict[\"datatype_attribuut\"] = \"Real\"\r\n                attribuutdict[\"default_value\"] = -999999999.000000\r\n            elif OTL_datatype.naam == \"Date\":\r\n                attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n                attribuutdict[\"default_value\"] = \"\"\r\n            elif OTL_datatype.naam == \"AnyURI\":\r\n                attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n                attribuutdict[\"default_value\"] = \"\"\r\n            elif OTL_datatype.naam == \"NonNegativeInteger\" or OTL_datatype.naam == \"Integer\": \r\n                attribuutdict[\"datatype_attribuut\"] = \"Integer\"\r\n                attribuutdict[\"default_value\"] = -999999999\r\n            elif OTL_datatype.naam == \"Boolean\":\r\n                if attribute == \"isActief\":\r\n                    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                    attribuutdict[\"default_value\"] = 'True'\r\n                    attribuutdict[\"keuzelijstopties\"] = ['True','False','-']\r\n                    attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst-true-default'\r\n                else:\r\n                    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                    attribuutdict[\"default_value\"] = '-'\r\n                    attribuutdict[\"keuzelijstopties\"] = ['-','True','False']\r\n                    attribuutdict[\"keuzelijstnaam\"] = 'booleanlijst'\r\n    \r\n            #KEUZELIJSTOPTIES\r\n            elif OTL_datatype.naam.startswith(\"Kl\"):\r\n                attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n                attribuutdict[\"default_value\"] = '-'\r\n                keuzelijstopties = [\"-\"] #Default value voor keuzelijst moet in lijst voorkomen\r\n                for i, k in enumerate(attr.field.options.keys()):\r\n                    keuzelijstopties.append(k)\r\n                attribuutdict[\"keuzelijstopties\"] = keuzelijstopties\r\n                attribuutdict[\"keuzelijstnaam\"] = str(attr.field.naam)       \r\n            else: #Speciale gevallen altijd string nemen\r\n                attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n                attribuutdict[\"default_value\"] = \"\"\r\n        else:#indien geen datatype gevonden\r\n            attribuutdict[\"datatype_attribuut\"] = \"Text\"\r\n            attribuutdict[\"default_value\"] = \"\"\r\n\r\n    return attribuutdict\r\n\r\ndef create_psetnaam(obj, urilijst):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n\r\n    #Naam en soort van de klasse\r\n    objectnaam = obj.__class__.__name__\r\n    objectsoort = obj.typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n\r\n    #Deprecation label toevoegen\r\n    if hasattr(obj, 'deprecated_version'):\r\n        depr = \"_DEPR-\" + str(obj.deprecated_version)\r\n    else:\r\n        depr = \"\"\r\n\r\n    #Controle of naam reeds voorkomt\r\n    if sum(s.endswith('#' + objectnaam) for s in urilijst) == 1:\r\n        propertysetnaam = \"OTL_\" + objectnaam + depr\r\n    else: \r\n        propertysetnaam = \"OTL_\" + objectnaam + \"_\" + objectsoort + depr \r\n\r\n    return propertysetnaam\r\n\r\n\r\ndef get_dotnotation(obj):\r\n    \"\"\"creer de dotnotatie weergave voor de attributen\"\"\"\r\n    \r\n    obj.fill_with_dummy_data() #Vul het object met dummy data, zodat deze bruikbaar is voor dotnotationdict\r\n\r\n    #Workaround voor ListOfList error bij dotnotatie creatie:\r\n    if obj.typeURI == \"https://wegenenverkeer.data.vlaanderen.be/ns/implementatieelement#Toegangsprocedure\": \r\n        obj.bijlage = None\r\n\r\n    try:\r\n        d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie\r\n    except Error as e:\r\n        ctypes.windll.user32.MessageBoxW(0, str(e), \"Dotnotatie aanmaken gefaald\", 0)\r\n        pass\r\n\r\n    return d_dict\r\n    \r\n#MAIN FUNCTION\r\ndef OTL_to_dict(OTL_subset, filter_subsetattributen:bool):\r\n    \"\"\"Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets\"\"\"\r\n\r\n    if exists(OTL_subset):\r\n        eindlijst = [] \r\n\r\n        urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset\r\n\r\n        for uri in urilijst:\r\n\r\n            obj = dynamic_create_instance_from_uri(uri) #Instantieer de klasse via het OTLMOW model\r\n            dotnotatie_attributen = get_dotnotation(obj) #Haalt alle dotnotatie attributen op voor het object \r\n            subsetattributen = select_attributen(OTL_subset, obj.typeURI) #haal een lijst van de attributen voor het object uit de subset\r\n\r\n            #Verzamel info over het onderdeel (of installatie, implemenatieelement, ...)\r\n            onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n            onderdeeldict[\"propertysetnaam\"] = create_psetnaam(obj, urilijst) #creert een unieke propertysetnaam\r\n            onderdeeldict[\"definitie\"] = (obj.__doc__[:250] + '..') if len(obj.__doc__) > 250 else obj.__doc__\r\n            onderdeeldict[\"typeURI\"] = obj.typeURI\r\n            onderdeeldict[\"attributen\"] = []\r\n    \r\n            #Verzamel info per attribuut, indien gevraagd volgens subset\r\n            for attribute in dotnotatie_attributen:\r\n                if filter_subsetattributen: #Enkel de attributen uit de subset meenemen\r\n                    if attribute.split(\".\")[0] in subsetattributen:\r\n                        attribuutdict = attribute_info_to_dict(obj,attribute)\r\n                    else:\r\n                        attribuutdict = {}\r\n\r\n                else: attribuutdict = attribute_info_to_dict(obj,attribute) #Alle attributen uit het OTL model meenemen\r\n\r\n                if attribuutdict: #Voegt enkel toe aan attributenlijst in dict als er een attribuutdict werd gemaakt.\r\n                    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n\r\n            eindlijst.append(onderdeeldict)\r\n\r\n\r\n    else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt\r\n        eindlijst = []\r\n        onderdeeldict = dummydict()\r\n\r\n    return eindlijst\r\n\r\n\r\n#UITVOEREN\r\ndoelpad = [0]\r\nsubsetpad = IN[1]\r\nsubset_filter = IN[2]\r\ngo = IN[3]\r\n\r\nOUT = \"\"\r\nif go:\r\n    try:\r\n        #NODIGE MODULES UIT OTLMOW CONVERTER INLADEN\r\n        from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter\r\n        from otlmow_converter.DotnotationHelper import DotnotationHelper\r\n        \r\n        #NODIGE MODULES UIT OTLMOW MODEL INLADEN\r\n        from otlmow_model.OtlmowModel.BaseClasses.KeuzelijstField import KeuzelijstField\r\n        from otlmow_model.OtlmowModel.BaseClasses.StringField import StringField\r\n        from otlmow_model.OtlmowModel.BaseClasses.BooleanField import BooleanField\r\n        from otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDecimalField\r\n        from otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField\r\n        from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField\r\n        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut\r\n        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri\r\n\r\n\r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Fout bij inladen van libraries:{e}\", \"OTL data naar dict\", 0)   \r\n        \r\n    try:\r\n        #OMZETTING STARTEN\r\n        OUT = OTL_to_dict(subsetpad,subset_filter)\r\n        \r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Er liep iets mis in het omzetten van de OTL data naar dynamo:{e}\", \"OTL data naar dict\", 0)        \r\n\r\n",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "11cfdb370be14b6e8cc6e64d6a67db6e",
@@ -336,7 +336,7 @@
     {
       "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Symbol, DynamoCore",
       "Parameter": {
-        "Name": "Library_Downlaod",
+        "Name": "Library_Download",
         "TypeName": "bool",
         "TypeRank": 0,
         "DefaultValue": "True",
@@ -566,7 +566,7 @@
       "ScaleFactor": 1.0,
       "HasRunWithoutCrash": false,
       "IsVisibleInDynamoLibrary": true,
-      "Version": "3.4.1.7055",
+      "Version": "3.6.1.9956",
       "RunType": "Manual",
       "RunPeriod": "1000"
     },
@@ -611,8 +611,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 961.1407656399416,
-        "Y": 601.9227458821288
+        "X": 935.753169348067,
+        "Y": 608.0507863663744
       },
       {
         "Id": "74645d2b3a0a496e8c323d7cad2a72ec",
@@ -713,14 +713,14 @@
         ],
         "HasNestedGroups": false,
         "Left": 605.5,
-        "Top": 503.2072852606593,
-        "Width": 1925.3979927363134,
-        "Height": 326.0550417559125,
+        "Top": 502.873951927326,
+        "Width": 1925.06465940298,
+        "Height": 322.7217084225792,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 576.2072852606593,
-        "InitialHeight": 170.71546062146945,
-        "TextblockHeight": 63.0,
+        "InitialHeight": 176.84350110571506,
+        "TextblockHeight": 63.333333333333336,
         "Background": "#FFB9F9E1"
       },
       {
@@ -735,14 +735,14 @@
         ],
         "HasNestedGroups": false,
         "Left": 2627.628772624997,
-        "Top": 506.59849252761387,
-        "Width": 309.5,
-        "Height": 214.5,
+        "Top": 506.26515919428056,
+        "Width": 310.0,
+        "Height": 215.66666666666669,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 579.5984925276139,
         "InitialHeight": 145.0,
-        "TextblockHeight": 63.0,
+        "TextblockHeight": 63.333333333333336,
         "Background": "#FFFFC999"
       },
       {
@@ -760,19 +760,19 @@
         ],
         "HasNestedGroups": false,
         "Left": -234.3199989963448,
-        "Top": 359.82942638455563,
-        "Width": 771.6387125737301,
-        "Height": 713.6878257607817,
+        "Top": 359.4960930512223,
+        "Width": 771.9720459070635,
+        "Height": 715.1878257607818,
         "FontSize": 36.0,
         "GroupStyleId": "883066aa-1fe2-44a4-9bd1-c3df86bfe9f6",
         "InitialTop": 432.82942638455563,
         "InitialHeight": 627.1878257607817,
-        "TextblockHeight": 63.0,
+        "TextblockHeight": 63.333333333333336,
         "Background": "#FFFFB8D8"
       }
     ],
-    "X": 243.91387684728713,
-    "Y": -86.312259760188,
-    "Zoom": 0.7615267357753437
+    "X": 953.9487095125293,
+    "Y": -430.55435250828464,
+    "Zoom": 1.3322513064551436
   }
 }
