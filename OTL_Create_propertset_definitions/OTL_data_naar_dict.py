@@ -105,41 +105,44 @@ def attribute_info_to_dict(obj, attribute):
         #DEFINTIE
         attribuutdict["attribuutdefinitie"] = (attr.definition[:250] + '..') if len(attr.definition) > 250 else attr.definition
         
-        if type(attr) == OTLAttribuut:
-            OTL_datatype = attr_ws.field
-            
         #DATATYPE & DEFAULT VALUE(civil3D datatypes)
-        if OTL_datatype == StringField:
-            attribuutdict["datatype_attribuut"] = "Text"
-            attribuutdict["default_value"] = ""
-        elif OTL_datatype == FloatOrDecimalField:
-            attribuutdict["datatype_attribuut"] = "Real"
-            attribuutdict["default_value"] = -999999999.000000
-        elif OTL_datatype == NonNegIntegerField or OTL_datatype == IntegerField: 
-            attribuutdict["datatype_attribuut"] = "Integer"
-            attribuutdict["default_value"] = -999999999
-        elif OTL_datatype == BooleanField:
-            if attribute == "isActief":
-                attribuutdict["datatype_attribuut"] = 'keuzelijst'
-                attribuutdict["default_value"] = 'True'
-                attribuutdict["keuzelijstopties"] = ['True','False','-']
-                attribuutdict["keuzelijstnaam"] = 'booleanlijst-true-default'
-            else:
+        if attr_ws.field:
+            OTL_datatype = attr_ws.field
+        
+            if OTL_datatype == StringField:
+                attribuutdict["datatype_attribuut"] = "Text"
+                attribuutdict["default_value"] = ""
+            elif OTL_datatype == FloatOrDecimalField:
+                attribuutdict["datatype_attribuut"] = "Real"
+                attribuutdict["default_value"] = -999999999.000000
+            elif OTL_datatype == NonNegIntegerField or OTL_datatype == IntegerField: 
+                attribuutdict["datatype_attribuut"] = "Integer"
+                attribuutdict["default_value"] = -999999999
+            elif OTL_datatype == BooleanField:
+                if attribute == "isActief":
+                    attribuutdict["datatype_attribuut"] = 'keuzelijst'
+                    attribuutdict["default_value"] = 'True'
+                    attribuutdict["keuzelijstopties"] = ['True','False','-']
+                    attribuutdict["keuzelijstnaam"] = 'booleanlijst-true-default'
+                else:
+                    attribuutdict["datatype_attribuut"] = 'keuzelijst'
+                    attribuutdict["default_value"] = '-'
+                    attribuutdict["keuzelijstopties"] = ['-','True','False']
+                    attribuutdict["keuzelijstnaam"] = 'booleanlijst'
+    
+            #KEUZELIJSTOPTIES
+            elif OTL_datatype.naam.startswith("Kl"):
                 attribuutdict["datatype_attribuut"] = 'keuzelijst'
                 attribuutdict["default_value"] = '-'
-                attribuutdict["keuzelijstopties"] = ['-','True','False']
-                attribuutdict["keuzelijstnaam"] = 'booleanlijst'
-
-        #KEUZELIJSTOPTIES
-        elif OTL_datatype.naam.startswith("Kl"):
-            attribuutdict["datatype_attribuut"] = 'keuzelijst'
-            attribuutdict["default_value"] = '-'
-            keuzelijstopties = ["-"] #Default value voor keuzelijst moet in lijst voorkomen
-            for i, k in enumerate(attr.field.options.keys()):
-                keuzelijstopties.append(k)
-            attribuutdict["keuzelijstopties"] = keuzelijstopties
-            attribuutdict["keuzelijstnaam"] = str(attr.field.naam)       
-        else: #DateField, URIField, ..
+                keuzelijstopties = ["-"] #Default value voor keuzelijst moet in lijst voorkomen
+                for i, k in enumerate(attr.field.options.keys()):
+                    keuzelijstopties.append(k)
+                attribuutdict["keuzelijstopties"] = keuzelijstopties
+                attribuutdict["keuzelijstnaam"] = str(attr.field.naam)       
+            else: #DateField, URIField, ..
+                attribuutdict["datatype_attribuut"] = "Text"
+                attribuutdict["default_value"] = ""
+        else:#indien geen datatype gevonden
             attribuutdict["datatype_attribuut"] = "Text"
             attribuutdict["default_value"] = ""
 
