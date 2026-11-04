@@ -203,10 +203,11 @@ go = 1
 
 OUT = ""
 if go:
-    #De json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) ophalen van github.
     OTL_data_dict = OTL_info_json_afladen()
     if objecten_filter:
-        OUT = OTL_dict_filter(subsetpad,subset_filter, OTL_data_dict)
+        resultaat = OTL_dict_filter(subsetpad, subset_filter, OTL_data_dict)
     else:
-        OUT = OTL_data_dict
-    print(OUT)
+        resultaat = OTL_data_dict
+        
+    # CRUCIAAL VOOR DYNAMO PRESTATIES: converteer de geneste output naar een tekst-string
+    OUT = json.dumps(resultaat)
