@@ -23,43 +23,51 @@ def create_connection(db_file):
 def select_klasses(conn):
     """klasses uit sqlite ophalen"""
     conn = create_connection(conn)
-    with conn:
-        cur = conn.cursor()
-        #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten
-        cur.execute("""
-             SELECT k.uri FROM OSLOClass k 
-                WHERE abstract = '0' 
-                AND name NOT LIKE 'Agent' 
-                AND name NOT LIKE 'Bijlage' 
-                AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'
-                AND k.uri NOT IN (
-                SELECT DISTINCT uri
-                FROM OSLORelaties
-                );""")
-        klasses_onderdelen_tuple = cur.fetchall()
-        klasses_onderdelen = []
-        for k in klasses_onderdelen_tuple:
-            klasses_onderdelen.append(k[0])
+    try:
+        with conn:
+            cur = conn.cursor()
+            #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten
+            cur.execute("""
+                SELECT k.uri FROM OSLOClass k 
+                    WHERE abstract = '0' 
+                    AND name NOT LIKE 'Agent' 
+                    AND name NOT LIKE 'Bijlage' 
+                    AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'
+                    AND k.uri NOT IN (
+                    SELECT DISTINCT uri
+                    FROM OSLORelaties
+                    );""")
+            klasses_onderdelen_tuple = cur.fetchall()
+            klasses_onderdelen = []
+            for k in klasses_onderdelen_tuple:
+                klasses_onderdelen.append(k[0])
 
-        if len(klasses_onderdelen) > 100:
-            ctypes.windll.user32.MessageBoxW(0, "Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..", "Inlezen OTL SQLite", 0)
-
+            if len(klasses_onderdelen) > 100:
+                ctypes.windll.user32.MessageBoxW(0, "Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..", "Inlezen OTL SQLite", 0)
+    finally:
+        if conn:
+            conn.close()    
     return(klasses_onderdelen)
 
 def select_attributen(conn, klasse_uri):
     """attributen voor klasse uit SQlite halen"""
     conn = create_connection(conn)
-    with conn:
-        cur = conn.cursor()
-        #attributen voor bepaalde klasse ophalen
-        cur.execute("""
-                    SELECT a.name FROM OSLOAttributen a
-                    WHERE class_uri = ?
-                    """, (klasse_uri,))
-        attributen_tuple = cur.fetchall()
-        attributen = []
-        for attr in attributen_tuple:
-            attributen.append(attr[0])
+    try:
+        with conn:
+            cur = conn.cursor()
+            #attributen voor bepaalde klasse ophalen
+            cur.execute("""
+                        SELECT a.name FROM OSLOAttributen a
+                        WHERE class_uri = ?
+                        """, (klasse_uri,))
+            attributen_tuple = cur.fetchall()
+            attributen = []
+            for attr in attributen_tuple:
+                attributen.append(attr[0])
+    finally:
+        if conn:
+            conn.close()
+
     return(attributen)
 
 
@@ -121,7 +129,7 @@ def OTL_info_json_afladen():
 
     try:
         # Haal de ruwe data op van de URL
-        response = urllib.request.urlopen(url, context=ctx)
+        response = urllib.request.urlopen(url, context=ctx, timeout=30)
         ruwe_data = response.read().decode('utf-8')
         
         # Zet de ruwe tekst om naar een bruikbaar Python dictionary (JSON)
@@ -130,8 +138,8 @@ def OTL_info_json_afladen():
 
     except Exception as e:
         # Als er iets misgaat, stuur de foutmelding naar de uitgang
-        ctypes.windll.user32.MessageBoxW(0, f"Fout bij het online ophalen van de OTL info.{nl}Kon de data niet ophalen vanop:{nl}{url}{nl}{nl}Foutcode:{nl}{e}", "OTL_propertysetdefinitions_aanmaken", 0)
-
+        ctypes.windll.user32.MessageBoxW(0, f"Fout bij het online ophalen van de OTL info. Controleer je internet of firewall. {nl}Kon de data niet ophalen vanop:{nl}{url}{nl}{nl}Foutcode:{nl}{e}", "OTL_propertysetdefinitions_aanmaken", 0)
+        raise Exception(f"Fout bij ophalen OTL json van Github. Controleer je internet of firewall.\nFoutcode: {e}")
     return json_data
 
 
@@ -190,7 +198,7 @@ def OTL_dict_filter(OTL_subset, filter_subsetattributen:bool, OTL_data_dict:dict
 
 subsetpad = r'seinbrug_en_dynbord.db'
 subset_filter = True
-objecten_filter = False
+objecten_filter = True
 go = 1
 
 OUT = ""
