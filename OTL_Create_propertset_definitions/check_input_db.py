@@ -5,7 +5,8 @@ import sqlite3
 
 # The inputs to this node will be stored as a list in the IN variables.
 subset_db = IN[0]
-subset_filter = IN[1]
+subset_filter = IN[1]#filter op de attributen
+objecten_filter = IN[2]#filter op de objecten of full OTL
 
 # Main variables
 nl = "\n"
@@ -62,12 +63,19 @@ def check_subset_geldigheid(db_pad):
 
 
 # MAIN
-subsetpad, subsetmessage = check_subset_geldigheid(subset_db)
-go = True
+if objecten_filter:
+    subsetpad, subsetmessage = check_subset_geldigheid(subset_db)
+    go = True
+    
+    if subsetmessage:
+        ctypes.windll.user32.MessageBoxW(0, subsetmessage, "OTL_propertysetdefinitions_aanmaken", 0)
+        go = False
 
-if subsetmessage:
-    ctypes.windll.user32.MessageBoxW(0, subsetmessage, "OTL_propertysetdefinitions_aanmaken", 0)
-    go = False
+else:
+    go = True
+    subsetpad = ""
+    no_objfilter_message = f"Geen filtering op subset objecten:{nl}Er worden propertyset definitions aangemaakt voor alle instantieerbare OTL objecten. Dit kan even duren"
+    ctypes.windll.user32.MessageBoxW(0, no_objfilter_message, "OTL_propertysetdefinitions_aanmaken", 0)
 
 # OUT variable
-OUT = subsetpad,subset_filter,go
+OUT = subsetpad,subset_filter,objecten_filter,go

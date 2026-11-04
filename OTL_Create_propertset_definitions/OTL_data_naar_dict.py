@@ -6,6 +6,9 @@ import json
 import urllib.request
 import ssl
 
+# Main variables
+nl = "\n"
+
 #FUNCTIES
 def create_connection(db_file):
         """ maak connectie naar de SQLite database"""
@@ -104,6 +107,7 @@ def create_psetnaam(obj, urilijst):
     return propertysetnaam
 
 
+
 def OTL_info_json_afladen():
     """Laadt de json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) van github"""
 
@@ -126,7 +130,7 @@ def OTL_info_json_afladen():
 
     except Exception as e:
         # Als er iets misgaat, stuur de foutmelding naar de uitgang
-        ctypes.windll.user32.MessageBoxW(0, f"Fout bij ophalen van de OTL info:{e}", "OTL data naar dict", 0)
+        ctypes.windll.user32.MessageBoxW(0, f"Fout bij het online ophalen van de OTL info.{nl}Kon de data niet ophalen vanop:{nl}{url}{nl}{nl}Foutcode:{nl}{e}", "OTL_propertysetdefinitions_aanmaken", 0)
 
     return json_data
 
@@ -171,7 +175,7 @@ def OTL_dict_filter(OTL_subset, filter_subsetattributen:bool, OTL_data_dict:dict
             print("Geen OTL subset gevonden, een dummy wordt aangemaakt.")
 
     except Exception as e:
-        ctypes.windll.user32.MessageBoxW(0, f"Er liep iets mis in het filteren van de OTL data adhv de subset:{e}", "OTL data naar dict", 0)        
+        ctypes.windll.user32.MessageBoxW(0, f"Er liep iets mis in het filteren van de OTL data adhv de subset:{e}", "OTL_propertysetdefinitions_aanmaken", 0)        
 
 
     return eindlijst
@@ -179,17 +183,22 @@ def OTL_dict_filter(OTL_subset, filter_subsetattributen:bool, OTL_data_dict:dict
 
 #UITVOEREN
 
-#subsetpad = IN[1]
-#subset_filter = IN[2]
+#subsetpad = IN[0]
+#subset_filter = IN[1]
+#objecten_filter = IN[2]
 #go = IN[3]
 
 subsetpad = r'seinbrug_en_dynbord.db'
 subset_filter = True
+objecten_filter = False
 go = 1
 
 OUT = ""
 if go:
     #De json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) ophalen van github.
     OTL_data_dict = OTL_info_json_afladen()
-    OUT = OTL_dict_filter(subsetpad,subset_filter, OTL_data_dict)
+    if objecten_filter:
+        OUT = OTL_dict_filter(subsetpad,subset_filter, OTL_data_dict)
+    else:
+        OUT = OTL_data_dict
     print(OUT)
