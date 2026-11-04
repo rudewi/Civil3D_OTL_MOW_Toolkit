@@ -1,8 +1,10 @@
-import importlib
 import sqlite3
 from sqlite3 import Error
 from os.path import exists
 import ctypes
+import json
+import urllib.request
+import ssl
 
 #FUNCTIES
 def create_connection(db_file):
@@ -79,80 +81,6 @@ def dummydict():
     return onderdeeldict
 
 
-def attribute_info_to_dict(obj, attribute):
-    """verzamelt de info van het attribuut (in dotnatatie) in een dict"""
-
-    attribuutdict = {} # een dict per dotnotatie-attribuut
-
-    #SPECIALE ATTRIBUTEN
-    if attribute == "typeURI": #kan geen attr ophalen voor typeURI
-        #attr = getattr(obj,"_typeURI")
-        attribuutdict["attribuutdefinitie"] = "De URI van het object"
-        attribuutdict["datatype_attribuut"] = "Text"
-        attribuutdict["default_value"] = obj.typeURI
-        attribuutdict["dotnotatie_attribuutnaam"] = attribute
-
-    elif attribute == "geometry": 
-        attribuutdict = {} #Geometrie attribuut niet nodig in civil3D, 
-
-    #NORMALE ATTRIBUTEN
-    else:
-        #ATTRIBUUTNAAM
-        attribuutdict["dotnotatie_attribuutnaam"] = attribute
-        attr = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=False) #haalt het attribuut-object op
-        attr_ws = DotnotationHelper.get_attribute_by_dotnotation(obj,attribute,waarde_shortcut=True)
-
-        #DEFINTIE
-        attribuutdict["attribuutdefinitie"] = (attr.definition[:250] + '..') if len(attr.definition) > 250 else attr.definition
-        
-        #DATATYPE & DEFAULT VALUE(civil3D datatypes)
-        if attr_ws.field:
-            OTL_datatype = attr_ws.field
-        
-            if OTL_datatype.naam == "String":
-                attribuutdict["datatype_attribuut"] = "Text"
-                attribuutdict["default_value"] = ""
-            elif OTL_datatype.naam == "Decimal":
-                attribuutdict["datatype_attribuut"] = "Real"
-                attribuutdict["default_value"] = -999999999.000000
-            elif OTL_datatype.naam == "Date":
-                attribuutdict["datatype_attribuut"] = "Text"
-                attribuutdict["default_value"] = ""
-            elif OTL_datatype.naam == "AnyURI":
-                attribuutdict["datatype_attribuut"] = "Text"
-                attribuutdict["default_value"] = ""
-            elif OTL_datatype.naam == "NonNegativeInteger" or OTL_datatype.naam == "Integer": 
-                attribuutdict["datatype_attribuut"] = "Integer"
-                attribuutdict["default_value"] = -999999999
-            elif OTL_datatype.naam == "Boolean":
-                if attribute == "isActief":
-                    attribuutdict["datatype_attribuut"] = 'keuzelijst'
-                    attribuutdict["default_value"] = 'True'
-                    attribuutdict["keuzelijstopties"] = ['True','False','-']
-                    attribuutdict["keuzelijstnaam"] = 'booleanlijst-true-default'
-                else:
-                    attribuutdict["datatype_attribuut"] = 'keuzelijst'
-                    attribuutdict["default_value"] = '-'
-                    attribuutdict["keuzelijstopties"] = ['-','True','False']
-                    attribuutdict["keuzelijstnaam"] = 'booleanlijst'
-    
-            #KEUZELIJSTOPTIES
-            elif OTL_datatype.naam.startswith("Kl"):
-                attribuutdict["datatype_attribuut"] = 'keuzelijst'
-                attribuutdict["default_value"] = '-'
-                keuzelijstopties = ["-"] #Default value voor keuzelijst moet in lijst voorkomen
-                for i, k in enumerate(attr.field.options.keys()):
-                    keuzelijstopties.append(k)
-                attribuutdict["keuzelijstopties"] = keuzelijstopties
-                attribuutdict["keuzelijstnaam"] = str(attr.field.naam)       
-            else: #Speciale gevallen altijd string nemen
-                attribuutdict["datatype_attribuut"] = "Text"
-                attribuutdict["default_value"] = ""
-        else:#indien geen datatype gevonden
-            attribuutdict["datatype_attribuut"] = "Text"
-            attribuutdict["default_value"] = ""
-
-    return attribuutdict
 
 def create_psetnaam(obj, urilijst):
     """Maakt de unieke propertysetnaam voor een object"""
@@ -176,99 +104,92 @@ def create_psetnaam(obj, urilijst):
     return propertysetnaam
 
 
-def get_dotnotation(obj):
-    """creer de dotnotatie weergave voor de attributen"""
-    
-    obj.fill_with_dummy_data() #Vul het object met dummy data, zodat deze bruikbaar is voor dotnotationdict
+def OTL_info_json_afladen():
+    """Laadt de json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) van github"""
 
-    #Workaround voor ListOfList error bij dotnotatie creatie:
-    if obj.typeURI == "https://wegenenverkeer.data.vlaanderen.be/ns/implementatieelement#Toegangsprocedure": 
-        obj.bijlage = None
+    # De link naar het JSON bestand (met https:// toegevoegd)
+    url = "https://raw.githubusercontent.com/rudewi/OTL_DotnotationMaker/refs/heads/main/OTL_Dotnotation_all_objects.json"
+
+    # Bypass voor SSL-certificaat fouten (een veelvoorkomend probleem in Dynamo/Revit)
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
 
     try:
-        d_dict = DotnotationDictConverter.to_dict(obj) #Vertaal alle attributen naar dotnotatie
-    except Error as e:
-        ctypes.windll.user32.MessageBoxW(0, str(e), "Dotnotatie aanmaken gefaald", 0)
-        pass
+        # Haal de ruwe data op van de URL
+        response = urllib.request.urlopen(url, context=ctx)
+        ruwe_data = response.read().decode('utf-8')
+        
+        # Zet de ruwe tekst om naar een bruikbaar Python dictionary (JSON)
+        json_data = json.loads(ruwe_data)
 
-    return d_dict
-    
-#MAIN FUNCTION
-def OTL_to_dict(OTL_subset, filter_subsetattributen:bool):
+
+    except Exception as e:
+        # Als er iets misgaat, stuur de foutmelding naar de uitgang
+        ctypes.windll.user32.MessageBoxW(0, f"Fout bij ophalen van de OTL info:{e}", "OTL data naar dict", 0)
+
+    return json_data
+
+
+
+def OTL_dict_filter(OTL_subset, filter_subsetattributen:bool, OTL_data_dict:dict):
     """Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets"""
 
-    if exists(OTL_subset):
-        eindlijst = [] 
+    eindlijst = [] 
+    try:
+        if exists(OTL_subset):
+            
+            urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset
+            for uri in urilijst:
+                #filter de nodige klasses uit de json
+                for onderdeeldict in OTL_data_dict:
+                    if onderdeeldict['typeURI'] == uri:
+                        eindlijst.append(onderdeeldict)
+                        break
 
-        urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset
+            if filter_subsetattributen: #filter de attributen van de klasses in de subset
+                for onderdeeldict in eindlijst:
+                    klasse_uri = onderdeeldict['typeURI']
+                    attributen_in_subset = select_attributen(OTL_subset, klasse_uri) #haal de attributen op voor deze klasse uit de subset
+                    attributenlijst = onderdeeldict['attributen'] #haal de attributenlijst op uit de json
+                    attributenlijst_filtered = [] #maak een nieuwe lijst voor de gefilterde attributen
+                    for attribuutdict in attributenlijst:
+                        attribuutnaam = attribuutdict['dotnotatie_attribuutnaam'].split('.')[-1] #pak enkel de naam van het attribuut (zonder dotnotatie)
+                        if attribuutnaam in attributen_in_subset: #check of het attribuut voorkomt in de subset
+                            attributenlijst_filtered.append(attribuutdict) #voeg het toe aan de nieuwe lijst
+                        elif attribuutdict['dotnotatie_attribuutnaam'] == "assetId.identificator": #voeg het assetId attribuut altijd toe, ook al staat het niet in de subset
+                            if attribuutdict not in attributenlijst_filtered: #check of het attribuut al toegevoegd is
+                                attributenlijst_filtered.append(attribuutdict)
+                        elif attribuutnaam == "typeURI": #voeg het typeURI attribuut altijd toe, ook al staat het niet in de subset
+                            if attribuutdict not in attributenlijst_filtered: #check of het attribuut al toegevoegd is
+                                attributenlijst_filtered.append(attribuutdict)
+                    onderdeeldict['attributen'] = attributenlijst_filtered #vervang de oude lijst door de gefilterde lijst
+            
+        else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt
+            eindlijst = []
+            onderdeeldict = dummydict()
+            print("Geen OTL subset gevonden, een dummy wordt aangemaakt.")
 
-        for uri in urilijst:
+    except Exception as e:
+        ctypes.windll.user32.MessageBoxW(0, f"Er liep iets mis in het filteren van de OTL data adhv de subset:{e}", "OTL data naar dict", 0)        
 
-            obj = dynamic_create_instance_from_uri(uri) #Instantieer de klasse via het OTLMOW model
-            dotnotatie_attributen = get_dotnotation(obj) #Haalt alle dotnotatie attributen op voor het object 
-            subsetattributen = select_attributen(OTL_subset, obj.typeURI) #haal een lijst van de attributen voor het object uit de subset
-
-            #Verzamel info over het onderdeel (of installatie, implemenatieelement, ...)
-            onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen
-            onderdeeldict["propertysetnaam"] = create_psetnaam(obj, urilijst) #creert een unieke propertysetnaam
-            onderdeeldict["definitie"] = (obj.__doc__[:250] + '..') if len(obj.__doc__) > 250 else obj.__doc__
-            onderdeeldict["typeURI"] = obj.typeURI
-            onderdeeldict["attributen"] = []
-    
-            #Verzamel info per attribuut, indien gevraagd volgens subset
-            for attribute in dotnotatie_attributen:
-                if filter_subsetattributen: #Enkel de attributen uit de subset meenemen
-                    if attribute.split(".")[0] in subsetattributen:
-                        attribuutdict = attribute_info_to_dict(obj,attribute)
-                    else:
-                        attribuutdict = {}
-
-                else: attribuutdict = attribute_info_to_dict(obj,attribute) #Alle attributen uit het OTL model meenemen
-
-                if attribuutdict: #Voegt enkel toe aan attributenlijst in dict als er een attribuutdict werd gemaakt.
-                    onderdeeldict["attributen"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel
-
-            eindlijst.append(onderdeeldict)
-
-
-    else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt
-        eindlijst = []
-        onderdeeldict = dummydict()
 
     return eindlijst
 
 
 #UITVOEREN
-doelpad = [0]
-subsetpad = IN[1]
-subset_filter = IN[2]
-go = IN[3]
+
+#subsetpad = IN[1]
+#subset_filter = IN[2]
+#go = IN[3]
+
+subsetpad = r'seinbrug_en_dynbord.db'
+subset_filter = True
+go = 1
 
 OUT = ""
 if go:
-    try:
-        #NODIGE MODULES UIT OTLMOW CONVERTER INLADEN
-        from otlmow_converter.DotnotationDictConverter import DotnotationDictConverter
-        from otlmow_converter.DotnotationHelper import DotnotationHelper
-        
-        #NODIGE MODULES UIT OTLMOW MODEL INLADEN
-        from otlmow_model.OtlmowModel.BaseClasses.KeuzelijstField import KeuzelijstField
-        from otlmow_model.OtlmowModel.BaseClasses.StringField import StringField
-        from otlmow_model.OtlmowModel.BaseClasses.BooleanField import BooleanField
-        from otlmow_model.OtlmowModel.BaseClasses.FloatOrDecimalField import FloatOrDecimalField
-        from otlmow_model.OtlmowModel.BaseClasses.NonNegIntegerField import NonNegIntegerField
-        from otlmow_model.OtlmowModel.BaseClasses.IntegerField import IntegerField
-        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import OTLAttribuut
-        from otlmow_model.OtlmowModel.BaseClasses.OTLObject import dynamic_create_instance_from_uri
-
-
-    except Exception as e:
-        ctypes.windll.user32.MessageBoxW(0, f"Fout bij inladen van libraries:{e}", "OTL data naar dict", 0)   
-        
-    try:
-        #OMZETTING STARTEN
-        OUT = OTL_to_dict(subsetpad,subset_filter)
-        
-    except Exception as e:
-        ctypes.windll.user32.MessageBoxW(0, f"Er liep iets mis in het omzetten van de OTL data naar dynamo:{e}", "OTL data naar dict", 0)        
-
+    #De json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) ophalen van github.
+    OTL_data_dict = OTL_info_json_afladen()
+    OUT = OTL_dict_filter(subsetpad,subset_filter, OTL_data_dict)
+    print(OUT)

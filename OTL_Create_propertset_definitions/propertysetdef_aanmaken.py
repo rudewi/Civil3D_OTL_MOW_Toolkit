@@ -116,7 +116,7 @@ def dict_to_psetdef(OTL_psetinfoDict):
                                 
                                 if ad["dotnotatie_attribuutnaam"]:
                                     try:
-                                        if ad["datatype_attribuut"] == "keuzelijst": #voor de keuzelijst attributen
+                                        if ad["civil3D_datatype_attribuut"] == "keuzelijst": #voor de keuzelijst attributen
                                             listdef_uit_keuzelijstoptie(ad["keuzelijstnaam"],ad["keuzelijstopties"])
                                             
                                             pd = PropertyDefinition()
@@ -137,8 +137,8 @@ def dict_to_psetdef(OTL_psetinfoDict):
                                             pd = PropertyDefinition()
                                             pd.Name = ad["dotnotatie_attribuutnaam"]
                                             pd.Description = ad["attribuutdefinitie"]
-                                            pd.DataType = DataType.Parse(DataType, ad["datatype_attribuut"], True)
-                                            #pd.DefaultData = ad["default_value"]
+                                            pd.DataType = DataType.Parse(DataType, ad["civil3D_datatype_attribuut"], True)
+                                            #pd.DefaultData = ad["civil3D_default_value"]
                                             
                                             if pd.DataType == DataType.Real:
                                                 pd.DefaultData = -999999999.000000
@@ -151,7 +151,7 @@ def dict_to_psetdef(OTL_psetinfoDict):
                                             definitions.Add(pd)
                                         
                                     except:
-                                        outputlijst = ["attribuut: er ging iets mis ", ad["dotnotatie_attribuutnaam"], od["propertysetnaam"],ad["attribuutdefinitie"],ad["datatype_attribuut"],ad["default_value"]]                    
+                                        outputlijst = ["attribuut: er ging iets mis ", ad["dotnotatie_attribuutnaam"], od["propertysetnaam"],ad["attribuutdefinitie"],ad["civil3D_datatype_attribuut"],ad["civil3D_default_value"]]                    
                         
                     except:
                         outputlijst = ["onderdeel: er ging iets mis bij het aanmaken van volgend item: ", od["propertysetnaam"]]
