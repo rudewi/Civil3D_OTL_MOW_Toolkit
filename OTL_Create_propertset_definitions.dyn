@@ -1,5 +1,5 @@
 {
-  "Uuid": "f7c6abc8-cf0c-4ff2-96dd-7b41c03d8ad2",
+  "Uuid": "400ae88d-84eb-4609-9d61-46daa8f68390",
   "IsCustomNode": false,
   "Description": "",
   "Name": "OTL_Create_propertset_definitions",
@@ -11,12 +11,12 @@
   "Nodes": [
     {
       "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
-      "Id": "b0edc6bca21e4ca9b28f0dc3e4965ed4",
+      "Id": "1c889e32c29a4b0bae539abd2125d8e5",
       "NodeType": "ExtensionNode",
       "Inputs": [],
       "Outputs": [
         {
-          "Id": "ef41c06e0a4144fd81fc6533f824c2fb",
+          "Id": "49c3ac5da7a1413193175261c03d2c07",
           "Name": "",
           "Description": "File Path",
           "UsingDefaultValue": false,
@@ -27,17 +27,17 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows you to select a file on the system and returns its file path",
-      "HintPath": "C:\\Users\\ruben\\Downloads\\testDyn.db",
-      "InputValue": "C:\\Users\\ruben\\Downloads\\testDyn.db"
+      "HintPath": "C:\\Users\\ruben\\Documents\\DYNAMO\\OTL Toolkit 25\\subsets\\leeg.db",
+      "InputValue": "..\\subsets\\leeg.db"
     },
     {
       "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
-      "Id": "8a51e40687af4c30826bab6937b16293",
+      "Id": "8adc3f14fb82482180d4ed78f7c16040",
       "NodeType": "BooleanInputNode",
       "Inputs": [],
       "Outputs": [
         {
-          "Id": "4c17e007507a40bbb37018364cd10ecc",
+          "Id": "c2dc6dcdf99f42f186ab0f98dca742a1",
           "Name": "",
           "Description": "Boolean",
           "UsingDefaultValue": false,
@@ -48,18 +48,18 @@
       ],
       "Replication": "Disabled",
       "Description": "Enables selection between True and False",
-      "InputValue": false
+      "InputValue": true
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport os.path\r\nimport ctypes\r\nimport sqlite3\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\nsubset_db = IN[0]\r\nsubset_filter = IN[1]\r\n\r\n# Main variables\r\nnl = \"\\n\"\r\n\r\n# Functies\r\ndef create_connection(db_file):\r\n    \"\"\" maak connectie naar de SQLite database\"\"\"\r\n    conn = None\r\n    try:\r\n        conn = sqlite3.connect(db_file)\r\n    except Error as e:\r\n        print(e)\r\n    return conn\r\n\r\n\r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    klasses_in_subset = []\r\n    with conn:\r\n        cur = conn.cursor()\r\n        cur.execute(\"SELECT name FROM sqlite_master WHERE type='table' AND name='OSLOClass';\")\r\n        bestaat_klassetabel = cur.fetchall()\r\n        if bestaat_klassetabel:\r\n            cur.execute(\"SELECT uri FROM OSLOClass WHERE abstract = '0';\")\r\n            klasses_in_subset = cur.fetchall()\r\n            klasses_in_subset = klasses_in_subset[0]\r\n    return klasses_in_subset\r\n\r\ndef check_subset_geldigheid(db_pad):\r\n    \"\"\"Kijkt na of de input een geldige OTL db is\"\"\"\r\n    geldige_db_pad = \"\"\r\n    message = \"\"\r\n    if isinstance(db_pad, str):\r\n        if os.path.exists(db_pad) and db_pad:\r\n            extensie = db_pad.split(\".\")[-1]\r\n            if extensie == \"db\":\r\n                geldige_db_pad = db_pad\r\n                #message = f\"Geldige subset input:{nl}{db_pad}\"\r\n            else:\r\n                message = f\"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}\"\r\n        else:\r\n            message = f\"ONGELDIGE subset input: bestand is geen geldige subset gevonden:{nl}{db_pad}\"\r\n    else:\r\n        message = f\"ONGELDIGE subset input: bestand kon niet worden gevonden:{nl}{db_pad}\"\r\n\r\n    if geldige_db_pad:\r\n        onderdelen = select_klasses(geldige_db_pad)\r\n        if len(onderdelen) == 0:\r\n            message = f\"ONGELDIGE subset input: Geen OTL klassen gevonden in db file:{nl}{db_pad}\"\r\n            geldige_db_pad = \"\"\r\n\r\n    return geldige_db_pad,message\r\n\r\n\r\n# MAIN\r\nsubsetpad, subsetmessage = check_subset_geldigheid(subset_db)\r\ngo = True\r\n\r\nif subsetmessage:\r\n    ctypes.windll.user32.MessageBoxW(0, subsetmessage, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n    go = False\r\n\r\n# OUT variable\r\nOUT = subsetpad,subset_filter,go",
+      "Code": "import sqlite3\r\nfrom sqlite3 import Error\r\nfrom os.path import exists\r\nimport ctypes\r\nimport json\r\nimport urllib.request\r\nimport ssl\r\n\r\n#FUNCTIES\r\ndef create_connection(db_file):\r\n        \"\"\" maak connectie naar de SQLite database\"\"\"\r\n        conn = None\r\n        try:\r\n            conn = sqlite3.connect(db_file)\r\n        except Error as e:\r\n            ctypes.windll.user32.MessageBoxW(0, str(e), \"SQlite lezen gefaald\", 0)\r\n        return conn\r\n    \r\n    \r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten\r\n        cur.execute(\"\"\"\r\n             SELECT k.uri FROM OSLOClass k \r\n                WHERE abstract = '0' \r\n                AND name NOT LIKE 'Agent' \r\n                AND name NOT LIKE 'Bijlage' \r\n                AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'\r\n                AND k.uri NOT IN (\r\n                SELECT DISTINCT uri\r\n                FROM OSLORelaties\r\n                );\"\"\")\r\n        klasses_onderdelen_tuple = cur.fetchall()\r\n        klasses_onderdelen = []\r\n        for k in klasses_onderdelen_tuple:\r\n            klasses_onderdelen.append(k[0])\r\n\r\n        if len(klasses_onderdelen) > 100:\r\n            ctypes.windll.user32.MessageBoxW(0, \"Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..\", \"Inlezen OTL SQLite\", 0)\r\n\r\n    return(klasses_onderdelen)\r\n\r\ndef select_attributen(conn, klasse_uri):\r\n    \"\"\"attributen voor klasse uit SQlite halen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #attributen voor bepaalde klasse ophalen\r\n        cur.execute(\"\"\"\r\n                    SELECT a.name FROM OSLOAttributen a\r\n                    WHERE class_uri = ?\r\n                    \"\"\", (klasse_uri,))\r\n        attributen_tuple = cur.fetchall()\r\n        attributen = []\r\n        for attr in attributen_tuple:\r\n            attributen.append(attr[0])\r\n    return(attributen)\r\n\r\n\r\ndef dummydict():\r\n    onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n    \r\n    onderdeeldict[\"propertysetnaam\"] = \"OTL_dummy\"\r\n    onderdeeldict[\"definitie\"] = \"Een dummy object\"\r\n    onderdeeldict[\"typeURI\"] = \"dummyURI\"\r\n    onderdeeldict[\"attributen\"] = []\r\n    \r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n    \r\n    attribuutdict[\"dotnotatie_attribuutnaam\"] = \"dummy.attribuut\"\r\n    attribuutdict[\"attribuutdefinitie\"] = \"Een dummy attribuut\"\r\n    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n    attribuutdict[\"default_value\"] = '-'\r\n    attribuutdict[\"keuzelijstopties\"] = ['dummywaarde-A','dummywaarde-B','-']\r\n    attribuutdict[\"keuzelijstnaam\"] = 'dummy-lijst'\r\n    \r\n    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n    return onderdeeldict\r\n\r\n\r\n\r\ndef create_psetnaam(obj, urilijst):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n\r\n    #Naam en soort van de klasse\r\n    objectnaam = obj.__class__.__name__\r\n    objectsoort = obj.typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n\r\n    #Deprecation label toevoegen\r\n    if hasattr(obj, 'deprecated_version'):\r\n        depr = \"_DEPR-\" + str(obj.deprecated_version)\r\n    else:\r\n        depr = \"\"\r\n\r\n    #Controle of naam reeds voorkomt\r\n    if sum(s.endswith('#' + objectnaam) for s in urilijst) == 1:\r\n        propertysetnaam = \"OTL_\" + objectnaam + depr\r\n    else: \r\n        propertysetnaam = \"OTL_\" + objectnaam + \"_\" + objectsoort + depr \r\n\r\n    return propertysetnaam\r\n\r\n\r\ndef OTL_info_json_afladen():\r\n    \"\"\"Laadt de json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) van github\"\"\"\r\n\r\n    # De link naar het JSON bestand (met https:// toegevoegd)\r\n    url = \"https://raw.githubusercontent.com/rudewi/OTL_DotnotationMaker/refs/heads/main/OTL_Dotnotation_all_objects.json\"\r\n\r\n    # Bypass voor SSL-certificaat fouten (een veelvoorkomend probleem in Dynamo/Revit)\r\n    ctx = ssl.create_default_context()\r\n    ctx.check_hostname = False\r\n    ctx.verify_mode = ssl.CERT_NONE\r\n\r\n    try:\r\n        # Haal de ruwe data op van de URL\r\n        response = urllib.request.urlopen(url, context=ctx)\r\n        ruwe_data = response.read().decode('utf-8')\r\n        \r\n        # Zet de ruwe tekst om naar een bruikbaar Python dictionary (JSON)\r\n        json_data = json.loads(ruwe_data)\r\n\r\n\r\n    except Exception as e:\r\n        # Als er iets misgaat, stuur de foutmelding naar de uitgang\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Fout bij ophalen van de OTL info:{e}\", \"OTL data naar dict\", 0)\r\n\r\n    return json_data\r\n\r\n\r\n\r\ndef OTL_dict_filter(OTL_subset, filter_subsetattributen:bool, OTL_data_dict:dict):\r\n    \"\"\"Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets\"\"\"\r\n\r\n    eindlijst = [] \r\n    try:\r\n        if exists(OTL_subset):\r\n            \r\n            urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset\r\n            for uri in urilijst:\r\n                #filter de nodige klasses uit de json\r\n                for onderdeeldict in OTL_data_dict:\r\n                    if onderdeeldict['typeURI'] == uri:\r\n                        eindlijst.append(onderdeeldict)\r\n                        break\r\n\r\n            if filter_subsetattributen: #filter de attributen van de klasses in de subset\r\n                for onderdeeldict in eindlijst:\r\n                    klasse_uri = onderdeeldict['typeURI']\r\n                    attributen_in_subset = select_attributen(OTL_subset, klasse_uri) #haal de attributen op voor deze klasse uit de subset\r\n                    attributenlijst = onderdeeldict['attributen'] #haal de attributenlijst op uit de json\r\n                    attributenlijst_filtered = [] #maak een nieuwe lijst voor de gefilterde attributen\r\n                    for attribuutdict in attributenlijst:\r\n                        attribuutnaam = attribuutdict['dotnotatie_attribuutnaam'].split('.')[-1] #pak enkel de naam van het attribuut (zonder dotnotatie)\r\n                        if attribuutnaam in attributen_in_subset: #check of het attribuut voorkomt in de subset\r\n                            attributenlijst_filtered.append(attribuutdict) #voeg het toe aan de nieuwe lijst\r\n                        elif attribuutdict['dotnotatie_attribuutnaam'] == \"assetId.identificator\": #voeg het assetId attribuut altijd toe, ook al staat het niet in de subset\r\n                            if attribuutdict not in attributenlijst_filtered: #check of het attribuut al toegevoegd is\r\n                                attributenlijst_filtered.append(attribuutdict)\r\n                        elif attribuutnaam == \"typeURI\": #voeg het typeURI attribuut altijd toe, ook al staat het niet in de subset\r\n                            if attribuutdict not in attributenlijst_filtered: #check of het attribuut al toegevoegd is\r\n                                attributenlijst_filtered.append(attribuutdict)\r\n                    onderdeeldict['attributen'] = attributenlijst_filtered #vervang de oude lijst door de gefilterde lijst\r\n            \r\n        else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt\r\n            eindlijst = []\r\n            onderdeeldict = dummydict()\r\n            print(\"Geen OTL subset gevonden, een dummy wordt aangemaakt.\")\r\n\r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Er liep iets mis in het filteren van de OTL data adhv de subset:{e}\", \"OTL data naar dict\", 0)        \r\n\r\n\r\n    return eindlijst\r\n\r\n\r\n#UITVOEREN\r\n\r\nsubsetpad = IN[0]\r\nsubset_filter = IN[1]\r\ngo = IN[2]\r\n\r\n#subsetpad = r'seinbrug_en_dynbord.db'\r\n#subset_filter = True\r\n#go = 1\r\n\r\nOUT = \"\"\r\nif go:\r\n    #De json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) ophalen van github.\r\n    OTL_data_dict = OTL_info_json_afladen()\r\n    OUT = OTL_dict_filter(subsetpad,subset_filter, OTL_data_dict)\r\n    print(OUT)",
       "Engine": "CPython3",
       "VariableInputPorts": true,
-      "Id": "6c3c0f33490c4c3bbe9f50182cf1877c",
+      "Id": "bb734f1840c044ec891a912d030c36a5",
       "NodeType": "PythonScriptNode",
       "Inputs": [
         {
-          "Id": "ae7335115d3240b6a1707e4a7f7cab63",
+          "Id": "ea20a63e00bc4330aa2a000803b4d302",
           "Name": "IN[0]",
           "Description": "Input #0",
           "UsingDefaultValue": false,
@@ -68,9 +68,18 @@
           "KeepListStructure": false
         },
         {
-          "Id": "eedc5cdcacce4da6bed91e287f232ba4",
+          "Id": "b848a02d8fa34e82850e6463a8bff128",
           "Name": "IN[1]",
           "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f1b26fa090494794811cf118c27692ae",
+          "Name": "IN[2]",
+          "Description": "Input #2",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -79,7 +88,7 @@
       ],
       "Outputs": [
         {
-          "Id": "3d6a4ce709314593af6d80441596f169",
+          "Id": "de9677259a1542a3930957048dc9ae9f",
           "Name": "OUT",
           "Description": "Result of the python script",
           "UsingDefaultValue": false,
@@ -93,11 +102,11 @@
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
-      "Id": "9a9143fcd17c41628d78efa306da48ae",
+      "Id": "63b1a459ed1747f1817be85a560d1bf4",
       "NodeType": "CodeBlockNode",
       "Inputs": [
         {
-          "Id": "8e448de96aa846c29863a86ade027052",
+          "Id": "cef3b33bdaf3403b9844da4232e70833",
           "Name": "out",
           "Description": "out",
           "UsingDefaultValue": false,
@@ -108,7 +117,7 @@
       ],
       "Outputs": [
         {
-          "Id": "e06b85a1621e4c8ba68c64f974144767",
+          "Id": "bad76c69e5734b8c877c5ffb58762a0d",
           "Name": "subsetpad",
           "Description": "subsetpad = DesignScript.Builtin.Get.ValueAtIndex(out, 0)",
           "UsingDefaultValue": false,
@@ -117,7 +126,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "beeef6b2eb4a4b37b2a493130bc17572",
+          "Id": "b107ebb9e7d644ba96cd830d4be94c0d",
           "Name": "subset_filter",
           "Description": "subset_filter = DesignScript.Builtin.Get.ValueAtIndex(out, 1)",
           "UsingDefaultValue": false,
@@ -126,7 +135,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "797636f6d21f465ead51ce0e251dd312",
+          "Id": "22124fab8e9d49bda0aa647e2b094682",
           "Name": "go",
           "Description": "go = DesignScript.Builtin.Get.ValueAtIndex(out, 2)",
           "UsingDefaultValue": false,
@@ -141,34 +150,16 @@
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "import sqlite3\r\nfrom sqlite3 import Error\r\nfrom os.path import exists\r\nimport ctypes\r\nimport json\r\nimport urllib.request\r\nimport ssl\r\n\r\n#FUNCTIES\r\ndef create_connection(db_file):\r\n        \"\"\" maak connectie naar de SQLite database\"\"\"\r\n        conn = None\r\n        try:\r\n            conn = sqlite3.connect(db_file)\r\n        except Error as e:\r\n            ctypes.windll.user32.MessageBoxW(0, str(e), \"SQlite lezen gefaald\", 0)\r\n        return conn\r\n    \r\n    \r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #klassen selecteren en daarbij abstracten, agents,bijlagen en relaties weglaten\r\n        cur.execute(\"\"\"\r\n             SELECT k.uri FROM OSLOClass k \r\n                WHERE abstract = '0' \r\n                AND name NOT LIKE 'Agent' \r\n                AND name NOT LIKE 'Bijlage' \r\n                AND uri NOT LIKE 'https://wegenenverkeer.data.vlaanderen.be/ns/proefenmeting#%'\r\n                AND k.uri NOT IN (\r\n                SELECT DISTINCT uri\r\n                FROM OSLORelaties\r\n                );\"\"\")\r\n        klasses_onderdelen_tuple = cur.fetchall()\r\n        klasses_onderdelen = []\r\n        for k in klasses_onderdelen_tuple:\r\n            klasses_onderdelen.append(k[0])\r\n\r\n        if len(klasses_onderdelen) > 100:\r\n            ctypes.windll.user32.MessageBoxW(0, \"Verwerking van meer dan 100 OTL types, dit kan enkele minuten duren..\", \"Inlezen OTL SQLite\", 0)\r\n\r\n    return(klasses_onderdelen)\r\n\r\ndef select_attributen(conn, klasse_uri):\r\n    \"\"\"attributen voor klasse uit SQlite halen\"\"\"\r\n    conn = create_connection(conn)\r\n    with conn:\r\n        cur = conn.cursor()\r\n        #attributen voor bepaalde klasse ophalen\r\n        cur.execute(\"\"\"\r\n                    SELECT a.name FROM OSLOAttributen a\r\n                    WHERE class_uri = ?\r\n                    \"\"\", (klasse_uri,))\r\n        attributen_tuple = cur.fetchall()\r\n        attributen = []\r\n        for attr in attributen_tuple:\r\n            attributen.append(attr[0])\r\n    return(attributen)\r\n\r\n\r\ndef dummydict():\r\n    onderdeeldict = {} #een dict om alle info voor een bepaalde propertyset in te verzamelen\r\n    \r\n    onderdeeldict[\"propertysetnaam\"] = \"OTL_dummy\"\r\n    onderdeeldict[\"definitie\"] = \"Een dummy object\"\r\n    onderdeeldict[\"typeURI\"] = \"dummyURI\"\r\n    onderdeeldict[\"attributen\"] = []\r\n    \r\n    attribuutdict = {} # een dict per dotnotatie-attribuut\r\n    \r\n    attribuutdict[\"dotnotatie_attribuutnaam\"] = \"dummy.attribuut\"\r\n    attribuutdict[\"attribuutdefinitie\"] = \"Een dummy attribuut\"\r\n    attribuutdict[\"datatype_attribuut\"] = 'keuzelijst'\r\n    attribuutdict[\"default_value\"] = '-'\r\n    attribuutdict[\"keuzelijstopties\"] = ['dummywaarde-A','dummywaarde-B','-']\r\n    attribuutdict[\"keuzelijstnaam\"] = 'dummy-lijst'\r\n    \r\n    onderdeeldict[\"attributen\"].append(attribuutdict) #Voeg de attribuutinfo toe aan de dict voor dit onderdeel\r\n    return onderdeeldict\r\n\r\n\r\n\r\ndef create_psetnaam(obj, urilijst):\r\n    \"\"\"Maakt de unieke propertysetnaam voor een object\"\"\"\r\n\r\n    #Naam en soort van de klasse\r\n    objectnaam = obj.__class__.__name__\r\n    objectsoort = obj.typeURI.split('/')[-1].split('#')[0] #objectsoort afleiden uit typeURI\r\n\r\n    #Deprecation label toevoegen\r\n    if hasattr(obj, 'deprecated_version'):\r\n        depr = \"_DEPR-\" + str(obj.deprecated_version)\r\n    else:\r\n        depr = \"\"\r\n\r\n    #Controle of naam reeds voorkomt\r\n    if sum(s.endswith('#' + objectnaam) for s in urilijst) == 1:\r\n        propertysetnaam = \"OTL_\" + objectnaam + depr\r\n    else: \r\n        propertysetnaam = \"OTL_\" + objectnaam + \"_\" + objectsoort + depr \r\n\r\n    return propertysetnaam\r\n\r\n\r\ndef OTL_info_json_afladen():\r\n    \"\"\"Laadt de json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) van github\"\"\"\r\n\r\n    # De link naar het JSON bestand (met https:// toegevoegd)\r\n    url = \"https://raw.githubusercontent.com/rudewi/OTL_DotnotationMaker/refs/heads/main/OTL_Dotnotation_all_objects.json\"\r\n\r\n    # Bypass voor SSL-certificaat fouten (een veelvoorkomend probleem in Dynamo/Revit)\r\n    ctx = ssl.create_default_context()\r\n    ctx.check_hostname = False\r\n    ctx.verify_mode = ssl.CERT_NONE\r\n\r\n    try:\r\n        # Haal de ruwe data op van de URL\r\n        response = urllib.request.urlopen(url, context=ctx)\r\n        ruwe_data = response.read().decode('utf-8')\r\n        \r\n        # Zet de ruwe tekst om naar een bruikbaar Python dictionary (JSON)\r\n        json_data = json.loads(ruwe_data)\r\n\r\n\r\n    except Exception as e:\r\n        # Als er iets misgaat, stuur de foutmelding naar de uitgang\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Fout bij ophalen van de OTL info:{e}\", \"OTL data naar dict\", 0)\r\n\r\n    return json_data\r\n\r\n\r\n\r\ndef OTL_dict_filter(OTL_subset, filter_subsetattributen:bool, OTL_data_dict:dict):\r\n    \"\"\"Gebruikt de OTLMOW model om info uit een OTL subset te vertalen naar een dict bruikbaar voor het opmaken van civil3D propertysets\"\"\"\r\n\r\n    eindlijst = [] \r\n    try:\r\n        if exists(OTL_subset):\r\n            \r\n            urilijst = select_klasses(OTL_subset) #haal een lijst van object uris op uit de OTL subset\r\n            for uri in urilijst:\r\n                #filter de nodige klasses uit de json\r\n                for onderdeeldict in OTL_data_dict:\r\n                    if onderdeeldict['typeURI'] == uri:\r\n                        eindlijst.append(onderdeeldict)\r\n                        break\r\n\r\n            if filter_subsetattributen: #filter de attributen van de klasses in de subset\r\n                for onderdeeldict in eindlijst:\r\n                    klasse_uri = onderdeeldict['typeURI']\r\n                    attributen_in_subset = select_attributen(OTL_subset, klasse_uri) #haal de attributen op voor deze klasse uit de subset\r\n                    attributenlijst = onderdeeldict['attributen'] #haal de attributenlijst op uit de json\r\n                    attributenlijst_filtered = [] #maak een nieuwe lijst voor de gefilterde attributen\r\n                    for attribuutdict in attributenlijst:\r\n                        attribuutnaam = attribuutdict['dotnotatie_attribuutnaam'].split('.')[-1] #pak enkel de naam van het attribuut (zonder dotnotatie)\r\n                        if attribuutnaam in attributen_in_subset: #check of het attribuut voorkomt in de subset\r\n                            attributenlijst_filtered.append(attribuutdict) #voeg het toe aan de nieuwe lijst\r\n                        elif attribuutdict['dotnotatie_attribuutnaam'] == \"assetId.identificator\": #voeg het assetId attribuut altijd toe, ook al staat het niet in de subset\r\n                            if attribuutdict not in attributenlijst_filtered: #check of het attribuut al toegevoegd is\r\n                                attributenlijst_filtered.append(attribuutdict)\r\n                        elif attribuutnaam == \"typeURI\": #voeg het typeURI attribuut altijd toe, ook al staat het niet in de subset\r\n                            if attribuutdict not in attributenlijst_filtered: #check of het attribuut al toegevoegd is\r\n                                attributenlijst_filtered.append(attribuutdict)\r\n                    onderdeeldict['attributen'] = attributenlijst_filtered #vervang de oude lijst door de gefilterde lijst\r\n            \r\n        else: #Een dummy maken als er geen gebruikersinput gegeven is, zodat dynamo geen 'none' krijgt\r\n            eindlijst = []\r\n            onderdeeldict = dummydict()\r\n            print(\"Geen OTL subset gevonden, een dummy wordt aangemaakt.\")\r\n\r\n    except Exception as e:\r\n        ctypes.windll.user32.MessageBoxW(0, f\"Er liep iets mis in het filteren van de OTL data adhv de subset:{e}\", \"OTL data naar dict\", 0)        \r\n\r\n\r\n    return eindlijst\r\n\r\n\r\n#UITVOEREN\r\n\r\nsubsetpad = IN[0]\r\nsubset_filter = IN[1]\r\ngo = IN[2]\r\n\r\n#subsetpad = r'seinbrug_en_dynbord.db'\r\n#subset_filter = True\r\n#go = 1\r\n\r\nOUT = \"\"\r\nif go:\r\n    #De json met OTL info (dotnotatie, datatypes, defaultvalues, keuzelijsten, ...) ophalen van github.\r\n    OTL_data_dict = OTL_info_json_afladen()\r\n    OUT = OTL_dict_filter(subsetpad,subset_filter, OTL_data_dict)\r\n    print(OUT)",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport clr\r\nimport ctypes\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# Import references for PropertySets\r\nfrom Autodesk.Aec.PropertyData import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\n\r\n# Import references for ListDefinitions\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\ndef listdef_uit_keuzelijstoptie(lijstnaam,lijstopties):\r\n    with adoc.LockDocument():\r\n        with adoc.Database as db:\r\n            ld = None\r\n            ldid = None\r\n            newld = False            \r\n            with db.TransactionManager.StartTransaction() as t:\r\n                dld = DictionaryListDefinition(db)\r\n                try:\r\n                    lname = lijstnaam\r\n                    \r\n                    if not dld.Has(lname, t):\r\n                        ld = ListDefinition()\r\n                        ld.AppliesToAll = True\r\n                        ld.AlternateName = lname\r\n                        ld.AllowToVary = False\r\n                        ld.Description = lname\r\n\r\n                        dld.AddNewRecord(lname, ld)\r\n                        newld = True\r\n                    else:\r\n                        ldid = dld.GetAt(lname)\r\n                        ld = t.GetObject(ldid, OpenMode.ForWrite)\r\n                    if newld:\r\n                        t.AddNewlyCreatedDBObject(ld, True)\r\n\r\n                    for optie in lijstopties:\r\n                        first = True\r\n                        for oid in ld.GetListItems():\r\n                            li = t.GetObject(oid, OpenMode.ForRead)\r\n                            if li.Name == optie:\r\n                                first = False\r\n                                break\r\n                        if first:\r\n                            ld.AddListItem(optie)\r\n                    message = ld\r\n                    t.Commit()\r\n                except:\r\n                    message = \"er ging iets mis met het aanmaken van lijst\" + lijstnaam\r\n    return ld.Name\r\n    \r\ndef dict_to_psetdef(OTL_psetinfoDict):\r\n    \"\"\"OTL Data uit een dict wegschrijven naar de propertyset definitions\"\"\"\r\n    with adoc.LockDocument():\r\n        with adoc.Database as db:\r\n            with db.TransactionManager.StartTransaction() as t:\r\n                dpsd = DictionaryPropertySetDefinitions(db)\r\n                outputlijst = []\r\n                psetdef_count = -1\r\n                pdn_count = -1\r\n                for onderdeeldict in OTL_psetinfoDict:\r\n                    od = onderdeeldict                    \r\n                    \r\n                    try:\r\n                        if od[\"propertysetnaam\"] == \"OTL_dummy\":\r\n                            pass                      \r\n                        else:\r\n                            if not dpsd.Has(od[\"propertysetnaam\"], t): #propertysetnaam bestaat nog niet, maak een nieuwe\r\n                                psdef = PropertySetDefinition()\r\n                                psdefid = psdef.Id\r\n                                dpsd.AddNewRecord(od[\"propertysetnaam\"], psdef)\r\n                                newps = True #?\r\n                                t.AddNewlyCreatedDBObject(psdef, True)\r\n                                    \r\n                            else: #de propertysetnaam bestaat al in de definitions, open deze\r\n                                psdefid = dpsd.GetAt(od[\"propertysetnaam\"])\r\n                                psdef = t.GetObject(psdefid, OpenMode.ForWrite)\r\n                                \r\n                            psdef.SetToStandard(db)\r\n                            psdef.SubSetDatabaseDefaults(db)\r\n                            psdef.AppliesToAll = True\r\n                            psdef.Description = od[\"definitie\"]\r\n                            \r\n                            outputlijst.append(psdef.Name)\r\n                            \r\n                            definitions = psdef.Definitions\r\n                            \r\n                            psetdef_count = psetdef_count + 1                        \r\n                                                    \r\n                            for attribuutdict in od[\"attributen\"]:\r\n                                ad = attribuutdict\r\n                                pdn_count = pdn_count + 1\r\n                                \r\n                                if ad[\"dotnotatie_attribuutnaam\"]:\r\n                                    try:\r\n                                        if ad[\"civil3D_datatype_attribuut\"] == \"keuzelijst\": #voor de keuzelijst attributen\r\n                                            listdef_uit_keuzelijstoptie(ad[\"keuzelijstnaam\"],ad[\"keuzelijstopties\"])\r\n                                            \r\n                                            pd = PropertyDefinition()\r\n                                            pd.Name = ad[\"dotnotatie_attribuutnaam\"]\r\n                                            pd.Description = ad[\"attribuutdefinitie\"]\r\n                                            pd.DataType = DataType.Parse(DataType, \"List\", True)\r\n                                            \r\n                                            dld = DictionaryListDefinition(db)\r\n                                            ldid = dld.GetAt(ad[\"keuzelijstnaam\"])\r\n                                            pd.ListDefinitionId = ldid\r\n                                            \r\n                                            ldef = t.GetObject(ldid, OpenMode.ForRead)\r\n                                            default = t.GetObject(ldef.GetListItems()[0], OpenMode.ForRead)\r\n                                            pd.DefaultData = default.Name\r\n                                            \r\n                                        \r\n                                        else: #voor alle niet keuzelijst attributen                            \r\n                                            pd = PropertyDefinition()\r\n                                            pd.Name = ad[\"dotnotatie_attribuutnaam\"]\r\n                                            pd.Description = ad[\"attribuutdefinitie\"]\r\n                                            pd.DataType = DataType.Parse(DataType, ad[\"civil3D_datatype_attribuut\"], True)\r\n                                            #pd.DefaultData = ad[\"civil3D_default_value\"]\r\n                                            \r\n                                            if pd.DataType == DataType.Real:\r\n                                                pd.DefaultData = -999999999.000000\r\n                                            if pd.DataType == DataType.Integer:\r\n                                                pd.DefaultData = -999999999\r\n                                            elif ad[\"dotnotatie_attribuutnaam\"] == \"typeURI\":\r\n                                                pd.DefaultData = od[\"typeURI\"]\r\n                                            \r\n                                        if not definitions.Contains(pd): #dubbele keys vermijden\r\n                                            definitions.Add(pd)\r\n                                        \r\n                                    except:\r\n                                        outputlijst = [\"attribuut: er ging iets mis \", ad[\"dotnotatie_attribuutnaam\"], od[\"propertysetnaam\"],ad[\"attribuutdefinitie\"],ad[\"civil3D_datatype_attribuut\"],ad[\"civil3D_default_value\"]]                    \r\n                        \r\n                    except:\r\n                        outputlijst = [\"onderdeel: er ging iets mis bij het aanmaken van volgend item: \", od[\"propertysetnaam\"]]\r\n                        \r\n                t.Commit()\r\n\r\n    info = str(pdn_count+1) + \" Properties aangemaakt in \" + str(psetdef_count+1) + \" Propertysets\"\r\n    \r\n    nl = \"\\n\"\r\n    if len(outputlijst) < 30:\r\n        message = f\"{info}{nl}Volgende sets werden aangemaakt:{nl}{nl.join(outputlijst)}\"\r\n    else:\r\n        message = f\"{info}{nl}Onder meer volgende sets werden aangemaakt:{nl}{nl.join(outputlijst[:30])}{nl}...\"\r\n        outputlijst = outputlijst[:30]\r\n    ctypes.windll.user32.MessageBoxW(0, message, \"Propertysets aangemaakt\", 0)\r\n    return [info,outputlijst]\r\n\r\n\r\n#UITVOEREN\r\nOUT = \"GEEN propertysets aangemaakt\"\r\nOTL_datadict = IN[0]\r\nif OTL_datadict:\r\n    OUT = dict_to_psetdef(OTL_datadict)\r\n    ",
       "Engine": "CPython3",
       "VariableInputPorts": true,
-      "Id": "cad5cefd8d244fefb43cc732e661f0d6",
+      "Id": "fb62066044a440ce8a92fdbb73968171",
       "NodeType": "PythonScriptNode",
       "Inputs": [
         {
-          "Id": "04252960f195407c809f25ad4bb647ae",
+          "Id": "d23e3e2646f1403ba6e050bfb3f48ea0",
           "Name": "IN[0]",
           "Description": "Input #0",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "be61e34e0f774794ae593e625f61085e",
-          "Name": "IN[1]",
-          "Description": "Input #1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "5dff5416bb3c40ffa028a2005727b7ef",
-          "Name": "IN[2]",
-          "Description": "Input #2",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -177,7 +168,7 @@
       ],
       "Outputs": [
         {
-          "Id": "8eb39829e06341838e847fd127c1a1e3",
+          "Id": "4ff5a80bd8ff4a849851bc6a53301821",
           "Name": "OUT",
           "Description": "Result of the python script",
           "UsingDefaultValue": false,
@@ -191,16 +182,25 @@
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport clr\r\nimport ctypes\r\n\r\n# Add Assemblies for AutoCAD and Civil3D\r\nclr.AddReference('AcMgd')\r\nclr.AddReference('AcCoreMgd')\r\nclr.AddReference('AcDbMgd')\r\nclr.AddReference('AecBaseMgd')\r\nclr.AddReference('AecPropDataMgd')\r\nclr.AddReference('AeccDbMgd')\r\n\r\n# Import references from AutoCAD\r\nfrom Autodesk.AutoCAD.Runtime import *\r\nfrom Autodesk.AutoCAD.ApplicationServices import *\r\nfrom Autodesk.AutoCAD.EditorInput import *\r\nfrom Autodesk.AutoCAD.DatabaseServices import *\r\nfrom Autodesk.AutoCAD.Geometry import *\r\n\r\n# Import references from Civil3D\r\nfrom Autodesk.Civil.ApplicationServices import *\r\nfrom Autodesk.Civil.DatabaseServices import *\r\n\r\n# Import references for PropertySets\r\nfrom Autodesk.Aec.PropertyData import *\r\nfrom Autodesk.Aec.PropertyData.DatabaseServices import *\r\n\r\n# Import references for ListDefinitions\r\nfrom Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryListDefinition\r\n\r\nadoc = Application.DocumentManager.MdiActiveDocument\r\neditor = adoc.Editor\r\n\r\ndef listdef_uit_keuzelijstoptie(lijstnaam,lijstopties):\r\n    with adoc.LockDocument():\r\n        with adoc.Database as db:\r\n            ld = None\r\n            ldid = None\r\n            newld = False            \r\n            with db.TransactionManager.StartTransaction() as t:\r\n                dld = DictionaryListDefinition(db)\r\n                try:\r\n                    lname = lijstnaam\r\n                    \r\n                    if not dld.Has(lname, t):\r\n                        ld = ListDefinition()\r\n                        ld.AppliesToAll = True\r\n                        ld.AlternateName = lname\r\n                        ld.AllowToVary = False\r\n                        ld.Description = lname\r\n\r\n                        dld.AddNewRecord(lname, ld)\r\n                        newld = True\r\n                    else:\r\n                        ldid = dld.GetAt(lname)\r\n                        ld = t.GetObject(ldid, OpenMode.ForWrite)\r\n                    if newld:\r\n                        t.AddNewlyCreatedDBObject(ld, True)\r\n\r\n                    for optie in lijstopties:\r\n                        first = True\r\n                        for oid in ld.GetListItems():\r\n                            li = t.GetObject(oid, OpenMode.ForRead)\r\n                            if li.Name == optie:\r\n                                first = False\r\n                                break\r\n                        if first:\r\n                            ld.AddListItem(optie)\r\n                    message = ld\r\n                    t.Commit()\r\n                except:\r\n                    message = \"er ging iets mis met het aanmaken van lijst\" + lijstnaam\r\n    return ld.Name\r\n    \r\ndef dict_to_psetdef(OTL_psetinfoDict):\r\n    \"\"\"OTL Data uit een dict wegschrijven naar de propertyset definitions\"\"\"\r\n    with adoc.LockDocument():\r\n        with adoc.Database as db:\r\n            with db.TransactionManager.StartTransaction() as t:\r\n                dpsd = DictionaryPropertySetDefinitions(db)\r\n                outputlijst = []\r\n                psetdef_count = -1\r\n                pdn_count = -1\r\n                for onderdeeldict in OTL_psetinfoDict:\r\n                    od = onderdeeldict                    \r\n                    \r\n                    try:\r\n                        if od[\"propertysetnaam\"] == \"OTL_dummy\":\r\n                            pass                      \r\n                        else:\r\n                            if not dpsd.Has(od[\"propertysetnaam\"], t): #propertysetnaam bestaat nog niet, maak een nieuwe\r\n                                psdef = PropertySetDefinition()\r\n                                psdefid = psdef.Id\r\n                                dpsd.AddNewRecord(od[\"propertysetnaam\"], psdef)\r\n                                newps = True #?\r\n                                t.AddNewlyCreatedDBObject(psdef, True)\r\n                                    \r\n                            else: #de propertysetnaam bestaat al in de definitions, open deze\r\n                                psdefid = dpsd.GetAt(od[\"propertysetnaam\"])\r\n                                psdef = t.GetObject(psdefid, OpenMode.ForWrite)\r\n                                \r\n                            psdef.SetToStandard(db)\r\n                            psdef.SubSetDatabaseDefaults(db)\r\n                            psdef.AppliesToAll = True\r\n                            psdef.Description = od[\"definitie\"]\r\n                            \r\n                            outputlijst.append(psdef.Name)\r\n                            \r\n                            definitions = psdef.Definitions\r\n                            \r\n                            psetdef_count = psetdef_count + 1                        \r\n                                                    \r\n                            for attribuutdict in od[\"attributen\"]:\r\n                                ad = attribuutdict\r\n                                pdn_count = pdn_count + 1\r\n                                \r\n                                if ad[\"dotnotatie_attribuutnaam\"]:\r\n                                    try:\r\n                                        if ad[\"civil3D_datatype_attribuut\"] == \"keuzelijst\": #voor de keuzelijst attributen\r\n                                            listdef_uit_keuzelijstoptie(ad[\"keuzelijstnaam\"],ad[\"keuzelijstopties\"])\r\n                                            \r\n                                            pd = PropertyDefinition()\r\n                                            pd.Name = ad[\"dotnotatie_attribuutnaam\"]\r\n                                            pd.Description = ad[\"attribuutdefinitie\"]\r\n                                            pd.DataType = DataType.Parse(DataType, \"List\", True)\r\n                                            \r\n                                            dld = DictionaryListDefinition(db)\r\n                                            ldid = dld.GetAt(ad[\"keuzelijstnaam\"])\r\n                                            pd.ListDefinitionId = ldid\r\n                                            \r\n                                            ldef = t.GetObject(ldid, OpenMode.ForRead)\r\n                                            default = t.GetObject(ldef.GetListItems()[0], OpenMode.ForRead)\r\n                                            pd.DefaultData = default.Name\r\n                                            \r\n                                        \r\n                                        else: #voor alle niet keuzelijst attributen                            \r\n                                            pd = PropertyDefinition()\r\n                                            pd.Name = ad[\"dotnotatie_attribuutnaam\"]\r\n                                            pd.Description = ad[\"attribuutdefinitie\"]\r\n                                            pd.DataType = DataType.Parse(DataType, ad[\"civil3D_datatype_attribuut\"], True)\r\n                                            #pd.DefaultData = ad[\"civil3D_default_value\"]\r\n                                            \r\n                                            if pd.DataType == DataType.Real:\r\n                                                pd.DefaultData = -999999999.000000\r\n                                            if pd.DataType == DataType.Integer:\r\n                                                pd.DefaultData = -999999999\r\n                                            elif ad[\"dotnotatie_attribuutnaam\"] == \"typeURI\":\r\n                                                pd.DefaultData = od[\"typeURI\"]\r\n                                            \r\n                                        if not definitions.Contains(pd): #dubbele keys vermijden\r\n                                            definitions.Add(pd)\r\n                                        \r\n                                    except:\r\n                                        outputlijst = [\"attribuut: er ging iets mis \", ad[\"dotnotatie_attribuutnaam\"], od[\"propertysetnaam\"],ad[\"attribuutdefinitie\"],ad[\"civil3D_datatype_attribuut\"],ad[\"civil3D_default_value\"]]                    \r\n                        \r\n                    except:\r\n                        outputlijst = [\"onderdeel: er ging iets mis bij het aanmaken van volgend item: \", od[\"propertysetnaam\"]]\r\n                        \r\n                t.Commit()\r\n\r\n    info = str(pdn_count+1) + \" Properties aangemaakt in \" + str(psetdef_count+1) + \" Propertysets\"\r\n    \r\n    nl = \"\\n\"\r\n    if len(outputlijst) < 30:\r\n        message = f\"{info}{nl}Volgende sets werden aangemaakt:{nl}{nl.join(outputlijst)}\"\r\n    else:\r\n        message = f\"{info}{nl}Onder meer volgende sets werden aangemaakt:{nl}{nl.join(outputlijst[:30])}{nl}...\"\r\n        outputlijst = outputlijst[:30]\r\n    ctypes.windll.user32.MessageBoxW(0, message, \"Propertysets aangemaakt\", 0)\r\n    return [info,outputlijst]\r\n\r\n\r\n#UITVOEREN\r\nOUT = \"GEEN propertysets aangemaakt\"\r\nOTL_datadict = IN[0]\r\nif OTL_datadict:\r\n    OUT = dict_to_psetdef(OTL_datadict)\r\n    ",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport os.path\r\nimport ctypes\r\nimport sqlite3\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\nsubset_db = IN[0]\r\nsubset_filter = IN[1]\r\n\r\n# Main variables\r\nnl = \"\\n\"\r\n\r\n# Functies\r\ndef create_connection(db_file):\r\n    \"\"\" maak connectie naar de SQLite database\"\"\"\r\n    conn = None\r\n    try:\r\n        conn = sqlite3.connect(db_file)\r\n    except Error as e:\r\n        print(e)\r\n    return conn\r\n\r\n\r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    klasses_in_subset = []\r\n    with conn:\r\n        cur = conn.cursor()\r\n        cur.execute(\"SELECT name FROM sqlite_master WHERE type='table' AND name='OSLOClass';\")\r\n        bestaat_klassetabel = cur.fetchall()\r\n        if bestaat_klassetabel:\r\n            cur.execute(\"SELECT uri FROM OSLOClass WHERE abstract = '0';\")\r\n            klasses_in_subset = cur.fetchall()\r\n            klasses_in_subset = klasses_in_subset[0]\r\n    return klasses_in_subset\r\n\r\ndef check_subset_geldigheid(db_pad):\r\n    \"\"\"Kijkt na of de input een geldige OTL db is\"\"\"\r\n    geldige_db_pad = \"\"\r\n    message = \"\"\r\n    if isinstance(db_pad, str):\r\n        if os.path.exists(db_pad) and db_pad:\r\n            extensie = db_pad.split(\".\")[-1]\r\n            if extensie == \"db\":\r\n                geldige_db_pad = db_pad\r\n                #message = f\"Geldige subset input:{nl}{db_pad}\"\r\n            else:\r\n                message = f\"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}\"\r\n        else:\r\n            message = f\"ONGELDIGE subset input: bestand is geen geldige subset gevonden:{nl}{db_pad}\"\r\n    else:\r\n        message = f\"ONGELDIGE subset input: bestand kon niet worden gevonden:{nl}{db_pad}\"\r\n\r\n    if geldige_db_pad:\r\n        onderdelen = select_klasses(geldige_db_pad)\r\n        if len(onderdelen) == 0:\r\n            message = f\"ONGELDIGE subset input: Geen OTL klassen gevonden in db file:{nl}{db_pad}\"\r\n            geldige_db_pad = \"\"\r\n\r\n    return geldige_db_pad,message\r\n\r\n\r\n# MAIN\r\nsubsetpad, subsetmessage = check_subset_geldigheid(subset_db)\r\ngo = True\r\n\r\nif subsetmessage:\r\n    ctypes.windll.user32.MessageBoxW(0, subsetmessage, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n    go = False\r\n\r\n# OUT variable\r\nOUT = subsetpad,subset_filter,go",
       "Engine": "CPython3",
       "VariableInputPorts": true,
-      "Id": "0209860d524b4e71bb84d9b3863a23f2",
+      "Id": "c660c3ab233041188dc58b66dd4c503a",
       "NodeType": "PythonScriptNode",
       "Inputs": [
         {
-          "Id": "e1e78d2356fa417c85d9ff77c582626e",
+          "Id": "9826b0395e0d486ba87619a6cc0526ae",
           "Name": "IN[0]",
           "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "32f8633ac6784c00a92bb61de9e06b4d",
+          "Name": "IN[1]",
+          "Description": "Input #1",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -209,7 +209,7 @@
       ],
       "Outputs": [
         {
-          "Id": "95cc326627ad458ea62eac1bc4f2d60a",
+          "Id": "8513e23504a1493b9fefaa04e960a80b",
           "Name": "OUT",
           "Description": "Result of the python script",
           "UsingDefaultValue": false,
@@ -224,58 +224,50 @@
   ],
   "Connectors": [
     {
-      "Start": "ef41c06e0a4144fd81fc6533f824c2fb",
-      "End": "ae7335115d3240b6a1707e4a7f7cab63",
-      "Id": "2b6642cc914d472d8eab8fe887088767",
+      "Start": "49c3ac5da7a1413193175261c03d2c07",
+      "End": "9826b0395e0d486ba87619a6cc0526ae",
+      "Id": "c07f802756614c5d8cf2935990ab739d",
       "IsHidden": "False"
     },
     {
-      "Start": "4c17e007507a40bbb37018364cd10ecc",
-      "End": "eedc5cdcacce4da6bed91e287f232ba4",
-      "Id": "5498b554a029422cbcc2ce51663bd3bd",
+      "Start": "c2dc6dcdf99f42f186ab0f98dca742a1",
+      "End": "32f8633ac6784c00a92bb61de9e06b4d",
+      "Id": "c891e8859edc4f76820a326c12789698",
       "IsHidden": "False"
     },
     {
-      "Start": "3d6a4ce709314593af6d80441596f169",
-      "End": "8e448de96aa846c29863a86ade027052",
-      "Id": "5d4db8fc6dbd4e4598e83fed10bc82c6",
+      "Start": "de9677259a1542a3930957048dc9ae9f",
+      "End": "d23e3e2646f1403ba6e050bfb3f48ea0",
+      "Id": "c9713d52f03e4e9ebc02fabc7a24e025",
       "IsHidden": "False"
     },
     {
-      "Start": "e06b85a1621e4c8ba68c64f974144767",
-      "End": "04252960f195407c809f25ad4bb647ae",
-      "Id": "3a94f306bafc4965b565a745541d49a5",
+      "Start": "bad76c69e5734b8c877c5ffb58762a0d",
+      "End": "ea20a63e00bc4330aa2a000803b4d302",
+      "Id": "42c63e51d6dc496688445d580cefa938",
       "IsHidden": "False"
     },
     {
-      "Start": "beeef6b2eb4a4b37b2a493130bc17572",
-      "End": "be61e34e0f774794ae593e625f61085e",
-      "Id": "668af3fb845148d08bca2ce3ee36114a",
+      "Start": "b107ebb9e7d644ba96cd830d4be94c0d",
+      "End": "b848a02d8fa34e82850e6463a8bff128",
+      "Id": "fbb9c25831cb4920a717eeb433b9ff3d",
       "IsHidden": "False"
     },
     {
-      "Start": "797636f6d21f465ead51ce0e251dd312",
-      "End": "5dff5416bb3c40ffa028a2005727b7ef",
-      "Id": "9bed6c24c02b43e9b2ab288d15e62fcf",
+      "Start": "22124fab8e9d49bda0aa647e2b094682",
+      "End": "f1b26fa090494794811cf118c27692ae",
+      "Id": "c7e6f87b4b684512933370109d43c244",
       "IsHidden": "False"
     },
     {
-      "Start": "8eb39829e06341838e847fd127c1a1e3",
-      "End": "e1e78d2356fa417c85d9ff77c582626e",
-      "Id": "de086f185cc444958553b12c1bac9ca3",
+      "Start": "8513e23504a1493b9fefaa04e960a80b",
+      "End": "cef3b33bdaf3403b9844da4232e70833",
+      "Id": "8a8a86ec048b435a92d357e3bcaefe1e",
       "IsHidden": "False"
     }
   ],
   "Dependencies": [],
-  "NodeLibraryDependencies": [
-    {
-      "Name": "testDyn.db",
-      "ReferenceType": "External",
-      "Nodes": [
-        "b0edc6bca21e4ca9b28f0dc3e4965ed4"
-      ]
-    }
-  ],
+  "NodeLibraryDependencies": [],
   "EnableLegacyPolyCurveBehavior": true,
   "Thumbnail": "",
   "GraphDocumentationURL": null,
@@ -283,7 +275,7 @@
     {
       "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
       "Name": "Properties",
-      "Version": "3.6",
+      "Version": "2.15",
       "Data": {}
     }
   ],
@@ -319,95 +311,139 @@
     "ConnectorPins": [],
     "NodeViews": [
       {
-        "Id": "b0edc6bca21e4ca9b28f0dc3e4965ed4",
+        "Id": "1c889e32c29a4b0bae539abd2125d8e5",
         "Name": "File Path",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 30.6666666666668,
-        "Y": 276.6666666666667
+        "X": 136.61567443538365,
+        "Y": 724.410579250432
       },
       {
-        "Id": "8a51e40687af4c30826bab6937b16293",
+        "Id": "8adc3f14fb82482180d4ed78f7c16040",
         "Name": "Boolean",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 128.66666666666686,
-        "Y": 494.6666666666667
+        "X": 133.5,
+        "Y": 1003.9553899387561
       },
       {
-        "Id": "6c3c0f33490c4c3bbe9f50182cf1877c",
-        "Name": "check_input_folders_and_db",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": 498.0,
-        "Y": 368.23679407158454
-      },
-      {
-        "Id": "9a9143fcd17c41628d78efa306da48ae",
-        "Name": "Code Block",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": 869.2733158365522,
-        "Y": 365.31649048982047
-      },
-      {
-        "Id": "cad5cefd8d244fefb43cc732e661f0d6",
+        "Id": "bb734f1840c044ec891a912d030c36a5",
         "Name": "OTLdata to dict",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1392.3904808020702,
-        "Y": 353.30038407798065
+        "X": 1456.770143236331,
+        "Y": 814.7661790992572
       },
       {
-        "Id": "0209860d524b4e71bb84d9b3863a23f2",
+        "Id": "63b1a459ed1747f1817be85a560d1bf4",
+        "Name": "Code Block",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 933.6529782708132,
+        "Y": 826.7822855110969
+      },
+      {
+        "Id": "fb62066044a440ce8a92fdbb73968171",
         "Name": "Psetdef aanmaken",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1762.4638943583846,
-        "Y": 354.06877572260703
+        "X": 1826.8435567926454,
+        "Y": 815.5345707438835
+      },
+      {
+        "Id": "c660c3ab233041188dc58b66dd4c503a",
+        "Name": "check_input_folders_and_db",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 562.379662434261,
+        "Y": 829.702589092861
       }
     ],
     "Annotations": [
       {
-        "Id": "208a6977035846188ccda7f5a097d91e",
+        "Id": "651209f7bad64b5a9901abe2bc36c94c",
+        "Title": "Subset db",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 118.59610061571505,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "1c889e32c29a4b0bae539abd2125d8e5"
+        ],
+        "HasNestedGroups": false,
+        "Left": 126.61567443538365,
+        "Top": 651.0772459170986,
+        "Width": 318.59610061571505,
+        "Height": 215.0,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 724.410579250432,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 63.333333333333336,
+        "Background": "#FFFFB8D8"
+      },
+      {
+        "Id": "ab8169e61e434389b62b8f2ba657d4c7",
+        "Title": "Subset filter",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 96.02527167047629,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "8adc3f14fb82482180d4ed78f7c16040"
+        ],
+        "HasNestedGroups": false,
+        "Left": 123.5,
+        "Top": 930.6220566054227,
+        "Width": 310.0252716704763,
+        "Height": 205.0000000000001,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 1003.9553899387561,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 63.333333333333336,
+        "Background": "#FFFFB8D8"
+      },
+      {
+        "Id": "0077e3d44fe647b9a4cf575184f5d037",
         "Title": "OTL_create_propertyset_definitions",
         "DescriptionText": "Description <Double click here to edit group description>",
         "IsExpanded": true,
         "WidthAdjustment": 0.0,
         "HeightAdjustment": 0.0,
         "Nodes": [
-          "6c3c0f33490c4c3bbe9f50182cf1877c",
-          "9a9143fcd17c41628d78efa306da48ae",
-          "cad5cefd8d244fefb43cc732e661f0d6",
-          "0209860d524b4e71bb84d9b3863a23f2"
+          "c660c3ab233041188dc58b66dd4c503a",
+          "63b1a459ed1747f1817be85a560d1bf4",
+          "bb734f1840c044ec891a912d030c36a5",
+          "fb62066044a440ce8a92fdbb73968171"
         ],
         "HasNestedGroups": false,
-        "Left": 488.0,
-        "Top": 279.96705074464734,
-        "Width": 1495.1305610250513,
-        "Height": 268.3333333333333,
+        "Left": 552.379662434261,
+        "Top": 741.4328457659238,
+        "Width": 1495.130561025051,
+        "Height": 268.33333333333337,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
-        "InitialTop": 353.30038407798065,
-        "InitialHeight": 261.63371741131414,
+        "InitialTop": 814.7661790992572,
+        "InitialHeight": 225.0,
         "TextblockHeight": 63.333333333333336,
         "Background": "#FFB9F9E1"
       }
     ],
-    "X": -218.14509047853903,
-    "Y": -185.31788467796446,
-    "Zoom": 0.8234954868045237
+    "X": 108.06731734225025,
+    "Y": 69.99908857755706,
+    "Zoom": 0.5866725002636757
   }
 }
