@@ -104,7 +104,7 @@ if pset_dicts[0]:#Check of er psets zijn
         result = message
         m.MessageBoxW(0, message, "OTL_Export psetdata to CSV", 0)
 else:
-    message = f"Geen propertysetinfo gevonden om te extraheren"
+    message = f"Geen propertysetinfo naar CSV geschreven"
     result = message
     m.MessageBoxW(0, message, "OTL_Export psetdata to CSV", 0)
     

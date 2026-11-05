@@ -83,8 +83,9 @@ def dummydict():
     
     attribuutdict["dotnotatie_attribuutnaam"] = "dummy.attribuut"
     attribuutdict["attribuutdefinitie"] = "Een dummy attribuut"
-    attribuutdict["datatype_attribuut"] = 'keuzelijst'
-    attribuutdict["default_value"] = '-'
+    attribuutdict["OTL_datatype_attribuut"] = "KlDummy"
+    attribuutdict["civil3D_datatype_attribuut"] = "keuzelijst"
+    attribuutdict["civil3D_default_value"] = '-'
     attribuutdict["keuzelijstopties"] = ['dummywaarde-A','dummywaarde-B','-']
     attribuutdict["keuzelijstnaam"] = 'dummy-lijst'
     
