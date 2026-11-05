@@ -48,8 +48,13 @@ def check_subset_geldigheid(db_pad):
                 #message = f"Geldige subset input:{nl}{db_pad}"
             else:
                 message = f"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}"
+
+        elif db_pad == "":
+                message = f"Geen bruikbare input gevonden.{nl}Geef een geldige subset op,{nl}Of zet 'Enkel_subset_objecten' op 'false' om de volledige OTL te gebruiken. (Dit kan even duren)"
+        
+            
         else:
-            message = f"ONGELDIGE subset input: bestand is geen geldige subset gevonden:{nl}{db_pad}"
+            message = f"ONGELDIGE subset input: Geen geldige subset gevonden:{nl}{db_pad}"
     else:
         message = f"ONGELDIGE subset input: bestand kon niet worden gevonden:{nl}{db_pad}"
 

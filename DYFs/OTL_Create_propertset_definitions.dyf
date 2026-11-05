@@ -2,7 +2,7 @@
   "Uuid": "3cd74cd7-b2cd-4a90-a6b4-c81fffda9568",
   "IsCustomNode": true,
   "Category": "Civil3D_OTL_MOW_Toolkit",
-  "Description": "Methode om vanuit een OTL subset property set definitions aan te maken in een dwg. Download en gebruikt hiervoor de Python OTLMOW libraries. Bruikbaar in dynamo 3.0 (vanaf civil3D 2025)",
+  "Description": "Methode om vanuit een OTL subset propertysetdefinitions aan te maken in een dwg. Download en gebruikt hiervoor een JSON met OTL info (zoals oa dotnotatie) vanop github.",
   "Name": "OTL_Create_propertset_definitions",
   "ElementResolver": {
     "ResolutionMap": {}
@@ -289,7 +289,7 @@
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport os.path\r\nimport ctypes\r\nimport sqlite3\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\nsubset_db = IN[0]\r\nsubset_filter = IN[1]#filter op de attributen\r\nobjecten_filter = IN[2]#filter op de objecten of full OTL\r\n\r\n# Main variables\r\nnl = \"\\n\"\r\n\r\n# Functies\r\ndef create_connection(db_file):\r\n    \"\"\" maak connectie naar de SQLite database\"\"\"\r\n    conn = None\r\n    try:\r\n        conn = sqlite3.connect(db_file)\r\n    except Error as e:\r\n        print(e)\r\n    return conn\r\n\r\n\r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    klasses_in_subset = []\r\n    with conn:\r\n        cur = conn.cursor()\r\n        cur.execute(\"SELECT name FROM sqlite_master WHERE type='table' AND name='OSLOClass';\")\r\n        bestaat_klassetabel = cur.fetchall()\r\n        if bestaat_klassetabel:\r\n            cur.execute(\"SELECT uri FROM OSLOClass WHERE abstract = '0';\")\r\n            klasses_in_subset = cur.fetchall()\r\n            klasses_in_subset = klasses_in_subset[0]\r\n    return klasses_in_subset\r\n\r\ndef check_subset_geldigheid(db_pad):\r\n    \"\"\"Kijkt na of de input een geldige OTL db is\"\"\"\r\n    geldige_db_pad = \"\"\r\n    message = \"\"\r\n    if isinstance(db_pad, str):\r\n        if os.path.exists(db_pad) and db_pad:\r\n            extensie = db_pad.split(\".\")[-1]\r\n            if extensie == \"db\":\r\n                geldige_db_pad = db_pad\r\n                #message = f\"Geldige subset input:{nl}{db_pad}\"\r\n            else:\r\n                message = f\"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}\"\r\n        else:\r\n            message = f\"ONGELDIGE subset input: bestand is geen geldige subset gevonden:{nl}{db_pad}\"\r\n    else:\r\n        message = f\"ONGELDIGE subset input: bestand kon niet worden gevonden:{nl}{db_pad}\"\r\n\r\n    if geldige_db_pad:\r\n        onderdelen = select_klasses(geldige_db_pad)\r\n        if len(onderdelen) == 0:\r\n            message = f\"ONGELDIGE subset input: Geen OTL klassen gevonden in db file:{nl}{db_pad}\"\r\n            geldige_db_pad = \"\"\r\n\r\n    return geldige_db_pad,message\r\n\r\n\r\n# MAIN\r\nif objecten_filter:\r\n    subsetpad, subsetmessage = check_subset_geldigheid(subset_db)\r\n    go = True\r\n    \r\n    if subsetmessage:\r\n        ctypes.windll.user32.MessageBoxW(0, subsetmessage, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n        go = False\r\n\r\nelse:\r\n    go = True\r\n    subsetpad = \"\"\r\n    no_objfilter_message = f\"Geen filtering op subset objecten:{nl}Er worden propertyset definitions aangemaakt voor alle instantieerbare OTL objecten. Dit kan even duren\"\r\n    ctypes.windll.user32.MessageBoxW(0, no_objfilter_message, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n\r\n# OUT variable\r\nOUT = subsetpad,subset_filter,objecten_filter,go",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport os.path\r\nimport ctypes\r\nimport sqlite3\r\n\r\n# The inputs to this node will be stored as a list in the IN variables.\r\nsubset_db = IN[0]\r\nsubset_filter = IN[1]#filter op de attributen\r\nobjecten_filter = IN[2]#filter op de objecten of full OTL\r\n\r\n# Main variables\r\nnl = \"\\n\"\r\n\r\n# Functies\r\ndef create_connection(db_file):\r\n    \"\"\" maak connectie naar de SQLite database\"\"\"\r\n    conn = None\r\n    try:\r\n        conn = sqlite3.connect(db_file)\r\n    except Error as e:\r\n        print(e)\r\n    return conn\r\n\r\n\r\ndef select_klasses(conn):\r\n    \"\"\"klasses uit sqlite ophalen\"\"\"\r\n    conn = create_connection(conn)\r\n    klasses_in_subset = []\r\n    with conn:\r\n        cur = conn.cursor()\r\n        cur.execute(\"SELECT name FROM sqlite_master WHERE type='table' AND name='OSLOClass';\")\r\n        bestaat_klassetabel = cur.fetchall()\r\n        if bestaat_klassetabel:\r\n            cur.execute(\"SELECT uri FROM OSLOClass WHERE abstract = '0';\")\r\n            klasses_in_subset = cur.fetchall()\r\n            klasses_in_subset = klasses_in_subset[0]\r\n    return klasses_in_subset\r\n\r\ndef check_subset_geldigheid(db_pad):\r\n    \"\"\"Kijkt na of de input een geldige OTL db is\"\"\"\r\n    geldige_db_pad = \"\"\r\n    message = \"\"\r\n    if isinstance(db_pad, str):\r\n        if os.path.exists(db_pad) and db_pad:\r\n            extensie = db_pad.split(\".\")[-1]\r\n            if extensie == \"db\":\r\n                geldige_db_pad = db_pad\r\n                #message = f\"Geldige subset input:{nl}{db_pad}\"\r\n            else:\r\n                message = f\"ONGELDIGE subset input: Bestand is geen .db bestand:{nl}{db_pad}\"\r\n\r\n        elif db_pad == \"\":\r\n                message = f\"Geen bruikbare input gevonden.{nl}Geef een geldige subset op,{nl}Of zet 'Enkel_subset_objecten' op 'false' om de volledige OTL te gebruiken. (Dit kan even duren)\"\r\n        \r\n            \r\n        else:\r\n            message = f\"ONGELDIGE subset input: Geen geldige subset gevonden:{nl}{db_pad}\"\r\n    else:\r\n        message = f\"ONGELDIGE subset input: bestand kon niet worden gevonden:{nl}{db_pad}\"\r\n\r\n    if geldige_db_pad:\r\n        onderdelen = select_klasses(geldige_db_pad)\r\n        if len(onderdelen) == 0:\r\n            message = f\"ONGELDIGE subset input: Geen OTL klassen gevonden in db file:{nl}{db_pad}\"\r\n            geldige_db_pad = \"\"\r\n\r\n    return geldige_db_pad,message\r\n\r\n\r\n# MAIN\r\nif objecten_filter:\r\n    subsetpad, subsetmessage = check_subset_geldigheid(subset_db)\r\n    go = True\r\n    \r\n    if subsetmessage:\r\n        ctypes.windll.user32.MessageBoxW(0, subsetmessage, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n        go = False\r\n\r\nelse:\r\n    go = True\r\n    subsetpad = \"\"\r\n    no_objfilter_message = f\"Geen filtering op subset objecten:{nl}Er worden propertyset definitions aangemaakt voor alle instantieerbare OTL objecten. Dit kan even duren\"\r\n    ctypes.windll.user32.MessageBoxW(0, no_objfilter_message, \"OTL_propertysetdefinitions_aanmaken\", 0)\r\n\r\n# OUT variable\r\nOUT = subsetpad,subset_filter,objecten_filter,go",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "2a66281e37cd43e289b76b4633853df6",
@@ -440,8 +440,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 569.7407225062719,
-        "Y": 463.3098838160952
+        "X": -1072.4256079771233,
+        "Y": -134.4821173790864
       },
       {
         "Id": "4777839aef3b499eacb6d8e8bf5665c3",
@@ -450,8 +450,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 206.41821387216953,
-        "Y": 614.665008444542
+        "X": -1072.4256079771233,
+        "Y": 23.51788262091361
       },
       {
         "Id": "d02164c960aa423fb302582fc6f03048",
@@ -460,8 +460,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 2936.2766049905563,
-        "Y": 552.0060297547091
+        "X": 1531.5743920228767,
+        "Y": -30.792117379086406
       },
       {
         "Id": "262e499222004c18862590faad58312f",
@@ -470,8 +470,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 206.6871239411946,
-        "Y": 789.5565611758623
+        "X": -1072.4256079771233,
+        "Y": 199.5178826209136
       },
       {
         "Id": "789b41f3317e4690aa67b434744a0c24",
@@ -479,9 +479,9 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "ShowGeometry": false,
-        "X": 2606.7800378861552,
-        "Y": 557.3673041363661
+        "ShowGeometry": true,
+        "X": 1220.9077253562102,
+        "Y": -30.792117379086406
       },
       {
         "Id": "fa2e7ce0b80942e6a93eea13a1887a7b",
@@ -490,8 +490,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 2321.3391032867776,
-        "Y": 555.9578769528364
+        "X": 926.9077253562102,
+        "Y": -30.792117379086406
       },
       {
         "Id": "cb95529a1543462db3ac4a00fea606e5",
@@ -499,9 +499,9 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "ShowGeometry": false,
-        "X": 1973.4510487261318,
-        "Y": 571.6170564031465
+        "ShowGeometry": true,
+        "X": 640.9077253562102,
+        "Y": -30.792117379086392
       },
       {
         "Id": "c4388df5186c4be8a7cfb06617496af5",
@@ -510,8 +510,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1448.0904974860114,
-        "Y": 594.8500941879977
+        "X": 166.90772535621022,
+        "Y": -4.4821173790863895
       },
       {
         "Id": "2a66281e37cd43e289b76b4633853df6",
@@ -520,36 +520,14 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1076.8171816494591,
-        "Y": 597.7703977697618
+        "X": -225.0922746437899,
+        "Y": -4.4821173790863895
       }
     ],
     "Annotations": [
       {
-        "Id": "32dc13e10c0d40dd9af969dee54e7393",
-        "Title": "Output message",
-        "DescriptionText": null,
-        "IsExpanded": true,
-        "WidthAdjustment": 0.0,
-        "HeightAdjustment": 0.0,
-        "Nodes": [
-          "d02164c960aa423fb302582fc6f03048"
-        ],
-        "HasNestedGroups": false,
-        "Left": 2926.2766049905563,
-        "Top": 478.67269642137575,
-        "Width": 310.0,
-        "Height": 215.66666666666669,
-        "FontSize": 36.0,
-        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
-        "InitialTop": 552.0060297547091,
-        "InitialHeight": 145.0,
-        "TextblockHeight": 63.333333333333336,
-        "Background": "#FFFFC999"
-      },
-      {
-        "Id": "658a20660fea40e4aacf93ddac0a3ba7",
-        "Title": "Inputs",
+        "Id": "f19f5e9461ea4fefb94708cf5259d8c2",
+        "Title": "OTL_Create_propertset_defintions",
         "DescriptionText": "Description <Double click here to edit group description>",
         "IsExpanded": true,
         "WidthAdjustment": 0.0,
@@ -557,49 +535,29 @@
         "Nodes": [
           "ee17f6cb56254944ad6aaf52ad437514",
           "4777839aef3b499eacb6d8e8bf5665c3",
-          "262e499222004c18862590faad58312f"
-        ],
-        "HasNestedGroups": false,
-        "Left": 196.41821387216953,
-        "Top": 389.97655048276187,
-        "Width": 767.6022434023585,
-        "Height": 559.2466773597671,
-        "FontSize": 36.0,
-        "GroupStyleId": "883066aa-1fe2-44a4-9bd1-c3df86bfe9f6",
-        "InitialTop": 463.3098838160952,
-        "InitialHeight": 471.2466773597671,
-        "TextblockHeight": 63.333333333333336,
-        "Background": "#FFFFB8D8"
-      },
-      {
-        "Id": "4dd77dc3ae3d460fabec4b119e2ae839",
-        "Title": "OTL_create_propertyset_definitions",
-        "DescriptionText": "Description <Double click here to edit group description>",
-        "IsExpanded": true,
-        "WidthAdjustment": 0.0,
-        "HeightAdjustment": 0.0,
-        "Nodes": [
-          "2a66281e37cd43e289b76b4633853df6",
-          "c4388df5186c4be8a7cfb06617496af5",
-          "cb95529a1543462db3ac4a00fea606e5",
+          "d02164c960aa423fb302582fc6f03048",
+          "262e499222004c18862590faad58312f",
           "789b41f3317e4690aa67b434744a0c24",
-          "fa2e7ce0b80942e6a93eea13a1887a7b"
+          "fa2e7ce0b80942e6a93eea13a1887a7b",
+          "cb95529a1543462db3ac4a00fea606e5",
+          "c4388df5186c4be8a7cfb06617496af5",
+          "2a66281e37cd43e289b76b4633853df6"
         ],
         "HasNestedGroups": false,
-        "Left": 1066.8171816494591,
-        "Top": 482.6245436195031,
-        "Width": 1760.6295229033626,
-        "Height": 329.32584611697683,
+        "Left": -1082.4256079771233,
+        "Top": -207.81545071241973,
+        "Width": 2914.0,
+        "Height": 567.0,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
-        "InitialTop": 555.9578769528364,
-        "InitialHeight": 285.9925127836434,
+        "InitialTop": -134.4821173790864,
+        "InitialHeight": 258.33333333333337,
         "TextblockHeight": 63.333333333333336,
-        "Background": "#FFB9F9E1"
+        "Background": "#FFC1D676"
       }
     ],
-    "X": 8.964124466429126,
-    "Y": -110.88147844049456,
-    "Zoom": 0.748425553050857
+    "X": 542.9248315937596,
+    "Y": 373.63295499911527,
+    "Zoom": 0.4460187158387221
   }
 }
