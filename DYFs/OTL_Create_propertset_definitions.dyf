@@ -42,7 +42,7 @@
         "Name": "Enkel_subset_attributen",
         "TypeName": "bool",
         "TypeRank": 0,
-        "DefaultValue": "True",
+        "DefaultValue": "true",
         "Description": "Bij 'True' worden enkel de attributen uit de susbet aangemaakt, bij 'False' alle OTL attributen voor de klasses in de subset"
       },
       "Id": "4777839aef3b499eacb6d8e8bf5665c3",
@@ -89,7 +89,7 @@
         "Name": "Enkel_subset_objecten",
         "TypeName": "bool",
         "TypeRank": 0,
-        "DefaultValue": "True",
+        "DefaultValue": "true",
         "Description": "Bij 'True' worden enkel propertysets aangemaakt voor de objecten in de subset, bij 'False' voor alle instantieerbare objecten uit de OTL"
       },
       "Id": "262e499222004c18862590faad58312f",
@@ -598,8 +598,8 @@
         "Background": "#FFB9F9E1"
       }
     ],
-    "X": -142.19750504994408,
-    "Y": 135.1298906799426,
-    "Zoom": 0.4107401875146274
+    "X": 8.964124466429126,
+    "Y": -110.88147844049456,
+    "Zoom": 0.748425553050857
   }
 }
