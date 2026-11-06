@@ -54,11 +54,11 @@
       "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
       "FunctionSignature": "3cd74cd7-b2cd-4a90-a6b4-c81fffda9568",
       "FunctionType": "Graph",
-      "Id": "5cd07dda1e3c480fa0e162f23eb5dada",
+      "Id": "b0d5dc9fb0b644e3a17a2da61abb590b",
       "NodeType": "FunctionNode",
       "Inputs": [
         {
-          "Id": "9b596913984d43fd8253bfa997c41a8b",
+          "Id": "ffcb729527a44ecba8def80b82c77964",
           "Name": "OTL_Subset",
           "Description": "pad naar OTL subset db in sqlite\n\nstring\nDefault value : \"\"",
           "UsingDefaultValue": true,
@@ -67,9 +67,18 @@
           "KeepListStructure": false
         },
         {
-          "Id": "e086fb6d6d474e0cb18f3ed5e6ec31c8",
-          "Name": "Attribuut_filter",
-          "Description": "Bij 'True' worden enkel de attributen uit de susbet aangemaakt, bij 'False' alle OTL attributen voor de klasses in de subset\n\nbool\nDefault value : True",
+          "Id": "fc1e290f9cb94fd2b57991445aa62584",
+          "Name": "Enkel_subset_attributen",
+          "Description": "Bij 'True' worden enkel de attributen uit de susbet aangemaakt, bij 'False' alle OTL attributen voor de klasses in de subset\n\nbool\nDefault value : true",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4c1ed117d72842f4813c8e87f09746da",
+          "Name": "Enkel_subset_objecten",
+          "Description": "Bij 'True' worden enkel propertysets aangemaakt voor de objecten in de subset, bij 'False' voor alle instantieerbare objecten uit de OTL\n\nbool\nDefault value : true",
           "UsingDefaultValue": true,
           "Level": 2,
           "UseLevels": false,
@@ -78,7 +87,7 @@
       ],
       "Outputs": [
         {
-          "Id": "f491863ac23547469c823cbad12a30f4",
+          "Id": "4c76819f899d4ba5af5497608fd2460c",
           "Name": "Propertyset_Info",
           "Description": "Aangemaakte propertysets",
           "UsingDefaultValue": false,
@@ -88,20 +97,46 @@
         }
       ],
       "Replication": "Auto",
-      "Description": "Methode om vanuit een OTL subset property set definitions aan te maken in een dwg. Download en gebruikt hiervoor de Python OTLMOW libraries. Bruikbaar in dynamo 3.0 (vanaf civil3D 2025)"
+      "Description": "Methode om vanuit een OTL subset propertysetdefinitions aan te maken in een dwg. Download en gebruikt hiervoor een JSON met OTL info (zoals oa dotnotatie) vanop github."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "fe75664a990b4adfb5739c1b62edd3c0",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "6f8052d527424064bd6dd79217b6955b",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
     }
   ],
   "Connectors": [
     {
       "Start": "68078132cbac4800bb63e27d22bb1fa5",
-      "End": "9b596913984d43fd8253bfa997c41a8b",
-      "Id": "a23025b5f6624e50ab85988f3b5a5cdb",
+      "End": "ffcb729527a44ecba8def80b82c77964",
+      "Id": "33ab58b0cbc14819b2ddb8a1f7e03b26",
       "IsHidden": "False"
     },
     {
       "Start": "62d0e618885c43a297eeac66d0bffa75",
-      "End": "e086fb6d6d474e0cb18f3ed5e6ec31c8",
-      "Id": "0473606cf868421096cd85cd70dd4046",
+      "End": "fc1e290f9cb94fd2b57991445aa62584",
+      "Id": "0734dcbce55940fd85f18ff0158396ed",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "6f8052d527424064bd6dd79217b6955b",
+      "End": "4c1ed117d72842f4813c8e87f09746da",
+      "Id": "56e9096cab1f45e683788f7fe64557ec",
       "IsHidden": "False"
     }
   ],
@@ -111,10 +146,10 @@
   "NodeLibraryDependencies": [
     {
       "Name": "Civil3D_OTL_MOW_Toolkit",
-      "Version": "0.0.2",
+      "Version": "0.0.6",
       "ReferenceType": "Package",
       "Nodes": [
-        "5cd07dda1e3c480fa0e162f23eb5dada"
+        "b0d5dc9fb0b644e3a17a2da61abb590b"
       ]
     }
   ],
@@ -177,18 +212,28 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 133.5,
-        "Y": 1003.9553899387561
+        "X": 144.86352336894993,
+        "Y": 960.7740011367457
       },
       {
-        "Id": "5cd07dda1e3c480fa0e162f23eb5dada",
+        "Id": "b0d5dc9fb0b644e3a17a2da61abb590b",
         "Name": "OTL_Create_propertset_definitions",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 593.0606783538068,
-        "Y": 843.1744903450128
+        "X": 583.4016834901992,
+        "Y": 807.9475679012672
+      },
+      {
+        "Id": "fe75664a990b4adfb5739c1b62edd3c0",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 144.0929316957929,
+        "Y": 1185.3174217778478
       }
     ],
     "Annotations": [
@@ -216,7 +261,7 @@
       },
       {
         "Id": "da7a9b2a5d254736ab20076568b0d339",
-        "Title": "Subset filter",
+        "Title": "attr filter",
         "DescriptionText": null,
         "IsExpanded": true,
         "WidthAdjustment": 96.02527167047629,
@@ -225,20 +270,42 @@
           "3a8a5daa205049db803b807f9ed63dc2"
         ],
         "HasNestedGroups": false,
-        "Left": 123.5,
-        "Top": 930.6220566054227,
+        "Left": 134.86352336894993,
+        "Top": 887.4406678034123,
         "Width": 310.0252716704763,
         "Height": 205.0000000000001,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
-        "InitialTop": 1003.9553899387561,
+        "InitialTop": 960.7740011367457,
         "InitialHeight": 145.0,
+        "TextblockHeight": 63.333333333333336,
+        "Background": "#FFFFB8D8"
+      },
+      {
+        "Id": "f8f7a48614c04ea384254cbcf966fd6a",
+        "Title": "obj filter",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 96.02527167047629,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "fe75664a990b4adfb5739c1b62edd3c0"
+        ],
+        "HasNestedGroups": false,
+        "Left": 134.0929316957929,
+        "Top": 1111.9840884445146,
+        "Width": 310.0252716704763,
+        "Height": 205.0,
+        "FontSize": 36.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 1185.3174217778478,
+        "InitialHeight": 161.66666666666674,
         "TextblockHeight": 63.333333333333336,
         "Background": "#FFFFB8D8"
       }
     ],
-    "X": 108.06731734225025,
-    "Y": 69.99908857755706,
+    "X": 89.40065067558362,
+    "Y": -4.00091142244294,
     "Zoom": 0.5866725002636757
   }
 }

@@ -47,8 +47,8 @@
       "Outputs": [
         {
           "Id": "eae62d6d375f423385237b1be01ae8c4",
-          "Name": "",
-          "Description": "Value of expression at line 1",
+          "Name": "string",
+          "Description": "\"14aaa032-f3fc-4773-8a69-44434ba5fde4-b25kZXJkZWVsI0RhdGFrYWJlbA\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -67,8 +67,8 @@
       "Outputs": [
         {
           "Id": "6d24827a1a78430da003a2ceec72349b",
-          "Name": "",
-          "Description": "Value of expression at line 1",
+          "Name": "string",
+          "Description": "\"handle\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -76,8 +76,8 @@
         },
         {
           "Id": "fe717da32b8142a2902014c2669fd265",
-          "Name": "",
-          "Description": "Value of expression at line 2",
+          "Name": "string",
+          "Description": "\"assetId.identificator\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -85,8 +85,8 @@
         },
         {
           "Id": "1ba5fe3141e845fa8cb94153252dfeb5",
-          "Name": "",
-          "Description": "Value of expression at line 3",
+          "Name": "string",
+          "Description": "\"assetType\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -94,8 +94,8 @@
         },
         {
           "Id": "ded6b103d67a496ea63af414a7f4c7ea",
-          "Name": "",
-          "Description": "Value of expression at line 4",
+          "Name": "string",
+          "Description": "\"OTL\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -114,8 +114,8 @@
       "Outputs": [
         {
           "Id": "16889a46d3cc4c20a48449044d6d2823",
-          "Name": "",
-          "Description": "Value of expression at line 1",
+          "Name": "string",
+          "Description": "\"https://wegenenverkeer.data.vlaanderen.be/ns/onderdeel#Camera\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -130,11 +130,11 @@
       "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
       "FunctionSignature": "06acbe8c-bf93-4b7f-9c5d-744cdb47c0ec",
       "FunctionType": "Graph",
-      "Id": "5ce572e2f0ba46279f452d0d1c29db69",
+      "Id": "35717cec5acb4d3ab06793a43c1d5dd7",
       "NodeType": "FunctionNode",
       "Inputs": [
         {
-          "Id": "37f5bbd4affe473e8d884539c80eda8f",
+          "Id": "6cd724b577ba4c53a456ceb4a3e4a5c4",
           "Name": "te_zoeken_waarde",
           "Description": "De waarde voor de objecten die je wil selecteren. Dit kan een enkele waarde zijn, of het pad naar een CSV file (waarbij het zoektype voorkomt in de hoofding)\n\nstring\nDefault value : \"\"",
           "UsingDefaultValue": true,
@@ -143,7 +143,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "eea2b3b7d9ed48ce93ba4075e01b0480",
+          "Id": "e8e3dc07f45e4e128ef82b0423865bbe",
           "Name": "zoektype",
           "Description": "Waarop wil je zoeken? Mogelijke zoektypes zijn \"handle\", \"assetId.identificator\",\"assetType\",\"OTL\"\n\nstring\nDefault value : \"\"",
           "UsingDefaultValue": true,
@@ -154,7 +154,7 @@
       ],
       "Outputs": [
         {
-          "Id": "6bd3e8526e7241e9a2b32a8a0f64f58d",
+          "Id": "e9ecb4c138c54d0a8336054c84104a35",
           "Name": "Gevonden_objecten",
           "Description": "Overzicht van de gevonden objecten",
           "UsingDefaultValue": false,
@@ -170,14 +170,14 @@
   "Connectors": [
     {
       "Start": "1ba5fe3141e845fa8cb94153252dfeb5",
-      "End": "eea2b3b7d9ed48ce93ba4075e01b0480",
-      "Id": "710c69ee1a364226b17e7a66702596a4",
+      "End": "e8e3dc07f45e4e128ef82b0423865bbe",
+      "Id": "e8560f6dac694f78a47dac0023d64130",
       "IsHidden": "False"
     },
     {
       "Start": "16889a46d3cc4c20a48449044d6d2823",
-      "End": "37f5bbd4affe473e8d884539c80eda8f",
-      "Id": "fe615554f79b48639f92dcfaf511a7a7",
+      "End": "6cd724b577ba4c53a456ceb4a3e4a5c4",
+      "Id": "86306403a8cc4f77866415da75c1f03e",
       "IsHidden": "False"
     }
   ],
@@ -186,17 +186,11 @@
   ],
   "NodeLibraryDependencies": [
     {
-      "Name": "OTL_Select_objects.dyf",
-      "ReferenceType": "DYFFile",
+      "Name": "Civil3D_OTL_MOW_Toolkit",
+      "Version": "0.0.6",
+      "ReferenceType": "Package",
       "Nodes": [
-        "5ce572e2f0ba46279f452d0d1c29db69"
-      ]
-    },
-    {
-      "Name": "validatiefouten-DA-2025-dummy.csv",
-      "ReferenceType": "External",
-      "Nodes": [
-        "b6d593d000df4efab2a34d292ae84259"
+        "35717cec5acb4d3ab06793a43c1d5dd7"
       ]
     }
   ],
@@ -224,7 +218,7 @@
       "ScaleFactor": 1.0,
       "HasRunWithoutCrash": true,
       "IsVisibleInDynamoLibrary": true,
-      "Version": "3.4.1.7055",
+      "Version": "3.6.1.9956",
       "RunType": "Manual",
       "RunPeriod": "1000"
     },
@@ -283,14 +277,14 @@
         "Y": 114.14075101729372
       },
       {
-        "Id": "5ce572e2f0ba46279f452d0d1c29db69",
+        "Id": "35717cec5acb4d3ab06793a43c1d5dd7",
         "Name": "OTL_Select_objects",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 313.93990312035,
-        "Y": 350.1767211081022
+        "X": 257.50645295394315,
+        "Y": 422.1480154833216
       }
     ],
     "Annotations": [
@@ -307,14 +301,14 @@
         ],
         "HasNestedGroups": false,
         "Left": -661.0380366871245,
-        "Top": -100.96305227159598,
-        "Width": 619.5,
+        "Top": -101.29638560492933,
+        "Width": 634.6666666666666,
         "Height": 347.1038032888897,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": -27.963052271595984,
-        "InitialHeight": 145.0,
-        "TextblockHeight": 63.0,
+        "InitialHeight": 287.1038032888897,
+        "TextblockHeight": 63.333333333333336,
         "Background": "#FFC1D676"
       },
       {
@@ -329,14 +323,14 @@
         ],
         "HasNestedGroups": false,
         "Left": -318.1240016707568,
-        "Top": 707.3157731332248,
-        "Width": 291.5,
-        "Height": 247.5,
+        "Top": 706.9824397998914,
+        "Width": 306.6666666666667,
+        "Height": 247.66666666666674,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 780.3157731332248,
         "InitialHeight": 145.0,
-        "TextblockHeight": 63.0,
+        "TextblockHeight": 63.333333333333336,
         "Background": "#FFC1D676"
       },
       {
@@ -351,14 +345,14 @@
         ],
         "HasNestedGroups": false,
         "Left": -482.6836586718007,
-        "Top": 294.9407368236216,
+        "Top": 294.6074034902883,
         "Width": 448.0,
-        "Height": 214.5,
+        "Height": 215.0,
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 367.9407368236216,
         "InitialHeight": 145.0,
-        "TextblockHeight": 63.0,
+        "TextblockHeight": 63.333333333333336,
         "Background": "#FFC1D676"
       },
       {

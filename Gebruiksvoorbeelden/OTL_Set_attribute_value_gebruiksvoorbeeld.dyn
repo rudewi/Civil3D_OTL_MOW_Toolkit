@@ -22,8 +22,8 @@
       "Outputs": [
         {
           "Id": "67f13ce1e463456491f375051a56f176",
-          "Name": "",
-          "Description": "Value of expression at line 1",
+          "Name": "string",
+          "Description": "\"random\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -31,8 +31,8 @@
         },
         {
           "Id": "df9e0bce249147cf8b55cda20d95618d",
-          "Name": "",
-          "Description": "Value of expression at line 2",
+          "Name": "string",
+          "Description": "\"RDW\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -51,8 +51,8 @@
       "Outputs": [
         {
           "Id": "34c78ab9371d4d7b9136d5bf5e4ce902",
-          "Name": "",
-          "Description": "Value of expression at line 1",
+          "Name": "string",
+          "Description": "\"assetId.identificator\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -60,8 +60,8 @@
         },
         {
           "Id": "c88d4d1c785c444f93529767d81ae4a7",
-          "Name": "",
-          "Description": "Value of expression at line 2",
+          "Name": "string",
+          "Description": "\"assetId.toegekendDoor\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -80,8 +80,8 @@
       "Outputs": [
         {
           "Id": "9121bd6ce5e34463a5759bab9e86a941",
-          "Name": "",
-          "Description": "Value of expression at line 1",
+          "Name": "string",
+          "Description": "\"\"",
           "UsingDefaultValue": false,
           "Level": 2,
           "UseLevels": false,
@@ -96,11 +96,11 @@
       "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
       "FunctionSignature": "270d8c10-36ee-403a-abf7-d23b39ca3c3d",
       "FunctionType": "Graph",
-      "Id": "7d4a848671854a47a90cb95cb765f83a",
+      "Id": "d733876af2b74f3ea28d1a55414d8e0b",
       "NodeType": "FunctionNode",
       "Inputs": [
         {
-          "Id": "6f1b06846e2c4c78a46ecb4e79c1c1cc",
+          "Id": "24facf6e124648098657aeb227b8f2be",
           "Name": "attribuutnaam",
           "Description": "De attribuut die vervangen mag worden. Bijvoorbeeld \"assetId.identificator\"  \n\nstring\nDefault value : \"\"",
           "UsingDefaultValue": true,
@@ -109,7 +109,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "dafe9df769da487686c7623c584151ef",
+          "Id": "6a7760eaae184073822fac22aae6e976",
           "Name": "te_vervangen_waarde",
           "Description": "De waarde die vervangen mag worden, bij geen input is dit een lege waarde \n\nstring\nDefault value : \"\"",
           "UsingDefaultValue": true,
@@ -118,7 +118,7 @@
           "KeepListStructure": false
         },
         {
-          "Id": "975c41e5affa487394c5e9e27151b26f",
+          "Id": "d2d80716128144b693887ae4e79bd8f8",
           "Name": "in_te_vullen_waarde",
           "Description": "De waarde die ingevuld mag worden. Bij leeg laten zal een willekeurige waarde genereerd worden \n\nstring\nDefault value : \"random\"",
           "UsingDefaultValue": true,
@@ -129,7 +129,7 @@
       ],
       "Outputs": [
         {
-          "Id": "0d52f48514f5441db47dced01c33b53f",
+          "Id": "a87a6f26c33c4c57a5a27a094cdbda64",
           "Name": "Objecten_met_gewijzigde_attributen",
           "Description": " Objecten waarvoor ID toegevoegd werd",
           "UsingDefaultValue": false,
@@ -145,20 +145,20 @@
   "Connectors": [
     {
       "Start": "df9e0bce249147cf8b55cda20d95618d",
-      "End": "975c41e5affa487394c5e9e27151b26f",
-      "Id": "a0cb7ddf63ff4a77909a16a39c6ce87e",
+      "End": "d2d80716128144b693887ae4e79bd8f8",
+      "Id": "2c9d6cdb72c248ea8095c7e03121b8ea",
       "IsHidden": "False"
     },
     {
       "Start": "c88d4d1c785c444f93529767d81ae4a7",
-      "End": "6f1b06846e2c4c78a46ecb4e79c1c1cc",
-      "Id": "e73d5c22f657407898a8f8de16b2db85",
+      "End": "24facf6e124648098657aeb227b8f2be",
+      "Id": "431898df764e4cc09d7dbf4a21b1aa8a",
       "IsHidden": "False"
     },
     {
       "Start": "9121bd6ce5e34463a5759bab9e86a941",
-      "End": "dafe9df769da487686c7623c584151ef",
-      "Id": "c4cee9f7fdd04a728c7fdf75d8bacdde",
+      "End": "6a7760eaae184073822fac22aae6e976",
+      "Id": "f660eae22837445288f63b1938c32cd6",
       "IsHidden": "False"
     }
   ],
@@ -167,10 +167,11 @@
   ],
   "NodeLibraryDependencies": [
     {
-      "Name": "OTL_Set_attribute_value.dyf",
-      "ReferenceType": "DYFFile",
+      "Name": "Civil3D_OTL_MOW_Toolkit",
+      "Version": "0.0.6",
+      "ReferenceType": "Package",
       "Nodes": [
-        "7d4a848671854a47a90cb95cb765f83a"
+        "d733876af2b74f3ea28d1a55414d8e0b"
       ]
     }
   ],
@@ -192,22 +193,13 @@
     "warningCount": 0,
     "errorCount": 0
   },
-  "Bindings": [
-    {
-      "NodeId": "7d4a8486-7185-4a47-a90c-b95cb765f83a",
-      "Binding": {
-        "__func_270d8c1036ee403aabf7d23b39ca3c3d_InClassDecl-1_InFunctionScope-1_Instance0_7d4a8486-7185-4a47-a90c-b95cb765f83a;GetAllObjectsOnLayer_InClassDecl-1_InFunctionScope247_Instance0_be066dee-c57c-49f1-b0de-52c037987a8f": "H4sIAAAAAAAACouuVspLLS5JTXFJLElUsoqurtUZRbQNAaUUcFArGRoYGbtamitRySwjU0OwWShCjk6oQobObs4YQi7mzhiqHN2UamNrYwFi1c3aHwIAAA==",
-        "__func_270d8c1036ee403aabf7d23b39ca3c3d_InClassDecl-1_InFunctionScope-1_Instance0_7d4a8486-7185-4a47-a90c-b95cb765f83a;get_PropertySets_InClassDecl-1_InFunctionScope247_Instance0_b4c25bb6-b1a8-4049-a09b-1aa2d805bc53": "H4sIAAAAAAAACu3SsQnAIBQE0F1+nQlSu4VYCNraxE7cPWCXBVI9uOK48nh5xejP7C3VWePOa1+fRDt7hO4HBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggAEGGGCAAQYYYIABBhhggIFfDZRdXjJRB7xNWwAA",
-        "__func_270d8c1036ee403aabf7d23b39ca3c3d_InClassDecl-1_InFunctionScope-1_Instance0_7d4a8486-7185-4a47-a90c-b95cb765f83a;UpdateProperty_InClassDecl-1_InFunctionScope247_Instance0_f92bb5d9-3ec6-4e07-8a02-966daf56a633": "H4sIAAAAAAAACu3WKw6AMAwA0LtUcwI0t1gqlmwWwxzp3UmwXADxXJu6pp/X7jjnteY4+uqxt0863iCisjZFTTAJ1sFNcBh9By+SE2AJCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqEQCqHwByjMygdPx9l5Z9wAAA=="
-      }
-    }
-  ],
+  "Bindings": [],
   "View": {
     "Dynamo": {
       "ScaleFactor": 1.0,
       "HasRunWithoutCrash": true,
       "IsVisibleInDynamoLibrary": true,
-      "Version": "3.4.1.7055",
+      "Version": "3.6.1.9956",
       "RunType": "Manual",
       "RunPeriod": "1000"
     },
@@ -256,14 +248,14 @@
         "Y": 2075.949070016737
       },
       {
-        "Id": "7d4a848671854a47a90cb95cb765f83a",
+        "Id": "d733876af2b74f3ea28d1a55414d8e0b",
         "Name": "OTL_Set_attribute_value",
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1029.352676495045,
-        "Y": 2019.3391785297881
+        "X": 991.5773653048734,
+        "Y": 2070.452236718072
       }
     ],
     "Annotations": [],

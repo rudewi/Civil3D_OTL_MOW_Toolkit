@@ -10,37 +10,6 @@
   "Outputs": [],
   "Nodes": [
     {
-      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
-      "FunctionSignature": "ae180f93-3f84-499a-99a8-9617b5e6d343",
-      "FunctionType": "Graph",
-      "Id": "1dd7a327aae44ef2a03e6b9d39658700",
-      "NodeType": "FunctionNode",
-      "Inputs": [
-        {
-          "Id": "8dd79b1fe42e4cc9842c523c03bbcc27",
-          "Name": "OTL_CSV_file_or_folder",
-          "Description": "Geef het pad naar een CSV file met OTL data, of een folder met meerdere CSV files met OTL data\n\nstring\nDefault value : \"\"",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "8b0667332b1043da9b8c109424891d75",
-          "Name": "Aangemaakte_Objecten",
-          "Description": "Aangemaakte dwg objecten met OTL data",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Maak objecten uit een OTL conforme CSV als Civil3D objecten met data in de OTL propertysets. Gebruik hiervoor een dwg met OTL propertyset definitions."
-    },
-    {
       "ConcreteType": "CoreNodeModels.Input.Directory, CoreNodeModels",
       "Id": "df911ceea85a4a94beea48d85d5eadc9",
       "NodeType": "ExtensionNode",
@@ -60,29 +29,61 @@
       "Description": "Allows you to select a directory on the system and returns its path",
       "HintPath": "C:\\Users\\ruben\\Desktop\\voorbeeld wkt download",
       "InputValue": "C:\\Users\\ruben\\Desktop\\voorbeeld wkt download"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "632c1175-ac04-432b-a59f-68c9a1f2b5ac",
+      "FunctionType": "Graph",
+      "Id": "998bc5c46c6440bfb149be4952aade04",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "a6be0238840448818a86f3c61226156e",
+          "Name": "OTL_CSV_file_or_folder",
+          "Description": "Geef het pad naar een CSV file met OTL data, of een folder met meerdere CSV files met OTL data\n\nstring\nDefault value : \"\"",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "6a4077382f52430297b5c29794c552d9",
+          "Name": "Aangemaakte_Objecten",
+          "Description": "Aangemaakte dwg objecten met OTL data",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Maak objecten uit een OTL conforme CSV als Civil3D objecten met data in de OTL propertysets. Gebruik hiervoor een dwg met OTL propertyset definitions."
     }
   ],
   "Connectors": [
     {
       "Start": "220632346f5a47179ac73ae93687fdff",
-      "End": "8dd79b1fe42e4cc9842c523c03bbcc27",
-      "Id": "d02ae8ca263442efb9dbfc4957199665",
+      "End": "a6be0238840448818a86f3c61226156e",
+      "Id": "79e9bc07cac34b008e4627262eb230f2",
       "IsHidden": "False"
     }
   ],
   "Dependencies": [
-    "ae180f93-3f84-499a-99a8-9617b5e6d343"
+    "632c1175-ac04-432b-a59f-68c9a1f2b5ac"
   ],
   "NodeLibraryDependencies": [
     {
-      "Name": "OTL_Create_objects_from_csv.dyf",
-      "ReferenceType": "DYFFile",
+      "Name": "Civil3D_OTL_MOW_Toolkit",
+      "Version": "0.0.6",
+      "ReferenceType": "Package",
       "Nodes": [
-        "1dd7a327aae44ef2a03e6b9d39658700"
+        "998bc5c46c6440bfb149be4952aade04"
       ]
     }
   ],
-  "EnableLegacyPolyCurveBehavior": null,
+  "EnableLegacyPolyCurveBehavior": true,
   "Thumbnail": "",
   "GraphDocumentationURL": null,
   "ExtensionWorkspaceData": [
@@ -106,7 +107,7 @@
       "ScaleFactor": 1.0,
       "HasRunWithoutCrash": true,
       "IsVisibleInDynamoLibrary": true,
-      "Version": "3.4.1.7055",
+      "Version": "3.6.1.9956",
       "RunType": "Manual",
       "RunPeriod": "1000"
     },
@@ -125,16 +126,6 @@
     "ConnectorPins": [],
     "NodeViews": [
       {
-        "Id": "1dd7a327aae44ef2a03e6b9d39658700",
-        "Name": "OTL_Create_objects_from_csv",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": true,
-        "X": 643.5,
-        "Y": 383.75
-      },
-      {
         "Id": "df911ceea85a4a94beea48d85d5eadc9",
         "Name": "Directory Path",
         "IsSetAsInput": false,
@@ -143,6 +134,16 @@
         "ShowGeometry": true,
         "X": 92.5,
         "Y": 380.75
+      },
+      {
+        "Id": "998bc5c46c6440bfb149be4952aade04",
+        "Name": "OTL_Create_objects_from_csv",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 626.0,
+        "Y": 425.9999999999999
       }
     ],
     "Annotations": [],
