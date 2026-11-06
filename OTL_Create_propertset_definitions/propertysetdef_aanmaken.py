@@ -1,6 +1,7 @@
 # Load the Python Standard and DesignScript Libraries
 import clr
 import ctypes
+import System
 
 # Add Assemblies for AutoCAD and Civil3D
 clr.AddReference('AcMgd')
@@ -30,6 +31,7 @@ from Autodesk.Aec.DatabaseServices import ListDefinition, ListItem, DictionaryLi
 
 adoc = Application.DocumentManager.MdiActiveDocument
 editor = adoc.Editor
+nl = "\n"
 
 def listdef_uit_keuzelijstoptie(lijstnaam,lijstopties):
     with adoc.LockDocument():
@@ -141,33 +143,38 @@ def dict_to_psetdef(OTL_psetinfoDict):
                                             #pd.DefaultData = ad["civil3D_default_value"]
                                             
                                             if pd.DataType == DataType.Real:
-                                                pd.DefaultData = -999999999.000000
+                                                pd.DefaultData = System.Double(-999999999.000000)
                                             if pd.DataType == DataType.Integer:
-                                                pd.DefaultData = -999999999
+                                                pd.DefaultData = System.Int32(-999999999)
                                             elif ad["dotnotatie_attribuutnaam"] == "typeURI":
-                                                pd.DefaultData = od["typeURI"]
+                                                pd.DefaultData = str(od["typeURI"])
                                             
                                         if not definitions.Contains(pd): #dubbele keys vermijden
                                             definitions.Add(pd)
                                         
-                                    except:
-                                        outputlijst = ["attribuut: er ging iets mis ", ad["dotnotatie_attribuutnaam"], od["propertysetnaam"],ad["attribuutdefinitie"],ad["civil3D_datatype_attribuut"],ad["civil3D_default_value"]]                    
+                                    except Exception as e:
+                                        outputlijst = [f'Er ging iets mis bij het aanmaken van volgend attribuut: {nl}{ad["dotnotatie_attribuutnaam"]} voor {od["propertysetnaam"]} met type {ad["civil3D_datatype_attribuut"]}{nl}{e}']                    
                         
-                    except:
-                        outputlijst = ["onderdeel: er ging iets mis bij het aanmaken van volgend item: ", od["propertysetnaam"]]
+                    except Exception as e:
+                        outputlijst = [f'Er ging iets mis bij het aanmaken van volgend onderdeel:{nl} {od["propertysetnaam"]}{nl}{e}']
                         
                 t.Commit()
 
     info = str(pdn_count+1) + " Properties aangemaakt in " + str(psetdef_count+1) + " Propertysets"
     
-    nl = "\n"
-    if len(outputlijst) < 30:
-        message = f"{info}{nl}Volgende sets werden aangemaakt:{nl}{nl.join(outputlijst)}"
+    
+    
+    # Forceer elk item in de lijst naar een string om join-errors te voorkomen
+    output_str_lijst = [str(item) for item in outputlijst]
+    
+    if len(output_str_lijst) < 30:
+        message = f"{info}{nl}Volgende sets werden aangemaakt:{nl}{nl.join(output_str_lijst)}"
     else:
-        message = f"{info}{nl}Onder meer volgende sets werden aangemaakt:{nl}{nl.join(outputlijst[:30])}{nl}..."
+        message = f"{info}{nl}Onder meer volgende sets werden aangemaakt:{nl}{nl.join(output_str_lijst[:30])}{nl}..."
         outputlijst = outputlijst[:30]
+        
     ctypes.windll.user32.MessageBoxW(0, message, "Propertysets aangemaakt", 0)
-    return [info,outputlijst]
+    return [info, outputlijst]
 
 
 #UITVOEREN
@@ -175,4 +182,3 @@ OUT = "GEEN propertysets aangemaakt"
 OTL_datadict = IN[0]
 if OTL_datadict:
     OUT = dict_to_psetdef(OTL_datadict)
-    
