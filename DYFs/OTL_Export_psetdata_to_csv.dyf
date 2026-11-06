@@ -668,7 +668,7 @@
     },
     {
       "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport os\r\nimport ctypes\r\n\r\n\r\n#INPUT\r\ninput_file_of_folder = IN[0]\r\n\r\ngo = 0\r\nmessage = \"\"\r\nm = ctypes.windll.user32\r\nnl = '\\n'\r\n\r\n\r\nif input_file_of_folder:\r\n    if os.path.isdir(input_file_of_folder):#bij folder\r\n        message = f\"Correcte input, CSV bestanden worden geschreven in de folder: {nl}{str(input_file_of_folder)}\"\r\n        go = 1\r\n                \r\n    if os.path.isfile(input_file_of_folder):#bij file\r\n        message = f\"Opgegeven pad is het pad naar een file: {nl}{str(input_file_of_folder)}{nl}{nl}Geef een folder waar de file mag worden geschreven,{nl}gebruik daarvoor de 'Directory Path' node\"\r\n        \r\n    else:\r\n        message = f\"Geen bruikbare input:{nl}{str(input_file_of_folder)}{nl}{nl}Geef een locatie op om de csv files naar te schrijven,{nl}gebruik daarvoor de 'Directory Path' node\"\r\n\r\nelse:\r\n    message = f\"Geen bruikbare input:{nl}{str(input_file_of_folder)}{nl}{nl}Geef een locatie op om de csv files naar te schrijven,{nl}gebruik daarvoor de 'Directory Path' node\"\r\n\r\nm.MessageBoxW(0, message, \"OTL_Export psetdata to CSV\", 0)\r\nOUT = go",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport os\r\nimport ctypes\r\n\r\n\r\n#INPUT\r\ninput_file_of_folder = IN[0]\r\n\r\ngo = 0\r\nmessage = \"\"\r\nm = ctypes.windll.user32\r\nnl = '\\n'\r\n\r\n\r\nif input_file_of_folder:\r\n    if os.path.isdir(input_file_of_folder):#bij folder\r\n        message = f\"Correcte input, CSV bestanden worden geschreven in de folder: {nl}{str(input_file_of_folder)}\"\r\n        go = 1\r\n                \r\n    elif os.path.isfile(input_file_of_folder):#bij file\r\n        message = f\"Opgegeven pad is het pad naar een file: {nl}{str(input_file_of_folder)}{nl}{nl}Geef een folder waar de file mag worden geschreven,{nl}gebruik daarvoor de 'Directory Path' node\"\r\n        \r\n    else:\r\n        message = f\"Geen bruikbare input:{nl}{str(input_file_of_folder)}{nl}{nl}Geef een locatie op om de csv files naar te schrijven,{nl}gebruik daarvoor de 'Directory Path' node\"\r\n\r\nelse:\r\n    message = f\"Geen bruikbare input:{nl}{str(input_file_of_folder)}{nl}{nl}Geef een locatie op om de csv files naar te schrijven,{nl}gebruik daarvoor de 'Directory Path' node\"\r\n\r\nm.MessageBoxW(0, message, \"OTL_Export psetdata to CSV\", 0)\r\nOUT = go",
       "Engine": "CPython3",
       "VariableInputPorts": true,
       "Id": "cb23715711fc42efa18521a13ebc5447",
@@ -1140,13 +1140,13 @@
         "FontSize": 36.0,
         "GroupStyleId": "00000000-0000-0000-0000-000000000000",
         "InitialTop": 3330.2440939321327,
-        "InitialHeight": 656.5519127753469,
+        "InitialHeight": 639.8852461086799,
         "TextblockHeight": 63.333333333333336,
         "Background": "#FFC1D676"
       }
     ],
-    "X": 715.7927014140914,
-    "Y": -676.2524196455078,
-    "Zoom": 0.27937558946182733
+    "X": 731.7598337325534,
+    "Y": -2239.042002187556,
+    "Zoom": 0.7248162350901082
   }
 }

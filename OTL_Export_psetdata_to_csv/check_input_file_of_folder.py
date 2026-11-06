@@ -17,7 +17,7 @@ if input_file_of_folder:
         message = f"Correcte input, CSV bestanden worden geschreven in de folder: {nl}{str(input_file_of_folder)}"
         go = 1
                 
-    if os.path.isfile(input_file_of_folder):#bij file
+    elif os.path.isfile(input_file_of_folder):#bij file
         message = f"Opgegeven pad is het pad naar een file: {nl}{str(input_file_of_folder)}{nl}{nl}Geef een folder waar de file mag worden geschreven,{nl}gebruik daarvoor de 'Directory Path' node"
         
     else:
